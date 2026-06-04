@@ -233,6 +233,25 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-prov-block { background:#f8f7f3; border-radius:8px; padding:14px; margin-bottom:10px; border-left:3px solid #e8a020; }
 .rpt-prov-name { font-size:13px; font-weight:700; margin-bottom:8px; color:#0a3d2e; }
 .no-break { page-break-inside:avoid; }
+
+/* EXTRA UI */
+.sale-items{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.sale-line{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.sale-line-main{min-width:0;flex:1}
+.sale-line-name{font-size:14px;font-weight:600;color:var(--text)}
+.sale-line-meta{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4}
+.sale-line-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sale-line-total{font-family:'DM Mono',monospace;font-size:14px;font-weight:600}
+.sale-total-chip{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:12px;background:var(--primary-l);color:var(--primary);font-size:12px;font-weight:700;white-space:nowrap}
+.report-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 14px 12px}
+.report-card-title{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:8px}
+.report-card-sub{font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5}
+.report-btn-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.report-btn{padding:10px 8px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.report-btn.secondary{background:var(--surface2);color:var(--primary);border:1px solid var(--border)}
+.report-btn:active{opacity:.88}
+
 </style>
 </head>
 <body>
@@ -257,14 +276,14 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <!-- ══ RESUMEN ══ -->
     <div class="page active" id="page-resumen">
 
-      <!-- Ventas y Gastos HOY -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <!-- Ventas y gastos del día -->
+      <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">
             <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            Ventas hoy
+            Ventas Hoy
           </div>
           <div class="stat-value" id="totalVentas" style="color:var(--green)">$0.00</div>
           <div class="stat-sub" id="cntVentas">0 transacciones</div>
@@ -274,33 +293,38 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
             <div class="stat-icon" style="background:#fdeee9">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d44f2e" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
-            Gastos hoy
+            Gastos Hoy
           </div>
           <div class="stat-value" id="totalGastos" style="color:var(--red)">$0.00</div>
           <div class="stat-sub" id="cntGastos">0 egresos</div>
         </div>
       </div>
 
-      <!-- Ventas y Gastos SEMANA -->
-      <div class="card" style="padding:14px 16px 10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <span style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2)">Esta semana</span>
-          <span id="semanaRango" style="font-size:11px;color:var(--text3)"></span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px">
-            <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Ventas semana</div>
-            <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--green)" id="semVentas">$0.00</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:3px" id="semVentasSub">0 transacciones</div>
+      <!-- ★ RESUMEN SEMANAL -->
+      <div class="semana-card">
+        <div class="semana-header">
+          <div class="semana-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Esta semana
           </div>
-          <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px">
-            <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Gastos semana</div>
-            <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--red)" id="semGastos">$0.00</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:3px" id="semGastosSub">0 egresos</div>
+          <span id="semanaRango" style="font-size:10px;color:var(--text3)"></span>
+        </div>
+        <div class="semana-body">
+          <div class="semana-stat">
+            <div class="semana-stat-label">Ventas</div>
+            <div class="semana-stat-value" id="semVentas" style="color:var(--green)">$0</div>
+          </div>
+          <div class="semana-stat">
+            <div class="semana-stat-label">Gastos</div>
+            <div class="semana-stat-value" id="semGastos" style="color:var(--red)">$0</div>
+          </div>
+          <div class="semana-stat">
+            <div class="semana-stat-label">Balance</div>
+            <div class="semana-stat-value" id="semBalance">$0</div>
           </div>
         </div>
-        <!-- mini barras por día -->
-        <div class="semana-days" id="semanaDays" style="padding:0"></div>
+        <!-- mini barras diarias -->
+        <div class="semana-days" id="semanaDays"></div>
       </div>
 
       <!-- Balance neto del día -->
@@ -317,65 +341,23 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         </div>
       </div>
 
-      <!-- Pedidos especiales resumen: día + semana por empresa -->
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div class="card-section-title" style="margin:0">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            Pedidos especiales
-          </div>
-          <div style="display:flex;gap:12px">
-            <span style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3)">HOY</span>
-            <span style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3)">SEMANA</span>
-          </div>
+      <!-- Pedidos especiales resumen -->
+      <div class="card">
+        <div class="card-section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Pedidos especiales de hoy
         </div>
-        <!-- Pollo Rico -->
-        <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border)">
-          <div class="pedido-dot" style="background:#e8a020"></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">Pollo Rico</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="cntPolloRicoDia">0 pedidos hoy</div>
-          </div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--orange)" id="sumPolloRico">$0.00</div>
-          </div>
-          <div style="width:1px;height:32px;background:var(--border);margin:0 12px"></div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--orange)" id="semPolloRico">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="semCntPolloRico">0 pedidos</div>
-          </div>
+        <div class="pedido-item">
+          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#e8a020"></div><div class="pedido-name">Pollo Rico</div></div>
+          <div class="pedido-val" style="color:var(--orange)" id="sumPolloRico">$0.00</div>
         </div>
-        <!-- Pollo Indio -->
-        <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border)">
-          <div class="pedido-dot" style="background:#d44f2e"></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">Pollo Indio</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="cntPolloIndioDia">0 pedidos hoy</div>
-          </div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="sumPolloIndio">$0.00</div>
-          </div>
-          <div style="width:1px;height:32px;background:var(--border);margin:0 12px"></div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="semPolloIndio">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="semCntPolloIndio">0 pedidos</div>
-          </div>
+        <div class="pedido-item">
+          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#d44f2e"></div><div class="pedido-name">Pollo Indio</div></div>
+          <div class="pedido-val" style="color:var(--red)" id="sumPolloIndio">$0.00</div>
         </div>
-        <!-- Sello de Oro -->
-        <div style="display:flex;align-items:center;padding:13px 16px">
-          <div class="pedido-dot" style="background:#c4860a"></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:600">Sello de Oro</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="cntSelloOroDia">0 pedidos hoy</div>
-          </div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="sumSelloOro">$0.00</div>
-          </div>
-          <div style="width:1px;height:32px;background:var(--border);margin:0 12px"></div>
-          <div style="text-align:right;min-width:64px">
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="semSelloOro">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px" id="semCntSelloOro">0 pedidos</div>
-          </div>
+        <div class="pedido-item" style="margin-bottom:0">
+          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#c4860a"></div><div class="pedido-name">Sello de Oro</div></div>
+          <div class="pedido-val" style="color:var(--gold)" id="sumSelloOro">$0.00</div>
         </div>
       </div>
 
@@ -403,38 +385,17 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="section-title">Gastos del día <span class="badge" id="badgeGastos">0</span></div>
       <div id="listaGastos"></div>
     </div>
-
     <!-- ══ PEDIDOS ══ -->
     <div class="page" id="page-pedidos">
       <div class="section-title">Pedidos especiales</div>
-
-      <!-- Resumen de montos por empresa -->
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0">
-          <div style="text-align:center;padding:0 4px">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:4px">Pollo Rico</div>
-            <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:#e8a020" id="pedResumenPR">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px" id="pedResumenPRcnt">0 pedidos</div>
-          </div>
-          <div style="text-align:center;padding:0 4px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#d44f2e;margin-bottom:4px">Pollo Indio</div>
-            <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:#d44f2e" id="pedResumenPI">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px" id="pedResumenPIcnt">0 pedidos</div>
-          </div>
-          <div style="text-align:center;padding:0 4px">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#c4860a;margin-bottom:4px">Sello de Oro</div>
-            <div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:#c4860a" id="pedResumenSO">$0.00</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:2px" id="pedResumenSOcnt">0 pedidos</div>
-          </div>
-        </div>
-        <!-- totales filtro activo -->
-        <div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:11px;color:var(--text3)" id="pedFiltroLabel">Todos los pedidos</span>
-          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--primary)" id="pedResumenTotal">$0.00</span>
+      <div class="card balance-card" style="margin-bottom:10px">
+        <div class="balance-label">Costo general de pedidos del día</div>
+        <div class="balance-value" id="pedidosDiaMonto">$0.00</div>
+        <div class="balance-meta">
+          <span id="pedidosDiaSub">0 pedidos activos</span>
+          <span class="balance-tag">Pedidos</span>
         </div>
       </div>
-
-      <!-- Tabs -->
       <div class="tabs">
         <button class="tab-btn active" id="tabPend" onclick="setPedidoTab('pendiente')">⏳ Pendientes</button>
         <button class="tab-btn" id="tabDone" onclick="setPedidoTab('completado')">✅ Completados</button>
@@ -443,7 +404,25 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div id="listaPedidos"></div>
     </div>
 
+    <!-- ══ ENCARGOS ══ -->
+    <div class="page" id="page-encargos">
+      <div class="section-title">
+        Encargos
+        <button onclick="openEncargoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Encargo</button>
+      </div>
+      <div class="card balance-card" style="margin-bottom:10px">
+        <div class="balance-label">Saldo pendiente de encargos del día</div>
+        <div class="balance-value" id="encargosDiaMonto">$0.00</div>
+        <div class="balance-meta">
+          <span id="encargosDiaSub">0 encargos</span>
+          <span class="balance-tag">Encargos</span>
+        </div>
+      </div>
+      <div id="listaEncargos"></div>
+    </div>
+
     <!-- ══ INVENTARIO ══ -->
+
     <div class="page" id="page-inventario">
       <div class="section-title">
         Inventario
@@ -451,51 +430,68 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       </div>
       <div id="listaInventario"></div>
     </div>
-
     <!-- ══ REPORTES ══ -->
     <div class="page" id="page-reportes">
       <div class="section-title">Reportes PDF</div>
+      <div class="report-grid">
 
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div>
-          <div>
-            <div style="font-size:14px;font-weight:600">Reporte Diario</div>
-            <div style="font-size:11px;color:var(--text3)">Ventas, gastos y pedidos del día seleccionado</div>
+        <div class="report-card">
+          <div class="report-card-title">Ventas</div>
+          <div class="report-card-sub">Ventas y gastos por día, semana o mes.</div>
+          <div class="report-btn-row">
+            <button class="report-btn" onclick="generarReporte('ventas-diario')">Diario</button>
+            <button class="report-btn secondary" onclick="generarReporte('ventas-semanal')">Semanal</button>
+            <button class="report-btn secondary" onclick="generarReporte('ventas-mensual')">Mensual</button>
           </div>
-          <button onclick="generarReporte('diario')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
         </div>
-        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
-          <div>
-            <div style="font-size:14px;font-weight:600">Reporte Semanal</div>
-            <div style="font-size:11px;color:var(--text3)">Resumen de la semana con pedidos por proveedor</div>
+
+        <div class="report-card">
+          <div class="report-card-title">Pedidos</div>
+          <div class="report-card-sub">Pedidos activos, completados y cancelados.</div>
+          <div class="report-btn-row">
+            <button class="report-btn" onclick="generarReporte('pedidos-diario')">Diario</button>
+            <button class="report-btn secondary" onclick="generarReporte('pedidos-semanal')">Semanal</button>
+            <button class="report-btn secondary" onclick="generarReporte('pedidos-mensual')">Mensual</button>
           </div>
-          <button onclick="generarReporte('semanal')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
         </div>
-        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#fdeee9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div>
-          <div>
-            <div style="font-size:14px;font-weight:600">Reporte Mensual</div>
-            <div style="font-size:11px;color:var(--text3)">Totales y tendencias del mes en curso</div>
+
+        <div class="report-card">
+          <div class="report-card-title">Encargos</div>
+          <div class="report-card-sub">Clientes, productos, anticipos y saldos.</div>
+          <div class="report-btn-row">
+            <button class="report-btn" onclick="generarReporte('encargos-diario')">Diario</button>
+            <button class="report-btn secondary" onclick="generarReporte('encargos-semanal')">Semanal</button>
+            <button class="report-btn secondary" onclick="generarReporte('encargos-mensual')">Mensual</button>
           </div>
-          <button onclick="generarReporte('mensual')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
         </div>
-        <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:10px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>
-          <div>
-            <div style="font-size:14px;font-weight:600">Estado de Inventario</div>
-            <div style="font-size:11px;color:var(--text3)">Stock actual con costos, valores y márgenes</div>
+
+        <div class="report-card">
+          <div class="report-card-title">Inventario</div>
+          <div class="report-card-sub">Stock actual y movimiento por periodo.</div>
+          <div class="report-btn-row">
+            <button class="report-btn" onclick="generarReporte('inventario-semanal')">Semanal</button>
+            <button class="report-btn secondary" onclick="generarReporte('inventario-mensual')">Mensual</button>
+            <button class="report-btn secondary" onclick="generarReporte('general')">General</button>
           </div>
-          <button onclick="generarReporte('inventario')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Generar</button>
         </div>
+
+        <div class="report-card">
+          <div class="report-card-title">General</div>
+          <div class="report-card-sub">Consolidado de todas las áreas del negocio.</div>
+          <div class="report-btn-row">
+            <button class="report-btn" onclick="generarReporte('general')">Abrir</button>
+            <button class="report-btn secondary" onclick="generarReporte('ventas-diario')">Ventas</button>
+            <button class="report-btn secondary" onclick="generarReporte('pedidos-diario')">Pedidos</button>
+          </div>
+        </div>
+
       </div>
 
-      <div class="card" style="background:var(--surface2);border-style:dashed">
+      <div class="card" style="background:var(--surface2);border-style:dashed;margin-top:12px">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <span style="font-size:18px">💡</span>
           <div style="font-size:12px;color:var(--text2);line-height:1.6">
-            Al generar un reporte se abre una vista de impresión. Toca <strong>Guardar como PDF</strong> (en el destino de impresión) para descargarlo. Funciona en Chrome, Safari y cualquier navegador moderno.
+            Al generar un reporte se abre una vista de impresión. Toca <strong>Guardar como PDF</strong> en el navegador para descargarlo.
           </div>
         </div>
       </div>
@@ -526,6 +522,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <button class="nav-btn" onclick="showPage('pedidos',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
       <span>Pedidos</span>
+    </button>
+        <button class="nav-btn" onclick="showPage('encargos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+      <span>Encargos</span>
     </button>
     <button class="nav-btn" onclick="showPage('inventario',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
@@ -571,6 +571,15 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:4px;display:none"></div>
       </div>
 
+      <div id="ventaComposerWrap" style="display:block">
+        <div class="info-box" style="margin-top:2px">Agrega uno o varios productos a una misma venta. Las cantidades aceptan decimales, por ejemplo 1.5 lb.</div>
+        <div id="ventaItemsList" class="sale-items"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <button type="button" class="inv-btn inv-btn-primary" style="flex:1" onclick="addVentaItem()">+ Agregar producto</button>
+          <div class="sale-total-chip">Total: <span id="ventaItemsTotal">$0.00</span></div>
+        </div>
+      </div>
+
       <!-- PEDIDO: tipo y producto a recibir -->
       <div id="pedidoWrap" style="display:none">
         <div style="margin-bottom:12px">
@@ -597,7 +606,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="form-row">
         <div>
           <label class="form-label">Cantidad</label>
-          <input class="form-input" type="number" id="fCant" placeholder="1" min="1" value="1" oninput="onCantChange()">
+          <input class="form-input" type="number" id="fCant" placeholder="1" min="0.01" step="0.01" value="1" oninput="onCantChange()">
         </div>
         <div>
           <label class="form-label">Monto ($)</label>
@@ -623,7 +632,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="form-row">
         <div>
           <label class="form-label">Cantidad inicial</label>
-          <input class="form-input" type="number" id="pCantidad" placeholder="0" min="0">
+          <input class="form-input" type="number" id="pCantidad" placeholder="0" min="0" step="0.01">
         </div>
         <div>
           <label class="form-label">Unidad</label>
@@ -678,9 +687,48 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       </div>
       <div>
         <label class="form-label">Cantidad</label>
-        <input class="form-input" type="number" id="sCant" placeholder="0" min="1" value="1">
+        <input class="form-input" type="number" id="sCant" placeholder="0" min="0.01" step="0.01" value="1">
       </div>
       <button class="btn-primary" onclick="saveStockAjuste()">✓ Aplicar ajuste</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ MODAL: ENCARGO ═══ -->
+<div class="modal-overlay" id="encargoModal" onclick="overlayClose(event,'encargoModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="encargoModalTitle">Nuevo encargo</div>
+    <div class="form-section">
+      <input type="hidden" id="eId">
+      <div>
+        <label class="form-label">Cliente</label>
+        <input class="form-input" type="text" id="eCliente" placeholder="Nombre del cliente">
+      </div>
+      <div>
+        <label class="form-label">Tipo de productos</label>
+        <input class="form-input" type="text" id="eProductos" placeholder="Ej: camisetas, tazas, pollo, cajas...">
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Fecha</label>
+          <input class="form-input" type="date" id="eFecha">
+        </div>
+        <div>
+          <label class="form-label">Costo total ($)</label>
+          <input class="form-input" type="number" id="eCosto" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Anticipo ($)</label>
+        <input class="form-input" type="number" id="eAnticipo" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div>
+        <label class="form-label">Notas</label>
+        <input class="form-input" type="text" id="eNotas" placeholder="Detalles adicionales">
+      </div>
+      <button class="btn-primary" onclick="saveEncargo()">✓ Guardar encargo</button>
     </div>
   </div>
 </div>
@@ -700,6 +748,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 <div class="notif" id="notif"></div>
 
 <script>
+
 // ══════════════════════════════════════════
 //  ESTADO
 // ══════════════════════════════════════════
@@ -709,1064 +758,1322 @@ var stkOpActual = 'sumar';
 var pedidoTab = 'pendiente';
 var currentDate = new Date();
 var currentPage = 'resumen';
-var data = {};      // data[YYYY-MM-DD] = {ventas,gastos,pedidos}
-var productos = []; // inventario global
-// pedidos especiales globales (multi-día)
-var pedidosGlobal = [];
+var data = {};         // data[YYYY-MM-DD] = {ventas,gastos,pedidos,encargos}
+var productos = [];    // inventario global
+var pedidosGlobal = []; // pedidos especiales globales
+var encargosGlobal = []; // encargos globales
+var ventaItems = [];   // items de una venta múltiple
 
 // ── PERSISTENCIA ──
 function loadData() {
-  try { var s=localStorage.getItem('cvd_data'); if(s) data=JSON.parse(s); } catch(e){data={};}
-  try { var s=localStorage.getItem('cvd_productos'); if(s) productos=JSON.parse(s); } catch(e){productos=[];}
-  try { var s=localStorage.getItem('cvd_pedidos'); if(s) pedidosGlobal=JSON.parse(s); } catch(e){pedidosGlobal=[];}
+  try { var s = localStorage.getItem('cvd_data'); if (s) data = JSON.parse(s) || {}; } catch (e) { data = {}; }
+  try { var s2 = localStorage.getItem('cvd_productos'); if (s2) productos = JSON.parse(s2) || []; } catch (e) { productos = []; }
+  try { var s3 = localStorage.getItem('cvd_pedidos'); if (s3) pedidosGlobal = JSON.parse(s3) || []; } catch (e) { pedidosGlobal = []; }
+  try { var s4 = localStorage.getItem('cvd_encargos'); if (s4) encargosGlobal = JSON.parse(s4) || []; } catch (e) { encargosGlobal = []; }
+
+  // Normalizar estructura antigua
+  Object.keys(data).forEach(function (k) {
+    if (!data[k]) data[k] = {};
+    if (!Array.isArray(data[k].ventas)) data[k].ventas = [];
+    if (!Array.isArray(data[k].gastos)) data[k].gastos = [];
+    if (!Array.isArray(data[k].pedidos)) data[k].pedidos = [];
+    if (!Array.isArray(data[k].encargos)) data[k].encargos = [];
+  });
 }
-function saveData(){ try{localStorage.setItem('cvd_data',JSON.stringify(data));}catch(e){toast('Error al guardar');} }
-function saveProductos(){ try{localStorage.setItem('cvd_productos',JSON.stringify(productos));}catch(e){toast('Error al guardar');} }
-function savePedidos(){ try{localStorage.setItem('cvd_pedidos',JSON.stringify(pedidosGlobal));}catch(e){toast('Error al guardar');} }
+
+function saveData() { try { localStorage.setItem('cvd_data', JSON.stringify(data)); } catch (e) { toast('Error al guardar datos'); } }
+function saveProductos() { try { localStorage.setItem('cvd_productos', JSON.stringify(productos)); } catch (e) { toast('Error al guardar inventario'); } }
+function savePedidos() { try { localStorage.setItem('cvd_pedidos', JSON.stringify(pedidosGlobal)); } catch (e) { toast('Error al guardar pedidos'); } }
+function saveEncargos() { try { localStorage.setItem('cvd_encargos', JSON.stringify(encargosGlobal)); } catch (e) { toast('Error al guardar encargos'); } }
 
 // ── HELPERS ──
-function dateKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function getDayData(d){ var k=dateKey(d); if(!data[k])data[k]={ventas:[],gastos:[],pedidos:[]}; return data[k]; }
-function fmt(n){ return '$'+Number(n).toFixed(2); }
-function fmtShort(n){ return n>=1000?'$'+(n/1000).toFixed(1)+'k':fmt(n); }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-function getProducto(id){ for(var i=0;i<productos.length;i++){if(productos[i].id===id)return productos[i];}return null; }
-function getPedido(id){ for(var i=0;i<pedidosGlobal.length;i++){if(pedidosGlobal[i].id===id)return pedidosGlobal[i];}return null; }
-
-// ── SEMANA ──
-function getLunes(d){
-  var day=new Date(d); var dow=day.getDay(); var diff=dow===0?-6:1-dow;
-  day.setDate(day.getDate()+diff); day.setHours(0,0,0,0); return day;
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
-function getWeekDays(d){
-  var lun=getLunes(d); var days=[];
-  for(var i=0;i<7;i++){ var dd=new Date(lun); dd.setDate(lun.getDate()+i); days.push(dd); }
+function parseDateKey(k) {
+  var p = String(k).split('-');
+  return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+}
+function getDayData(d) {
+  var k = dateKey(d);
+  if (!data[k]) data[k] = { ventas: [], gastos: [], pedidos: [], encargos: [] };
+  if (!Array.isArray(data[k].ventas)) data[k].ventas = [];
+  if (!Array.isArray(data[k].gastos)) data[k].gastos = [];
+  if (!Array.isArray(data[k].pedidos)) data[k].pedidos = [];
+  if (!Array.isArray(data[k].encargos)) data[k].encargos = [];
+  return data[k];
+}
+function fmt(n) { return '$' + Number(n || 0).toFixed(2); }
+function fmtShort(n) { n = Number(n || 0); return n >= 1000 ? '$' + (n / 1000).toFixed(1) + 'k' : fmt(n); }
+function fmtQty(n) {
+  var x = Number(n || 0);
+  if (!isFinite(x)) return '0';
+  return (Math.round(x * 100) / 100).toString().replace(/\.00$/, '').replace(/(\.\d*[1-9])0$/, '$1');
+}
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
+function getProducto(id) { for (var i = 0; i < productos.length; i++) { if (productos[i].id === id) return productos[i]; } return null; }
+function getPedido(id) { for (var i = 0; i < pedidosGlobal.length; i++) { if (pedidosGlobal[i].id === id) return pedidosGlobal[i]; } return null; }
+function getEncargo(id) { for (var i = 0; i < encargosGlobal.length; i++) { if (encargosGlobal[i].id === id) return encargosGlobal[i]; } return null; }
+
+function getLunes(d) {
+  var day = new Date(d);
+  var dow = day.getDay();
+  var diff = dow === 0 ? -6 : 1 - dow;
+  day.setDate(day.getDate() + diff);
+  day.setHours(0, 0, 0, 0);
+  return day;
+}
+function getWeekDays(d) {
+  var lun = getLunes(d);
+  var days = [];
+  for (var i = 0; i < 7; i++) { var dd = new Date(lun); dd.setDate(lun.getDate() + i); days.push(dd); }
   return days;
 }
+function getMonthDays(d) {
+  var year = d.getFullYear(), month = d.getMonth(), total = new Date(year, month + 1, 0).getDate();
+  var arr = [];
+  for (var i = 1; i <= total; i++) arr.push(new Date(year, month, i));
+  return arr;
+}
+function inPeriodDate(d, period) {
+  var key = dateKey(d);
+  if (period === 'diario') return key === dateKey(currentDate);
+  if (period === 'semanal') return key >= dateKey(getLunes(currentDate)) && key <= dateKey(getWeekDays(currentDate)[6]);
+  if (period === 'mensual') return d.getFullYear() === currentDate.getFullYear() && d.getMonth() === currentDate.getMonth();
+  return true;
+}
+function periodLabel(period) {
+  if (period === 'diario') return currentDate.toLocaleDateString('es-SV', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  if (period === 'semanal') {
+    var days = getWeekDays(currentDate);
+    return 'Semana del ' + fmtDateObj(days[0]) + ' al ' + fmtDateObj(days[6]);
+  }
+  if (period === 'mensual') return currentDate.toLocaleDateString('es-SV', { month: 'long', year: 'numeric' });
+  return 'Todos los registros';
+}
+function getKeysInPeriod(period) {
+  if (period === 'diario') return [dateKey(currentDate)];
+  if (period === 'semanal') return getWeekDays(currentDate).map(dateKey);
+  if (period === 'mensual') {
+    var days = getMonthDays(currentDate);
+    return days.map(dateKey);
+  }
+  return Object.keys(data).sort();
+}
+function saleItemsSum(items) {
+  return (items || []).reduce(function (a, x) { return a + Number(x.subtotal || x.monto || 0); }, 0);
+}
+function saleQtySum(items) {
+  return (items || []).reduce(function (a, x) { return a + Number(x.cant || 0); }, 0);
+}
+function saleRecordTotal(rec) {
+  if (!rec) return 0;
+  if (Array.isArray(rec.items) && rec.items.length) return saleItemsSum(rec.items);
+  return Number(rec.monto || 0);
+}
+function saleRecordQty(rec) {
+  if (!rec) return 0;
+  if (Array.isArray(rec.items) && rec.items.length) return saleQtySum(rec.items);
+  return Number(rec.cant || 0);
+}
+function saleRecordSummary(rec) {
+  if (!rec) return '';
+  if (Array.isArray(rec.items) && rec.items.length) {
+    return rec.items.map(function (it) {
+      return (it.productoNombre || it.desc || 'Producto') + ' × ' + fmtQty(it.cant);
+    }).join(' · ');
+  }
+  return rec.productoNombre ? rec.productoNombre + ' × ' + fmtQty(rec.cant) : '';
+}
+function pedidoActivo(p) { return !p || p.estado !== 'cancelado'; }
+function pedidoMontoContable(p) { return pedidoActivo(p) ? Number(p.monto || 0) : 0; }
+function encargoTotal(e) { return Number(e && e.monto || 0) - Number(e && e.anticipo || 0); }
+function syncPedidoDay(p) {
+  var day = getDayData(parseDateKey(p.fecha || dateKey(currentDate)));
+  var idx = day.pedidos.findIndex(function (x) { return x.id === p.id; });
+  if (idx >= 0) {
+    day.pedidos[idx].estado = p.estado;
+    day.pedidos[idx].fechaCompletado = p.fechaCompletado || '';
+    day.pedidos[idx].productoId = p.productoId || null;
+  }
+  saveData();
+}
+function syncEncargoDay(e) {
+  var day = getDayData(parseDateKey(e.fecha || dateKey(currentDate)));
+  var idx = day.encargos.findIndex(function (x) { return x.id === e.id; });
+  if (idx >= 0) day.encargos[idx] = e;
+  saveData();
+}
+function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
 
 // ══════════════════════════════════════════
 //  NAVEGACIÓN
 // ══════════════════════════════════════════
-function showPage(name,btn){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('page-'+name).classList.add('active');
-  if(btn) btn.classList.add('active');
-  currentPage=name;
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+  var target = document.getElementById('page-' + name);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentPage = name;
   renderPage(name);
-  var hideFab=(name==='historial'||name==='inventario');
-  document.getElementById('fabBtn').style.display=hideFab?'none':'flex';
+  var hideFab = (name === 'historial' || name === 'inventario');
+  var fab = document.getElementById('fabBtn');
+  if (fab) fab.style.display = hideFab ? 'none' : 'flex';
 }
 
 // ══════════════════════════════════════════
 //  FECHA
 // ══════════════════════════════════════════
-function updateHeaderDate(){ document.getElementById('headerDate').textContent=currentDate.toLocaleDateString('es-SV',{day:'2-digit',month:'2-digit',year:'numeric'}); }
-function openDateModal(){ document.getElementById('dateInput').value=dateKey(currentDate); document.getElementById('dateModal').classList.add('open'); }
-function applyDate(){
-  var v=document.getElementById('dateInput').value;
-  if(v){var p=v.split('-');currentDate=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
-  closeModal('dateModal'); updateHeaderDate(); renderAll();
+function updateHeaderDate() {
+  document.getElementById('headerDate').textContent = currentDate.toLocaleDateString('es-SV', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function openDateModal() {
+  document.getElementById('dateInput').value = dateKey(currentDate);
+  document.getElementById('dateModal').classList.add('open');
+}
+function applyDate() {
+  var v = document.getElementById('dateInput').value;
+  if (v) currentDate = parseDateKey(v);
+  closeModal('dateModal');
+  updateHeaderDate();
+  renderAll();
 }
 
 // ══════════════════════════════════════════
 //  MODALES
 // ══════════════════════════════════════════
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+function closeModal(id) { var el = document.getElementById(id); if (el) el.classList.remove('open'); }
+function overlayClose(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
-// ─ Modal registro ─
-function openAddModal(){
+function setTipo(t) {
+  selectedTipo = t;
+  ['venta', 'gasto', 'pedido'].forEach(function (x) {
+    var b = document.getElementById('tBtn' + cap(x));
+    if (b) b.classList.toggle('active', x === t);
+  });
+  document.getElementById('pedidoWrap').style.display = (t === 'pedido') ? 'block' : 'none';
+  document.getElementById('ventaProductoWrap').style.display = (t === 'venta') ? 'block' : 'none';
+  document.getElementById('ventaComposerWrap').style.display = (t === 'venta') ? 'block' : 'none';
+}
+function openAddModal() {
   setTipo('venta');
-  document.getElementById('fDesc').value='';
-  document.getElementById('fCant').value='1';
-  document.getElementById('fMonto').value='';
-  document.getElementById('ventaProductoSel').value='';
-  document.getElementById('ventaStockInfo').style.display='none';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fCant').value = '1';
+  document.getElementById('fMonto').value = '';
+  document.getElementById('ventaProductoSel').value = '';
+  document.getElementById('ventaStockInfo').style.display = 'none';
+  document.getElementById('pedidoProductoSel').value = '';
+  ventaItems = [];
+  renderVentaItems();
   poblarSelectProductos('ventaProductoSel');
   poblarSelectProductos('pedidoProductoSel');
   document.getElementById('addModal').classList.add('open');
 }
 
-function poblarSelectProductos(selId){
-  var sel=document.getElementById(selId);
-  sel.innerHTML='<option value="">— Seleccionar producto —</option>';
-  productos.forEach(function(p){
-    var opt=document.createElement('option');
-    opt.value=p.id;
-    opt.textContent=p.nombre+' (stock: '+p.cantidad+' '+p.unidad+')';
+function poblarSelectProductos(selId) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Seleccionar producto —</option>';
+  productos.forEach(function (p) {
+    var opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.nombre + ' (stock: ' + fmtQty(p.cantidad) + ' ' + p.unidad + ')';
     sel.appendChild(opt);
   });
 }
 
-function setTipo(t){
-  selectedTipo=t;
-  ['Venta','Gasto','Pedido'].forEach(function(x){document.getElementById('tBtn'+x).classList.remove('active');});
-  document.getElementById('tBtn'+cap(t)).classList.add('active');
-  document.getElementById('pedidoWrap').style.display=(t==='pedido')?'block':'none';
-  document.getElementById('ventaProductoWrap').style.display=(t==='venta')?'block':'none';
-}
-
-function onProductoSelChange(){
-  var pid=parseInt(document.getElementById('ventaProductoSel').value);
-  var info=document.getElementById('ventaStockInfo');
-  if(!pid){info.style.display='none';return;}
-  var p=getProducto(pid);
-  if(!p){info.style.display='none';return;}
-  info.style.display='block';
-  info.innerHTML='Precio venta: <strong>'+fmt(p.precioVenta)+'</strong> &nbsp;|&nbsp; Stock: <strong>'+p.cantidad+' '+p.unidad+'</strong>';
-  document.getElementById('fMonto').value=p.precioVenta>0?p.precioVenta:'';
-  document.getElementById('fDesc').value=p.nombre;
+function onProductoSelChange() {
+  var pid = parseInt(document.getElementById('ventaProductoSel').value || '0', 10);
+  var info = document.getElementById('ventaStockInfo');
+  if (!pid) { info.style.display = 'none'; return; }
+  var p = getProducto(pid);
+  if (!p) { info.style.display = 'none'; return; }
+  info.style.display = 'block';
+  info.innerHTML = 'Precio venta: <strong>' + fmt(p.precioVenta) + '</strong> &nbsp;|&nbsp; Stock: <strong>' + fmtQty(p.cantidad) + ' ' + p.unidad + '</strong>';
+  document.getElementById('fMonto').value = (Number(p.precioVenta || 0) > 0) ? Number(p.precioVenta || 0).toFixed(2) : '';
+  document.getElementById('fDesc').value = p.nombre;
   onCantChange();
 }
+function onCantChange() {
+  var pid = parseInt(document.getElementById('ventaProductoSel').value || '0', 10);
+  var cant = parseFloat(document.getElementById('fCant').value || '0') || 0;
+  if (!pid) return;
+  var p = getProducto(pid);
+  if (!p) return;
+  document.getElementById('fMonto').value = (Number(p.precioVenta || 0) * cant).toFixed(2);
+}
+function buildVentaItemFromForm() {
+  var pid = parseInt(document.getElementById('ventaProductoSel').value || '0', 10);
+  var cant = parseFloat(document.getElementById('fCant').value || '0') || 0;
+  var monto = parseFloat(document.getElementById('fMonto').value || '0') || 0;
+  var desc = document.getElementById('fDesc').value.trim();
 
-function onCantChange(){
-  var pid=parseInt(document.getElementById('ventaProductoSel').value);
-  if(!pid)return;
-  var p=getProducto(pid);
-  if(!p)return;
-  var cant=parseInt(document.getElementById('fCant').value)||1;
-  document.getElementById('fMonto').value=(p.precioVenta*cant).toFixed(2);
+  if (pid) {
+    var p = getProducto(pid);
+    if (!p) { toast('⚠ Producto no encontrado'); return null; }
+    if (cant <= 0) { toast('⚠ Ingresa una cantidad válida'); return null; }
+    if (cant > Number(p.cantidad || 0)) { toast('⚠ Stock insuficiente (' + fmtQty(p.cantidad) + ' disponibles)'); return null; }
+    if (!monto || monto <= 0) monto = Number(p.precioVenta || 0) * cant;
+    return {
+      productoId: pid,
+      productoNombre: p.nombre,
+      cant: cant,
+      precioUnitario: Number(p.precioVenta || 0),
+      subtotal: Number(monto.toFixed(2)),
+      desc: desc || p.nombre
+    };
+  }
+
+  if (!desc) { toast('⚠ Ingresa una descripción'); return null; }
+  if (!monto || monto <= 0) { toast('⚠ Ingresa un monto válido'); return null; }
+  return {
+    productoId: null,
+    productoNombre: '',
+    cant: cant > 0 ? cant : 1,
+    precioUnitario: 0,
+    subtotal: Number(monto.toFixed(2)),
+    desc: desc
+  };
+}
+function clearVentaCurrentFields() {
+  document.getElementById('ventaProductoSel').value = '';
+  document.getElementById('ventaStockInfo').style.display = 'none';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fCant').value = '1';
+  document.getElementById('fMonto').value = '';
+}
+function addVentaItem() {
+  var it = buildVentaItemFromForm();
+  if (!it) return;
+  ventaItems.push(it);
+  renderVentaItems();
+  clearVentaCurrentFields();
+}
+function removeVentaItem(idx) {
+  ventaItems.splice(idx, 1);
+  renderVentaItems();
+}
+function renderVentaItems() {
+  var box = document.getElementById('ventaItemsList');
+  var totalEl = document.getElementById('ventaItemsTotal');
+  if (!box) return;
+  if (!ventaItems.length) {
+    box.innerHTML = '<div class="empty" style="padding:12px 8px"><div class="empty-text">Aún no agregas productos a esta venta.</div></div>';
+    if (totalEl) totalEl.textContent = fmt(0);
+    return;
+  }
+  var html = '';
+  var total = 0;
+  ventaItems.forEach(function (it, idx) {
+    total += Number(it.subtotal || 0);
+    html += '<div class="sale-line">' +
+      '<div class="sale-line-main">' +
+      '<div class="sale-line-name">' + esc(it.productoNombre || it.desc) + '</div>' +
+      '<div class="sale-line-meta">Cant: ' + fmtQty(it.cant) + (it.productoId ? ' · Precio: ' + fmt(it.precioUnitario) : '') + '</div>' +
+      '</div>' +
+      '<div class="sale-line-right">' +
+      '<div class="sale-line-total">' + fmt(it.subtotal) + '</div>' +
+      '<button type="button" class="tx-del" onclick="removeVentaItem(' + idx + ')">×</button>' +
+      '</div>' +
+      '</div>';
+  });
+  box.innerHTML = html;
+  if (totalEl) totalEl.textContent = fmt(total);
 }
 
-// ─ Guardar registro ─
-function saveRecord(){
-  var monto=parseFloat(document.getElementById('fMonto').value);
-  var desc=document.getElementById('fDesc').value.trim();
-  var cant=parseInt(document.getElementById('fCant').value)||1;
-  if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
-  if(!desc) desc=selectedTipo==='venta'?'Venta':selectedTipo==='gasto'?'Gasto':'Pedido';
+// ══════════════════════════════════════════
+//  GUARDADO
+// ══════════════════════════════════════════
+function saveRecord() {
+  var ahora = new Date();
+  var hora = ahora.toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' });
+  var day = getDayData(currentDate);
 
-  var ahora=new Date();
-  var hora=ahora.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
-  var record={id:Date.now(),monto:monto,desc:desc,cant:cant,hora:hora};
-  var day=getDayData(currentDate);
+  if (selectedTipo === 'venta') {
+    var items = ventaItems.slice();
+    var currentItem = buildVentaItemFromForm();
 
-  if(selectedTipo==='venta'){
-    var pid=parseInt(document.getElementById('ventaProductoSel').value);
-    if(pid){
-      var prod=getProducto(pid);
-      if(prod){
-        if(cant>prod.cantidad){toast('⚠ Stock insuficiente ('+prod.cantidad+' disponibles)');return;}
-        prod.cantidad-=cant;
-        record.productoId=pid;
-        record.productoNombre=prod.nombre;
-        saveProductos();
+    if (!items.length && currentItem) items.push(currentItem);
+    else if (currentItem && document.getElementById('fDesc').value.trim() || parseFloat(document.getElementById('fMonto').value || '0') > 0) {
+      // Si el usuario dejó un ítem sin agregar, lo incluimos.
+      if (currentItem && !items.some(function (x) { return x.productoId === currentItem.productoId && x.desc === currentItem.desc && Number(x.subtotal) === Number(currentItem.subtotal); })) {
+        if (currentItem.productoId || currentItem.desc || currentItem.subtotal > 0) {
+          if (ventaItems.length === 0 || document.getElementById('ventaProductoSel').value || document.getElementById('fDesc').value.trim()) {
+            // en venta múltiple con ítems guardados, añadimos el actual si fue llenado
+            if (document.getElementById('ventaProductoSel').value || document.getElementById('fDesc').value.trim() || parseFloat(document.getElementById('fMonto').value || '0') > 0) items.push(currentItem);
+          }
+        }
       }
     }
-    day.ventas.push(record);
-    saveData();
 
-  } else if(selectedTipo==='gasto'){
-    day.gastos.push(record);
-    saveData();
+    if (!items.length) { toast('⚠ Agrega al menos un producto o un monto'); return; }
 
-  } else {
-    // PEDIDO ESPECIAL → va a pedidosGlobal con estado pendiente
-    var pedRec={
-      id:Date.now(),
-      tipo:document.getElementById('pedidoTipo').value,
-      desc:desc, cant:cant, monto:monto, hora:hora,
-      fecha:dateKey(currentDate),
-      estado:'pendiente',  // pendiente | completado | cancelado
-      productoId:parseInt(document.getElementById('pedidoProductoSel').value)||null
+    // Validar y descontar stock
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.productoId) {
+        var prod = getProducto(it.productoId);
+        if (!prod) { toast('⚠ Producto no encontrado'); return; }
+        if (Number(it.cant) > Number(prod.cantidad)) { toast('⚠ Stock insuficiente en ' + prod.nombre); return; }
+      }
+    }
+    items.forEach(function (it) {
+      if (it.productoId) {
+        var pr = getProducto(it.productoId);
+        if (pr) pr.cantidad = Number(pr.cantidad || 0) - Number(it.cant || 0);
+      }
+    });
+    saveProductos();
+
+    var total = saleItemsSum(items);
+    var cantTotal = saleQtySum(items);
+    var desc = document.getElementById('fDesc').value.trim();
+    if (!desc) desc = items.length > 1 ? 'Venta múltiple' : (items[0].productoNombre || 'Venta');
+
+    var rec = {
+      id: Date.now(),
+      monto: Number(total.toFixed(2)),
+      desc: desc,
+      cant: cantTotal > 0 ? cantTotal : 1,
+      hora: hora,
+      items: clone(items),
+      productoId: items.length === 1 ? items[0].productoId : null,
+      productoNombre: items.length === 1 ? items[0].productoNombre : '',
+      fecha: dateKey(currentDate)
     };
-    // también guardar en el día para historial de pedidos especiales
-    day.pedidos.push({id:pedRec.id,tipo:pedRec.tipo,desc:desc,cant:cant,monto:monto,hora:hora});
+    day.ventas.push(rec);
+    saveData();
+    ventaItems = [];
+    closeModal('addModal');
+    renderAll();
+    toast('✓ Venta guardada');
+
+  } else if (selectedTipo === 'gasto') {
+    var monto = parseFloat(document.getElementById('fMonto').value || '0');
+    var descG = document.getElementById('fDesc').value.trim();
+    var cantG = parseFloat(document.getElementById('fCant').value || '1') || 1;
+    if (!monto || monto <= 0) { toast('⚠ Ingresa un monto válido'); return; }
+    if (!descG) descG = 'Gasto';
+    day.gastos.push({ id: Date.now(), monto: Number(monto.toFixed(2)), desc: descG, cant: cantG, hora: hora, fecha: dateKey(currentDate) });
+    saveData();
+    closeModal('addModal');
+    renderAll();
+    toast('✓ Gasto guardado');
+
+  } else if (selectedTipo === 'pedido') {
+    var montoP = parseFloat(document.getElementById('fMonto').value || '0');
+    var descP = document.getElementById('fDesc').value.trim() || 'Pedido';
+    var cantP = parseFloat(document.getElementById('fCant').value || '1') || 1;
+    if (!montoP || montoP <= 0) { toast('⚠ Ingresa un monto válido'); return; }
+    var pedRec = {
+      id: Date.now(),
+      tipo: document.getElementById('pedidoTipo').value,
+      desc: descP,
+      cant: cantP,
+      monto: Number(montoP.toFixed(2)),
+      hora: hora,
+      fecha: dateKey(currentDate),
+      estado: 'pendiente',
+      productoId: parseInt(document.getElementById('pedidoProductoSel').value || '0', 10) || null
+    };
+    day.pedidos.push(pedRec);
     pedidosGlobal.push(pedRec);
     saveData();
     savePedidos();
+    closeModal('addModal');
+    renderAll();
+    toast('✓ Pedido guardado');
   }
-
-  closeModal('addModal');
-  renderAll();
-  toast('✓ Registro guardado');
 }
 
-// ─ Eliminar registro ─
-function deleteRecord(tipo,id){
-  if(!confirm('¿Eliminar este registro?'))return;
-  var day=getDayData(currentDate);
-  if(tipo==='ventas'){
-    var rec=null;
-    for(var i=0;i<day.ventas.length;i++){if(day.ventas[i].id===id){rec=day.ventas[i];break;}}
-    if(rec&&rec.productoId){var prod=getProducto(rec.productoId);if(prod){prod.cantidad+=rec.cant;saveProductos();}}
+// ── ELIMINAR REGISTRO ──
+function deleteRecord(tipo, id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  var day = getDayData(currentDate);
+
+  if (tipo === 'ventas') {
+    var rec = day.ventas.find(function (x) { return x.id === id; });
+    if (rec) {
+      if (Array.isArray(rec.items) && rec.items.length) {
+        rec.items.forEach(function (it) {
+          if (it.productoId) {
+            var prod = getProducto(it.productoId);
+            if (prod) prod.cantidad = Number(prod.cantidad || 0) + Number(it.cant || 0);
+          }
+        });
+      } else if (rec.productoId) {
+        var p = getProducto(rec.productoId);
+        if (p) p.cantidad = Number(p.cantidad || 0) + Number(rec.cant || 0);
+      }
+      saveProductos();
+    }
   }
-  day[tipo]=day[tipo].filter(function(x){return x.id!==id;});
+
+  day[tipo] = day[tipo].filter(function (x) { return x.id !== id; });
   saveData();
   renderAll();
   toast('Registro eliminado');
 }
 
 // ══════════════════════════════════════════
-//  PEDIDOS ESPECIALES - COMPLETAR/CANCELAR
+//  PEDIDOS ESPECIALES
 // ══════════════════════════════════════════
-function setPedidoTab(tab){
-  pedidoTab=tab;
-  document.getElementById('tabPend').classList.toggle('active',tab==='pendiente');
-  document.getElementById('tabDone').classList.toggle('active',tab==='completado');
-  document.getElementById('tabCanc').classList.toggle('active',tab==='cancelado');
+function setPedidoTab(tab) {
+  pedidoTab = tab;
+  document.getElementById('tabPend').classList.toggle('active', tab === 'pendiente');
+  document.getElementById('tabDone').classList.toggle('active', tab === 'completado');
+  document.getElementById('tabCanc').classList.toggle('active', tab === 'cancelado');
   renderPedidos();
 }
-
-function completarPedido(id){
-  var ped=getPedido(id);
-  if(!ped)return;
-  if(ped.estado!=='pendiente'){toast('Este pedido ya fue procesado');return;}
-
-  // Sumar al stock si tiene producto asignado
-  if(ped.productoId){
-    var prod=getProducto(ped.productoId);
-    if(prod){
-      prod.cantidad+=ped.cant;
-      saveProductos();
-      toast('✓ Pedido completado — +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre);
-    } else {
-      toast('✓ Pedido marcado como completado');
-    }
-  } else {
-    toast('✓ Pedido marcado como completado');
+function completarPedido(id) {
+  var ped = getPedido(id);
+  if (!ped) return;
+  if (ped.estado !== 'pendiente') { toast('Este pedido ya fue procesado'); return; }
+  if (ped.productoId) {
+    var prod = getProducto(ped.productoId);
+    if (prod) prod.cantidad = Number(prod.cantidad || 0) + Number(ped.cant || 0);
   }
-
-  ped.estado='completado';
-  ped.fechaCompletado=dateKey(new Date());
+  ped.estado = 'completado';
+  ped.fechaCompletado = dateKey(new Date());
+  saveProductos();
   savePedidos();
+  syncPedidoDay(ped);
   renderAll();
+  toast('✓ Pedido completado');
 }
-
-function cancelarPedido(id){
-  if(!confirm('¿Cancelar este pedido?'))return;
-  var ped=getPedido(id);
-  if(!ped)return;
-  ped.estado='cancelado';
+function cancelarPedido(id) {
+  if (!confirm('¿Cancelar este pedido?')) return;
+  var ped = getPedido(id);
+  if (!ped) return;
+  ped.estado = 'cancelado';
   savePedidos();
+  syncPedidoDay(ped);
   renderAll();
   toast('Pedido cancelado');
 }
+function eliminarPedidoGlobal(id) {
+  if (!confirm('¿Eliminar este pedido del historial?')) return;
+  var ped = getPedido(id);
+  if (!ped) return;
 
-function eliminarPedidoGlobal(id){
-  if(!confirm('¿Eliminar este pedido del historial?'))return;
-  pedidosGlobal=pedidosGlobal.filter(function(p){return p.id!==id;});
+  if (ped.estado === 'completado' && ped.productoId) {
+    var prod = getProducto(ped.productoId);
+    if (prod) {
+      var cant = Number(ped.cant || 0);
+      if (Number(prod.cantidad || 0) >= cant) prod.cantidad = Number(prod.cantidad || 0) - cant;
+      else prod.cantidad = 0;
+      saveProductos();
+    }
+  }
+
+  pedidosGlobal = pedidosGlobal.filter(function (p) { return p.id !== id; });
+  var day = getDayData(parseDateKey(ped.fecha || dateKey(currentDate)));
+  day.pedidos = day.pedidos.filter(function (p) { return p.id !== id; });
   savePedidos();
+  saveData();
   renderPedidos();
+  renderAll();
   toast('Pedido eliminado');
 }
 
-// ── Producto modal ──
-function openProductoModal(id){
-  document.getElementById('pId').value=id||'';
-  if(id){
-    var p=getProducto(id);
-    document.getElementById('productoModalTitle').textContent='Editar producto';
-    document.getElementById('pNombre').value=p.nombre;
-    document.getElementById('pCantidad').value=p.cantidad;
-    document.getElementById('pUnidad').value=p.unidad;
-    document.getElementById('pPrecioCosto').value=p.precioCosto;
-    document.getElementById('pPrecioVenta').value=p.precioVenta;
-    document.getElementById('pFecha').value=p.fecha;
-    document.getElementById('pNotas').value=p.notas||'';
+// ══════════════════════════════════════════
+//  ENCARGOS
+// ══════════════════════════════════════════
+function openEncargoModal(id) {
+  document.getElementById('eId').value = id || '';
+  if (id) {
+    var e = getEncargo(id);
+    if (!e) return;
+    document.getElementById('encargoModalTitle').textContent = 'Editar encargo';
+    document.getElementById('eCliente').value = e.cliente || '';
+    document.getElementById('eProductos').value = e.productos || '';
+    document.getElementById('eFecha').value = e.fecha || dateKey(new Date());
+    document.getElementById('eCosto').value = e.monto || '';
+    document.getElementById('eAnticipo').value = e.anticipo || '';
+    document.getElementById('eNotas').value = e.notas || '';
   } else {
-    document.getElementById('productoModalTitle').textContent='Nuevo producto';
-    ['pNombre','pNotas'].forEach(function(f){document.getElementById(f).value='';});
-    document.getElementById('pCantidad').value='';
-    document.getElementById('pUnidad').value='unidad';
-    document.getElementById('pPrecioCosto').value='';
-    document.getElementById('pPrecioVenta').value='';
-    document.getElementById('pFecha').value=dateKey(new Date());
+    document.getElementById('encargoModalTitle').textContent = 'Nuevo encargo';
+    document.getElementById('eCliente').value = '';
+    document.getElementById('eProductos').value = '';
+    document.getElementById('eFecha').value = dateKey(new Date());
+    document.getElementById('eCosto').value = '';
+    document.getElementById('eAnticipo').value = '';
+    document.getElementById('eNotas').value = '';
+  }
+  document.getElementById('encargoModal').classList.add('open');
+}
+function saveEncargo() {
+  var idExist = document.getElementById('eId').value;
+  var cliente = document.getElementById('eCliente').value.trim();
+  var productosDesc = document.getElementById('eProductos').value.trim();
+  var fecha = document.getElementById('eFecha').value;
+  var monto = parseFloat(document.getElementById('eCosto').value || '0') || 0;
+  var anticipo = parseFloat(document.getElementById('eAnticipo').value || '0') || 0;
+  var notas = document.getElementById('eNotas').value.trim();
+
+  if (!cliente) { toast('⚠ Ingresa el cliente'); return; }
+  if (!productosDesc) { toast('⚠ Ingresa el tipo de producto'); return; }
+  if (!fecha) { toast('⚠ Selecciona la fecha'); return; }
+  if (monto <= 0) { toast('⚠ Ingresa el costo'); return; }
+
+  if (idExist) {
+    var e = getEncargo(parseInt(idExist, 10));
+    if (e) {
+      e.cliente = cliente;
+      e.productos = productosDesc;
+      e.fecha = fecha;
+      e.monto = Number(monto.toFixed(2));
+      e.anticipo = Number(anticipo.toFixed(2));
+      e.notas = notas;
+    }
+  } else {
+    encargosGlobal.push({
+      id: Date.now(),
+      cliente: cliente,
+      productos: productosDesc,
+      fecha: fecha,
+      monto: Number(monto.toFixed(2)),
+      anticipo: Number(anticipo.toFixed(2)),
+      notas: notas,
+      creado: dateKey(currentDate)
+    });
+  }
+  saveEncargos();
+  closeModal('encargoModal');
+  renderEncargos();
+  toast('✓ Encargo guardado');
+}
+function eliminarEncargo(id) {
+  if (!confirm('¿Eliminar este encargo?')) return;
+  encargosGlobal = encargosGlobal.filter(function (e) { return e.id !== id; });
+  saveEncargos();
+  renderEncargos();
+  renderResumen();
+  toast('Encargo eliminado');
+}
+
+// ══════════════════════════════════════════
+//  PRODUCTO / INVENTARIO
+// ══════════════════════════════════════════
+function openProductoModal(id) {
+  document.getElementById('pId').value = id || '';
+  if (id) {
+    var p = getProducto(id);
+    if (!p) return;
+    document.getElementById('productoModalTitle').textContent = 'Editar producto';
+    document.getElementById('pNombre').value = p.nombre || '';
+    document.getElementById('pCantidad').value = p.cantidad || '';
+    document.getElementById('pUnidad').value = p.unidad || 'unidad';
+    document.getElementById('pPrecioCosto').value = p.precioCosto || '';
+    document.getElementById('pPrecioVenta').value = p.precioVenta || '';
+    document.getElementById('pFecha').value = p.fecha || dateKey(new Date());
+    document.getElementById('pNotas').value = p.notas || '';
+  } else {
+    document.getElementById('productoModalTitle').textContent = 'Nuevo producto';
+    document.getElementById('pNombre').value = '';
+    document.getElementById('pCantidad').value = '';
+    document.getElementById('pUnidad').value = 'unidad';
+    document.getElementById('pPrecioCosto').value = '';
+    document.getElementById('pPrecioVenta').value = '';
+    document.getElementById('pFecha').value = dateKey(new Date());
+    document.getElementById('pNotas').value = '';
   }
   document.getElementById('productoModal').classList.add('open');
 }
+function saveProducto() {
+  var nombre = document.getElementById('pNombre').value.trim();
+  var cantidad = parseFloat(document.getElementById('pCantidad').value || '0') || 0;
+  var unidad = document.getElementById('pUnidad').value;
+  var precioCosto = parseFloat(document.getElementById('pPrecioCosto').value || '0') || 0;
+  var precioVenta = parseFloat(document.getElementById('pPrecioVenta').value || '0') || 0;
+  var fecha = document.getElementById('pFecha').value;
+  var notas = document.getElementById('pNotas').value.trim();
+  var idExist = document.getElementById('pId').value;
 
-function saveProducto(){
-  var nombre=document.getElementById('pNombre').value.trim();
-  var cantidad=parseFloat(document.getElementById('pCantidad').value)||0;
-  var unidad=document.getElementById('pUnidad').value;
-  var precioCosto=parseFloat(document.getElementById('pPrecioCosto').value)||0;
-  var precioVenta=parseFloat(document.getElementById('pPrecioVenta').value)||0;
-  var fecha=document.getElementById('pFecha').value;
-  var notas=document.getElementById('pNotas').value.trim();
-  var idExist=document.getElementById('pId').value;
-  if(!nombre){toast('⚠ Ingresa el nombre del producto');return;}
-  if(!fecha){toast('⚠ Selecciona la fecha de ingreso');return;}
-  if(idExist){
-    var p=getProducto(parseInt(idExist));
-    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;}
+  if (!nombre) { toast('⚠ Ingresa el nombre del producto'); return; }
+  if (!fecha) { toast('⚠ Selecciona la fecha de ingreso'); return; }
+
+  if (idExist) {
+    var p = getProducto(parseInt(idExist, 10));
+    if (p) {
+      p.nombre = nombre;
+      p.cantidad = cantidad;
+      p.unidad = unidad;
+      p.precioCosto = precioCosto;
+      p.precioVenta = precioVenta;
+      p.fecha = fecha;
+      p.notas = notas;
+    }
   } else {
-    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas});
+    productos.push({
+      id: Date.now(),
+      nombre: nombre,
+      cantidad: cantidad,
+      unidad: unidad,
+      precioCosto: precioCosto,
+      precioVenta: precioVenta,
+      fecha: fecha,
+      notas: notas
+    });
   }
   saveProductos();
   closeModal('productoModal');
   renderInventario();
+  renderVentaSelects();
   toast('✓ Producto guardado');
 }
-
-function eliminarProducto(id){
-  if(!confirm('¿Eliminar este producto?'))return;
-  productos=productos.filter(function(p){return p.id!==id;});
+function eliminarProducto(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  productos = productos.filter(function (p) { return p.id !== id; });
   saveProductos();
   renderInventario();
+  renderVentaSelects();
   toast('Producto eliminado');
 }
-
-function openStockModal(id){
-  var p=getProducto(id);
-  if(!p)return;
-  document.getElementById('sId').value=id;
-  document.getElementById('stockModalTitle').textContent='Ajustar stock: '+p.nombre;
-  document.getElementById('sActual').textContent=p.cantidad+' '+p.unidad;
-  document.getElementById('sCant').value='1';
+function openStockModal(id) {
+  var p = getProducto(id);
+  if (!p) return;
+  document.getElementById('sId').value = id;
+  document.getElementById('stockModalTitle').textContent = 'Ajustar stock: ' + p.nombre;
+  document.getElementById('sActual').textContent = fmtQty(p.cantidad) + ' ' + p.unidad;
+  document.getElementById('sCant').value = '1';
   setStkOp('sumar');
   document.getElementById('stockModal').classList.add('open');
 }
-
-function setStkOp(op){
-  stkOpActual=op;
-  document.getElementById('sOpSumar').classList.toggle('active',op==='sumar');
-  document.getElementById('sOpRestar').classList.toggle('active',op==='restar');
+function setStkOp(op) {
+  stkOpActual = op;
+  document.getElementById('sOpSumar').classList.toggle('active', op === 'sumar');
+  document.getElementById('sOpRestar').classList.toggle('active', op === 'restar');
 }
-
-function saveStockAjuste(){
-  var id=parseInt(document.getElementById('sId').value);
-  var cant=parseFloat(document.getElementById('sCant').value)||0;
-  if(cant<=0){toast('⚠ Ingresa una cantidad válida');return;}
-  var p=getProducto(id);
-  if(!p)return;
-  if(stkOpActual==='sumar'){p.cantidad+=cant;}
-  else{if(cant>p.cantidad){toast('⚠ No hay suficiente stock');return;}p.cantidad-=cant;}
+function saveStockAjuste() {
+  var id = parseInt(document.getElementById('sId').value || '0', 10);
+  var cant = parseFloat(document.getElementById('sCant').value || '0') || 0;
+  if (cant <= 0) { toast('⚠ Ingresa una cantidad válida'); return; }
+  var p = getProducto(id);
+  if (!p) return;
+  if (stkOpActual === 'sumar') p.cantidad = Number(p.cantidad || 0) + cant;
+  else {
+    if (cant > Number(p.cantidad || 0)) { toast('⚠ No hay suficiente stock'); return; }
+    p.cantidad = Number(p.cantidad || 0) - cant;
+  }
   saveProductos();
   closeModal('stockModal');
   renderInventario();
+  renderVentaSelects();
   toast('✓ Stock actualizado');
 }
 
 // ══════════════════════════════════════════
-//  RENDER
+//  RENDER GENERAL
 // ══════════════════════════════════════════
-function renderAll(){ renderResumen(); renderPage(currentPage); }
-
-function renderPage(name){
-  if(name==='resumen') renderResumen();
-  else if(name==='ventas') renderList('ventas');
-  else if(name==='gastos') renderList('gastos');
-  else if(name==='pedidos') renderPedidos();
-  else if(name==='inventario') renderInventario();
-  else if(name==='historial') renderHistorial();
+function renderAll() {
+  renderResumen();
+  renderPage(currentPage);
+}
+function renderPage(name) {
+  if (name === 'resumen') renderResumen();
+  else if (name === 'ventas') renderList('ventas');
+  else if (name === 'gastos') renderList('gastos');
+  else if (name === 'pedidos') renderPedidos();
+  else if (name === 'encargos') renderEncargos();
+  else if (name === 'inventario') renderInventario();
+  else if (name === 'historial') renderHistorial();
+  else if (name === 'reportes') renderReportesMenu();
 }
 
-function renderResumen(){
-  var day=getDayData(currentDate);
-  var tv=day.ventas.reduce(function(a,x){return a+x.monto;},0);
-  var tg=day.gastos.reduce(function(a,x){return a+x.monto;},0);
-
-  // pedidos especiales del DÍA — desde day.pedidos (el snapshot del día)
-  var dPR=day.pedidos.filter(function(x){return x.tipo==='Pollo Rico';});
-  var dPI=day.pedidos.filter(function(x){return x.tipo==='Pollo Indio';});
-  var dSO=day.pedidos.filter(function(x){return x.tipo==='Sello de Oro';});
-  var tpr=dPR.reduce(function(a,x){return a+x.monto;},0);
-  var tpi=dPI.reduce(function(a,x){return a+x.monto;},0);
-  var tso=dSO.reduce(function(a,x){return a+x.monto;},0);
-  var bal=tv-tg;
-  var pct=Math.min(100,(tv/META)*100);
-
-  // día
-  document.getElementById('totalVentas').textContent=fmt(tv);
-  document.getElementById('cntVentas').textContent=day.ventas.length+' transacciones';
-  document.getElementById('totalGastos').textContent=fmt(tg);
-  document.getElementById('cntGastos').textContent=day.gastos.length+' egresos';
-
-  // balance card
-  document.getElementById('balanceNeto').textContent=fmt(bal);
-  document.getElementById('balanceNeto').style.color=bal>=0?'#a8e6cf':'#f4a590';
-  document.getElementById('balanceTag').textContent=bal>0?'Positivo':bal<0?'Negativo':'Neutro';
-  document.getElementById('metaText').textContent=Math.round(pct)+'% de meta ('+fmt(META)+')';
-  document.getElementById('progressFill').style.width=pct+'%';
-
-  // pedidos del día con conteo
-  document.getElementById('sumPolloRico').textContent=fmt(tpr);
-  document.getElementById('cntPolloRicoDia').textContent=dPR.length+' pedido'+(dPR.length!==1?'s':'')+' hoy';
-  document.getElementById('sumPolloIndio').textContent=fmt(tpi);
-  document.getElementById('cntPolloIndioDia').textContent=dPI.length+' pedido'+(dPI.length!==1?'s':'')+' hoy';
-  document.getElementById('sumSelloOro').textContent=fmt(tso);
-  document.getElementById('cntSelloOroDia').textContent=dSO.length+' pedido'+(dSO.length!==1?'s':'')+' hoy';
-
-  // barras distribución
-  var maxVal=Math.max(tv,tg,tpr,tpi,tso,1);
-  ['bVentas','bGastos','bPollo','bIndio','bSello'].forEach(function(bid,i){
-    var vals=[tv,tg,tpr,tpi,tso];
-    document.getElementById(bid).style.height=Math.max(4,Math.round((vals[i]/maxVal)*80))+'px';
-  });
-
-  renderSemana();
-}
-
-function renderSemana(){
-  var days=getWeekDays(currentDate);
-  var lun=days[0]; var dom=days[6];
-  var fmtD=function(d){return d.toLocaleDateString('es-SV',{day:'2-digit',month:'2-digit'});};
-  document.getElementById('semanaRango').textContent=fmtD(lun)+' – '+fmtD(dom);
-
-  var semV=0,semG=0,semNV=0,semNG=0;
-  var semPR=0,semPI=0,semSO=0,semCntPR=0,semCntPI=0,semCntSO=0;
-  var dayVals=[];
-  var DIAS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-
-  days.forEach(function(d){
-    var dd=getDayData(d);
-    var v=dd.ventas.reduce(function(a,x){return a+x.monto;},0);
-    var g=dd.gastos.reduce(function(a,x){return a+x.monto;},0);
-    semV+=v; semG+=g;
-    semNV+=dd.ventas.length; semNG+=dd.gastos.length;
-
-    // pedidos de la semana por tipo (desde pedidosGlobal con fecha de la semana)
-    var k=dateKey(d);
-    pedidosGlobal.forEach(function(p){
-      if(p.fecha===k){
-        if(p.tipo==='Pollo Rico'){semPR+=p.monto;semCntPR++;}
-        else if(p.tipo==='Pollo Indio'){semPI+=p.monto;semCntPI++;}
-        else if(p.tipo==='Sello de Oro'){semSO+=p.monto;semCntSO++;}
-      }
-    });
-    dayVals.push({v:v,g:g});
-  });
-
-  document.getElementById('semVentas').textContent=fmt(semV);
-  document.getElementById('semVentasSub').textContent=semNV+' transacciones';
-  document.getElementById('semGastos').textContent=fmt(semG);
-  document.getElementById('semGastosSub').textContent=semNG+' egresos';
-
-  // pedidos semana
-  document.getElementById('semPolloRico').textContent=fmt(semPR);
-  document.getElementById('semCntPolloRico').textContent=semCntPR+' pedido'+(semCntPR!==1?'s':'');
-  document.getElementById('semPolloIndio').textContent=fmt(semPI);
-  document.getElementById('semCntPolloIndio').textContent=semCntPI+' pedido'+(semCntPI!==1?'s':'');
-  document.getElementById('semSelloOro').textContent=fmt(semSO);
-  document.getElementById('semCntSelloOro').textContent=semCntSO+' pedido'+(semCntSO!==1?'s':'');
-
-  // mini barras
-  var maxDay=Math.max.apply(null,dayVals.map(function(d){return Math.max(d.v,d.g);}));
-  if(maxDay===0) maxDay=1;
-  var todayK=dateKey(currentDate);
-  var html='';
-  days.forEach(function(d,i){
-    var isToday=dateKey(d)===todayK;
-    var hv=Math.max(3,Math.round((dayVals[i].v/maxDay)*32));
-    var hg=Math.max(3,Math.round((dayVals[i].g/maxDay)*32));
-    var dotColor=dayVals[i].v>dayVals[i].g?'#1d9e75':dayVals[i].g>dayVals[i].v?'#d44f2e':'#9a9a9a';
-    html+='<div class="semana-day">'+
-      '<div class="semana-day-label" style="color:'+(isToday?'var(--primary)':'var(--text3)')+'">'+DIAS[i]+'</div>'+
-      '<div class="semana-day-bar-wrap" style="gap:2px;display:flex;align-items:flex-end">'+
-        '<div class="semana-day-bar" style="background:#1d9e75;height:'+hv+'px"></div>'+
-        '<div class="semana-day-bar" style="background:#d44f2e;height:'+hg+'px"></div>'+
-      '</div>'+
-      '<div class="semana-day-dot" style="background:'+dotColor+'"></div>'+
-    '</div>';
-  });
-  document.getElementById('semanaDays').innerHTML=html;
-}
-
-function renderList(tipo){
-  var day=getDayData(currentDate);
-  var items=day[tipo];
-  var el=document.getElementById('lista'+cap(tipo));
-  var badge=document.getElementById('badge'+cap(tipo));
-  if(badge) badge.textContent=items.length;
-  if(!items.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">'+(tipo==='ventas'?'💰':'📋')+'</div><div class="empty-text">No hay '+tipo+' registradas hoy.<br>Toca <strong>+</strong> para agregar.</div></div>';
-    return;
-  }
-  var html='<div class="tx-list">';
-  items.forEach(function(it){
-    var isV=tipo==='ventas';
-    var bg=isV?'#e8f7f1':'#fdeee9';
-    var color=isV?'var(--green)':'var(--red)';
-    var meta='Cant: '+it.cant+' &middot; '+esc(it.hora);
-    if(isV&&it.productoNombre) meta+=' &middot; 📦 '+esc(it.productoNombre);
-    html+='<div class="tx-item">'+
-      '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':'📋')+'</div>'+
-      '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div>'+
-      '<div class="tx-amount" style="color:'+color+'">'+(isV?'+':'-')+fmt(it.monto)+'</div>'+
-      '<button class="tx-del" onclick="deleteRecord(\''+tipo+'\','+it.id+')">&#215;</button>'+
-    '</div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
-}
-
-function renderPedidos(){
-  var el=document.getElementById('listaPedidos');
-
-  // Calcular totales por empresa (TODOS los estados) para el resumen superior
-  var resPR=0,resPRcnt=0,resPI=0,resPIcnt=0,resSO=0,reSOcnt=0;
-  pedidosGlobal.forEach(function(p){
-    if(p.estado==='cancelado') return; // no contar cancelados en el resumen
-    if(p.tipo==='Pollo Rico'){resPR+=p.monto;resPRcnt++;}
-    else if(p.tipo==='Pollo Indio'){resPI+=p.monto;resPIcnt++;}
-    else if(p.tipo==='Sello de Oro'){resSO+=p.monto;reSOcnt++;}
-  });
-  document.getElementById('pedResumenPR').textContent=fmt(resPR);
-  document.getElementById('pedResumenPRcnt').textContent=resPRcnt+' pedido'+(resPRcnt!==1?'s':'');
-  document.getElementById('pedResumenPI').textContent=fmt(resPI);
-  document.getElementById('pedResumenPIcnt').textContent=resPIcnt+' pedido'+(resPIcnt!==1?'s':'');
-  document.getElementById('pedResumenSO').textContent=fmt(resSO);
-  document.getElementById('pedResumenSOcnt').textContent=reSOcnt+' pedido'+(reSOcnt!==1?'s':'');
-
-  // Filtrar por tab activo
-  var items=pedidosGlobal.filter(function(p){return p.estado===pedidoTab;});
-  items=items.slice().sort(function(a,b){return b.id-a.id;});
-
-  // Total del tab activo
-  var tabTotal=items.reduce(function(a,p){return a+p.monto;},0);
-  var tabLabels={pendiente:'Pendientes',completado:'Completados',cancelado:'Cancelados'};
-  document.getElementById('pedFiltroLabel').textContent=tabLabels[pedidoTab]+': '+items.length+' pedidos';
-  document.getElementById('pedResumenTotal').textContent=fmt(tabTotal);
-
-  if(!items.length){
-    var msgs={pendiente:'No hay pedidos pendientes.<br>Toca <strong>+</strong> para crear uno.',completado:'No hay pedidos completados aún.',cancelado:'No hay pedidos cancelados.'};
-    el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">'+msgs[pedidoTab]+'</div></div>';
-    return;
-  }
-
-  var colores={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'};
-  var html='';
-  items.forEach(function(it){
-    var color=colores[it.tipo]||'#888';
-    var prod=it.productoId?getProducto(it.productoId):null;
-    var prodInfo=prod?'Stock: <strong>'+esc(prod.nombre)+'</strong>':'';
-    var statusClass='ped-status-'+(it.estado==='pendiente'?'pending':it.estado==='completado'?'done':'cancelled');
-    var statusLabel=it.estado==='pendiente'?'⏳ Pendiente':it.estado==='completado'?'✅ Completado':'❌ Cancelado';
-    var fechaDisplay=it.fecha?it.fecha.split('-').reverse().join('/'):'-';
-    var fechaComp=it.fechaCompletado?(' · Entregado: '+it.fechaCompletado.split('-').reverse().join('/')):'';
-
-    html+='<div class="ped-card">'+
-      '<div class="ped-card-top">'+
-        '<div class="ped-card-info">'+
-          '<div class="ped-card-name" style="color:'+color+'">'+esc(it.tipo)+'</div>'+
-          '<div class="ped-card-meta">'+
-            esc(it.desc)+' · Cant: '+it.cant+' · '+esc(it.hora)+'<br>'+
-            'Pedido: '+fechaDisplay+fechaComp+
-            (prodInfo?'<br>'+prodInfo:'')+
-          '</div>'+
-          '<span class="ped-status '+statusClass+'">'+statusLabel+'</span>'+
-        '</div>'+
-        '<div style="text-align:right;flex-shrink:0">'+
-          '<div class="ped-card-amount" style="color:'+color+'">'+fmt(it.monto)+'</div>'+
-        '</div>'+
-      '</div>';
-
-    if(it.estado==='pendiente'){
-      html+='<div class="ped-actions">'+
-        '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal('+it.id+')">Eliminar</button>'+
-        '<button class="ped-btn ped-btn-cancel" onclick="cancelarPedido('+it.id+')">Cancelar</button>'+
-        '<button class="ped-btn ped-btn-complete" onclick="completarPedido('+it.id+')">✓ Completar</button>'+
-      '</div>';
-    } else {
-      html+='<div class="ped-actions">'+
-        '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal('+it.id+')">Eliminar</button>'+
-      '</div>';
-    }
-    html+='</div>';
-  });
-  el.innerHTML=html;
-}
-
-function renderInventario(){
-  var el=document.getElementById('listaInventario');
-  if(!productos.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No tienes productos en inventario.<br>Toca <strong>+ Producto</strong> para agregar.</div></div>';
-    return;
-  }
-  var html='';
-  productos.forEach(function(p){
-    var sc=p.cantidad<=0?'stock-out':p.cantidad<=5?'stock-low':'stock-ok';
-    var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Stock bajo':'En stock';
-    var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
-    var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0):'--';
-    html+='<div class="inv-card">'+
-      '<div class="inv-card-header">'+
-        '<div><div class="inv-card-name">'+esc(p.nombre)+'</div><div class="inv-card-date">Ingreso: '+esc(fd)+(p.notas?' &middot; '+esc(p.notas):'')+'</div></div>'+
-        '<span class="stock-badge '+sc+'">'+sl+'</span>'+
-      '</div>'+
-      '<div class="inv-card-body">'+
-        '<div class="inv-stat"><div class="inv-stat-label">Stock</div><div class="inv-stat-value">'+p.cantidad+'<span style="font-size:10px;color:var(--text3)"> '+esc(p.unidad)+'</span></div></div>'+
-        '<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value" style="color:var(--red)">'+fmt(p.precioCosto)+'</div></div>'+
-        '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value" style="color:var(--green)">'+fmt(p.precioVenta)+'</div></div>'+
-      '</div>'+
-      '<div style="padding:0 16px 12px;font-size:11px;color:var(--text3)">Margen: <strong style="color:var(--primary)">'+(margen!=='--'?margen+'%':'--')+'</strong> &nbsp;|&nbsp; Valor stock: <strong style="color:var(--text)">'+fmt(p.cantidad*p.precioCosto)+'</strong></div>'+
-      '<div class="inv-card-footer">'+
-        '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto('+p.id+')">Eliminar</button>'+
-        '<button class="inv-btn" onclick="openStockModal('+p.id+')">Ajustar stock</button>'+
-        '<button class="inv-btn inv-btn-primary" onclick="openProductoModal('+p.id+')">Editar</button>'+
-      '</div>'+
-    '</div>';
-  });
-  el.innerHTML=html;
-}
-
-function renderHistorial(){
-  var el=document.getElementById('listaHistorial');
-  var keys=Object.keys(data).sort().reverse();
-  if(!keys.length){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Aún no hay registros históricos.</div></div>';return;}
-  var html='';
-  keys.forEach(function(k){
-    var d=data[k];
-    if(!d.ventas.length&&!d.gastos.length&&!d.pedidos.length)return;
-    var tv=d.ventas.reduce(function(a,x){return a+x.monto;},0);
-    var tg=d.gastos.reduce(function(a,x){return a+x.monto;},0);
-    var tp=d.pedidos.reduce(function(a,x){return a+x.monto;},0);
-    var p2=k.split('-');
-    var fo=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
-    var fecha=fo.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-    var balColor=(tv-tg)>=0?'#0f6e56':'#993c1d';
-    var balBg=(tv-tg)>=0?'#e8f7f1':'#fdeee9';
-    html+='<div class="hist-day"><div class="hist-day-header">'+fecha+'</div><div class="tx-list">';
-    d.ventas.forEach(function(it){
-      var meta=it.hora+(it.productoNombre?' &middot; 📦 '+esc(it.productoNombre):'');
-      html+='<div class="tx-item"><div class="tx-icon" style="background:#e8f7f1">💰</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div><div class="tx-amount" style="color:var(--green)">+'+fmt(it.monto)+'</div></div>';
-    });
-    d.gastos.forEach(function(it){
-      html+='<div class="tx-item"><div class="tx-icon" style="background:#fdeee9">📋</div><div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+esc(it.hora)+'</div></div><div class="tx-amount" style="color:var(--red)">-'+fmt(it.monto)+'</div></div>';
-    });
-    d.pedidos.forEach(function(it){
-      var c2={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'}[it.tipo]||'#888';
-      // buscar estado en pedidosGlobal
-      var gped=getPedido(it.id);
-      var estadoLabel=gped?(gped.estado==='completado'?' ✅':gped.estado==='cancelado'?' ❌':' ⏳'):'';
-      html+='<div class="tx-item"><div class="tx-icon" style="background:#f5f0e0">📦</div><div class="tx-info"><div class="tx-name" style="color:'+c2+'">'+esc(it.tipo)+estadoLabel+'</div><div class="tx-meta">'+esc(it.desc)+' &middot; '+esc(it.hora)+'</div></div><div class="tx-amount" style="color:'+c2+'">'+fmt(it.monto)+'</div></div>';
-    });
-    html+='</div><div class="hist-summary">'+
-      '<span class="hist-chip" style="background:#e8f7f1;color:#0f6e56">Ventas: '+fmt(tv)+'</span>'+
-      '<span class="hist-chip" style="background:#fdeee9;color:#993c1d">Gastos: '+fmt(tg)+'</span>'+
-      '<span class="hist-chip" style="background:#fef0d9;color:#854f0b">Pedidos: '+fmt(tp)+'</span>'+
-      '<span class="hist-chip" style="background:'+balBg+';color:'+balColor+';margin-left:auto">Bal: '+fmt(tv-tg)+'</span>'+
-    '</div></div>';
-  });
-  el.innerHTML=html||'<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Sin registros aún.</div></div>';
-}
-
-// ── TOAST ──
-function toast(msg){
-  var n=document.getElementById('notif');
-  n.textContent=msg;
-  n.classList.add('show');
-  clearTimeout(n._t);
-  n._t=setTimeout(function(){n.classList.remove('show');},2600);
-}
-
-// ══════════════════════════════════════════
-//  MOTOR DE REPORTES PDF
-// ══════════════════════════════════════════
-
-function fmtPDF(n){ return '$'+Number(n).toFixed(2); }
-function fmtDate(k){ var p=k.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function fmtDateObj(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
-
-function rptHeader(titulo, subtitulo){
-  var now = new Date();
-  return '<div class="rpt-wrap">'+
-    '<div class="rpt-header">'+
-      '<div class="rpt-logo-area">'+
-        '<div class="rpt-logo-box">JR</div>'+
-        '<div><div class="rpt-biz-name">Control de Negocio</div><div class="rpt-biz-sub">Ventas Diarias</div></div>'+
-      '</div>'+
-      '<div class="rpt-meta">Generado: '+fmtDateObj(now)+'<br>'+now.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})+'</div>'+
-    '</div>'+
-    '<div class="rpt-title">'+titulo+'</div>'+
-    '<div class="rpt-subtitle">'+subtitulo+'</div>';
-}
-
-function rptFooter(){
-  return '<div class="rpt-footer"><span>Control de Ventas — Reporte generado automáticamente</span><span>Datos almacenados localmente en este dispositivo</span></div></div>';
-}
-
-function rptKPI(label, value, sub, color){
-  return '<div class="rpt-kpi"><div class="rpt-kpi-label">'+label+'</div><div class="rpt-kpi-value" style="color:'+(color||'#0a3d2e')+'">'+value+'</div>'+(sub?'<div class="rpt-kpi-sub">'+sub+'</div>':'')+'</div>';
-}
-
-// ─── REPORTE DIARIO ───
-function buildReporteDiario(){
+function renderResumen() {
   var day = getDayData(currentDate);
-  var k = dateKey(currentDate);
-  var fechaLabel = currentDate.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-
-  var tv = day.ventas.reduce(function(a,x){return a+x.monto;},0);
-  var tg = day.gastos.reduce(function(a,x){return a+x.monto;},0);
-  var tp = day.pedidos.reduce(function(a,x){return a+x.monto;},0);
+  var tv = day.ventas.reduce(function (a, x) { return a + saleRecordTotal(x); }, 0);
+  var tg = day.gastos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var pedidosActivos = day.pedidos.filter(pedidoActivo);
+  var tp = pedidosActivos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var te = day.encargos.reduce(function (a, x) { return a + encargoTotal(x); }, 0);
+  var tpr = day.pedidos.filter(function (x) { return x.tipo === 'Pollo Rico' && pedidoActivo(x); }).reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var tpi = day.pedidos.filter(function (x) { return x.tipo === 'Pollo Indio' && pedidoActivo(x); }).reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var tso = day.pedidos.filter(function (x) { return x.tipo === 'Sello de Oro' && pedidoActivo(x); }).reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
   var bal = tv - tg;
+  var pct = Math.min(100, (tv / META) * 100);
 
-  var html = rptHeader('Reporte Diario', fechaLabel);
+  document.getElementById('totalVentas').textContent = fmt(tv);
+  document.getElementById('cntVentas').textContent = day.ventas.length + ' transacciones';
+  document.getElementById('totalGastos').textContent = fmt(tg);
+  document.getElementById('cntGastos').textContent = day.gastos.length + ' egresos';
+  document.getElementById('balanceNeto').textContent = fmt(bal);
+  document.getElementById('balanceNeto').style.color = bal >= 0 ? '#a8e6cf' : '#f4a590';
+  document.getElementById('balanceTag').textContent = bal > 0 ? 'Positivo' : bal < 0 ? 'Negativo' : 'Neutro';
+  document.getElementById('metaText').textContent = Math.round(pct) + '% de meta (' + fmt(META) + ')';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('sumPolloRico').textContent = fmt(tpr);
+  document.getElementById('sumPolloIndio').textContent = fmt(tpi);
+  document.getElementById('sumSelloOro').textContent = fmt(tso);
 
-  // KPIs
-  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen del día</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas totales', fmtPDF(tv), day.ventas.length+' transacciones', '#1d9e75');
-  html += rptKPI('Gastos totales', fmtPDF(tg), day.gastos.length+' egresos', '#d44f2e');
-  html += rptKPI('Pedidos especiales', fmtPDF(tp), day.pedidos.length+' pedidos', '#e8a020');
-  html += rptKPI('Balance neto', fmtPDF(bal), bal>=0?'Positivo':'Negativo', bal>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
+  var maxVal = Math.max(tv, tg, tpr, tpi, tso, 1);
+  ['bVentas', 'bGastos', 'bPollo', 'bIndio', 'bSello'].forEach(function (bid, i) {
+    var vals = [tv, tg, tpr, tpi, tso];
+    document.getElementById(bid).style.height = Math.max(4, Math.round((vals[i] / maxVal) * 80)) + 'px';
+  });
+  renderSemana();
 
-  // Ventas
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas del día</div>';
-  if(day.ventas.length){
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    day.ventas.forEach(function(v){
-      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
-    });
-    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL VENTAS</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
-    html += '</tbody></table>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
-  html += '</div>';
-
-  // Gastos
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Gastos del día</div>';
-  if(day.gastos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    day.gastos.forEach(function(g){
-      html += '<tr><td>'+esc(g.hora)+'</td><td>'+esc(g.desc)+'</td><td class="center">'+g.cant+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(g.monto)+'</td></tr>';
-    });
-    html += '<tr><td colspan="3" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL GASTOS</td><td class="num" style="font-weight:700;color:#d44f2e;background:#f0f0f0">'+fmtPDF(tg)+'</td></tr>';
-    html += '</tbody></table>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin gastos registrados.</p>'; }
-  html += '</div>';
-
-  // Pedidos especiales del día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos especiales del día</div>';
-  if(day.pedidos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
-    day.pedidos.forEach(function(p){
-      var gped=getPedido(p.id);
-      var estado=gped?gped.estado:'pendiente';
-      var estadoClass=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-      var estadoTxt=estado==='completado'?'Completado':estado==='cancelado'?'Cancelado':'Pendiente';
-      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
-    });
-    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL PEDIDOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
-    html += '</tbody></table>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales.</p>'; }
-  html += '</div>';
-
-  // Inventario del día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del día</div>';
-  if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Venta unit.</div><div>Margen</div><div>Valor stock</div></div>';
-    productos.forEach(function(p){
-      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.cantidad*p.precioCosto)+'</div></div>';
-    });
-    var totalValor=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValor)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
-
-  html += rptFooter();
-  return html;
+  var pedidosHoy = pedidosActivos.length;
+  var pedidosHoyTag = pedidosHoy + ' pedidos';
+  if (document.getElementById('pedidosDiaMonto')) {
+    document.getElementById('pedidosDiaMonto').textContent = fmt(tp);
+    document.getElementById('pedidosDiaSub').textContent = pedidosHoyTag;
+  }
+  if (document.getElementById('encargosDiaMonto')) {
+    document.getElementById('encargosDiaMonto').textContent = fmt(te);
+    document.getElementById('encargosDiaSub').textContent = day.encargos.length + ' encargos';
+  }
 }
 
-// ─── REPORTE SEMANAL ───
-function buildReporteSemanal(){
+function renderSemana() {
   var days = getWeekDays(currentDate);
-  var lun = days[0]; var dom = days[6];
-  var rango = fmtDateObj(lun)+' — '+fmtDateObj(dom);
-  var DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  var lun = days[0], dom = days[6];
+  document.getElementById('semanaRango').textContent = fmtDateObj(lun) + ' – ' + fmtDateObj(dom);
 
-  var semV=0,semG=0,semP=0;
-  var dayRows=[];
-  days.forEach(function(d,i){
-    var dd=getDayData(d);
-    var v=dd.ventas.reduce(function(a,x){return a+x.monto;},0);
-    var g=dd.gastos.reduce(function(a,x){return a+x.monto;},0);
-    var p=dd.pedidos.reduce(function(a,x){return a+x.monto;},0);
-    semV+=v; semG+=g; semP+=p;
-    dayRows.push({dia:DIAS[i],k:dateKey(d),v:v,g:g,p:p,bal:v-g,nv:dd.ventas.length,ng:dd.gastos.length,np:dd.pedidos.length});
+  var semV = 0, semG = 0;
+  var dayVals = [];
+  days.forEach(function (d) {
+    var dd = getDayData(d);
+    var v = dd.ventas.reduce(function (a, x) { return a + saleRecordTotal(x); }, 0);
+    var g = dd.gastos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+    semV += v;
+    semG += g;
+    dayVals.push({ v: v, g: g });
   });
 
-  var html = rptHeader('Reporte Semanal', 'Semana del '+rango);
+  document.getElementById('semVentas').textContent = fmtShort(semV);
+  document.getElementById('semGastos').textContent = fmtShort(semG);
+  var semBal = semV - semG;
+  var balEl = document.getElementById('semBalance');
+  balEl.textContent = fmtShort(Math.abs(semBal));
+  balEl.style.color = semBal >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // KPIs semana
-  html += '<div class="rpt-section"><div class="rpt-section-title">Totales de la semana</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas semana', fmtPDF(semV), '', '#1d9e75');
-  html += rptKPI('Gastos semana', fmtPDF(semG), '', '#d44f2e');
-  html += rptKPI('Pedidos semana', fmtPDF(semP), '', '#e8a020');
-  html += rptKPI('Balance semana', fmtPDF(semV-semG), (semV-semG)>=0?'Positivo':'Negativo', (semV-semG)>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
-
-  // Tabla por día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas y gastos por día</div>';
-  html += '<table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th># Ventas</th><th>Ventas $</th><th># Gastos</th><th>Gastos $</th><th>Pedidos $</th><th>Balance</th></tr></thead><tbody>';
-  dayRows.forEach(function(r){
-    html += '<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="center">'+r.ng+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
+  var maxDay = Math.max.apply(null, dayVals.map(function (d) { return Math.max(d.v, d.g); }));
+  if (maxDay === 0) maxDay = 1;
+  var todayKey2 = dateKey(currentDate);
+  var html = '';
+  days.forEach(function (d, i) {
+    var isToday = dateKey(d) === todayKey2;
+    var hv = Math.max(4, Math.round((dayVals[i].v / maxDay) * 36));
+    var hg = Math.max(3, Math.round((dayVals[i].g / maxDay) * 36));
+    html += '<div class="semana-day">' +
+      '<div class="semana-day-label">' + ['L', 'M', 'M', 'J', 'V', 'S', 'D'][i] + '</div>' +
+      '<div class="semana-day-bar-wrap" style="gap:2px">' +
+      '<div class="semana-day-bar" style="background:#1d9e75;height:' + hv + 'px;opacity:' + (isToday ? '1' : '0.75') + '"></div>' +
+      '<div class="semana-day-bar" style="background:#d44f2e;height:' + hg + 'px;opacity:' + (isToday ? '1' : '0.75') + '"></div>' +
+      '</div>' +
+      '<div class="semana-day-dot" style="background:' + (isToday ? 'var(--primary)' : 'var(--border)') + '"></div>' +
+      '</div>';
   });
-  html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td><td></td><td class="num" style="color:#d44f2e">'+fmtPDF(semG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(semP)+'</td><td class="num" style="color:'+(semV-semG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(semV-semG)+'</td></tr>';
-  html += '</tbody></table></div>';
-
-  // Detalle ventas por día de la semana
-  html += '<div class="rpt-section"><div class="rpt-section-title">Detalle de ventas por día</div>';
-  days.forEach(function(d,i){
-    var dd=getDayData(d);
-    if(!dd.ventas.length) return;
-    html += '<div class="no-break" style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;">'+DIAS[i]+' '+fmtDate(dateKey(d))+'</div>';
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    dd.ventas.forEach(function(v){
-      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
-    });
-    html += '</tbody></table></div>';
-  });
-  html += '</div>';
-
-  // Pedidos por proveedor
-  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales — agrupados por proveedor</div>';
-  var semKeys = days.map(function(d){return dateKey(d);});
-  var pedsSem = pedidosGlobal.filter(function(p){ return semKeys.indexOf(p.fecha)!==-1; });
-
-  if(pedsSem.length){
-    // Agrupar por tipo (proveedor)
-    var byProv = {};
-    pedsSem.forEach(function(p){
-      if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProv[p.tipo].peds.push(p);
-      byProv[p.tipo].total+=p.monto;
-      byProv[p.tipo][p.estado+'s']++;
-    });
-    Object.keys(byProv).forEach(function(prov){
-      var g=byProv[prov];
-      html += '<div class="rpt-prov-block no-break">'+
-        '<div class="rpt-prov-name">'+esc(prov)+' — Total: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+'</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+'</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+'</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha pedido</th><th>Descripción</th><th>Cant.</th><th>Producto stock</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
-      g.peds.forEach(function(p){
-        var prodN=p.productoId?(getProducto(p.productoId)?getProducto(p.productoId).nombre:'—'):'—';
-        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td>'+esc(prodN)+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
-      });
-      html += '</tbody></table></div>';
-    });
-  } else {
-    html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales esta semana.</p>';
-  }
-  html += '</div>';
-
-  // Inventario estado semanal
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario (semana)</div>';
-  if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock actual</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen %</div><div>Valor en stock</div></div>';
-    var totalV=0;
-    productos.forEach(function(p){
-      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var vs=p.cantidad*p.precioCosto; totalV+=vs;
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
-    });
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalV)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
-
-  html += rptFooter();
-  return html;
+  document.getElementById('semanaDays').innerHTML = html;
 }
 
-// ─── REPORTE MENSUAL ───
-function buildReporteMensual(){
-  var year = currentDate.getFullYear();
-  var month = currentDate.getMonth();
-  var mesNombre = currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
-  var totalDias = new Date(year, month+1, 0).getDate();
+function renderList(tipo) {
+  var day = getDayData(currentDate);
+  var items = day[tipo] || [];
+  var el = document.getElementById('lista' + cap(tipo));
+  var badge = document.getElementById('badge' + cap(tipo));
+  if (badge) badge.textContent = items.length;
 
-  var mV=0,mG=0,mP=0;
-  var dayRows=[];
-  for(var d=1;d<=totalDias;d++){
-    var dd=new Date(year,month,d);
-    var k=dateKey(dd);
-    var dayD=data[k]||{ventas:[],gastos:[],pedidos:[]};
-    var v=dayD.ventas.reduce(function(a,x){return a+x.monto;},0);
-    var g=dayD.gastos.reduce(function(a,x){return a+x.monto;},0);
-    var p=dayD.pedidos.reduce(function(a,x){return a+x.monto;},0);
-    if(v||g||p) dayRows.push({k:k,d:d,v:v,g:g,p:p,bal:v-g,nv:dayD.ventas.length});
-    mV+=v; mG+=g; mP+=p;
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">' + (tipo === 'ventas' ? '💰' : '📋') + '</div><div class="empty-text">No hay ' + tipo + ' registradas hoy.<br>Toca <strong>+</strong> para agregar.</div></div>';
+    return;
   }
 
-  var diasConVentas = dayRows.filter(function(r){return r.v>0;}).length;
-  var promDiario = diasConVentas>0 ? mV/diasConVentas : 0;
-
-  var html = rptHeader('Reporte Mensual', cap(mesNombre));
-
-  html += '<div class="rpt-section"><div class="rpt-section-title">Totales del mes</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas mes', fmtPDF(mV), diasConVentas+' días con ventas', '#1d9e75');
-  html += rptKPI('Gastos mes', fmtPDF(mG), '', '#d44f2e');
-  html += rptKPI('Pedidos mes', fmtPDF(mP), '', '#e8a020');
-  html += rptKPI('Balance mes', fmtPDF(mV-mG), (mV-mG)>=0?'Positivo':'Negativo', (mV-mG)>=0?'#1d9e75':'#d44f2e');
-  html += '</div>';
-  html += '<div class="rpt-kpi-row" style="grid-template-columns:1fr 1fr;margin-top:8px">';
-  html += rptKPI('Promedio diario (días con ventas)', fmtPDF(promDiario), '', '#0a3d2e');
-  html += rptKPI('Meta diaria ($500) — días alcanzados', dayRows.filter(function(r){return r.v>=META;}).length+' / '+diasConVentas, '', '#c4860a');
-  html += '</div></div>';
-
-  // Tabla diaria del mes
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día del mes</div>';
-  if(dayRows.length){
-    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th><th>Gastos</th><th>Pedidos</th><th>Balance día</th></tr></thead><tbody>';
-    dayRows.forEach(function(r){
-      html += '<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
-    });
-    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(mG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(mP)+'</td><td class="num" style="color:'+(mV-mG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(mV-mG)+'</td></tr>';
-    html += '</tbody></table>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin datos registrados este mes.</p>'; }
-  html += '</div>';
-
-  // Pedidos del mes por proveedor
-  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales del mes — por proveedor</div>';
-  var monthKeys=[];
-  for(var d2=1;d2<=totalDias;d2++) monthKeys.push(dateKey(new Date(year,month,d2)));
-  var pedsMes=pedidosGlobal.filter(function(p){return monthKeys.indexOf(p.fecha)!==-1;});
-  if(pedsMes.length){
-    var byProvM={};
-    pedsMes.forEach(function(p){
-      if(!byProvM[p.tipo]) byProvM[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProvM[p.tipo].peds.push(p);
-      byProvM[p.tipo].total+=p.monto;
-      byProvM[p.tipo][p.estado+'s']++;
-    });
-    Object.keys(byProvM).forEach(function(prov){
-      var g=byProvM[prov];
-      html += '<div class="rpt-prov-block no-break">'+
-        '<div class="rpt-prov-name">'+esc(prov)+' — Total mes: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+' completados</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+' pendientes</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+' cancelados</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
-      g.peds.forEach(function(p){
-        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
-      });
-      html += '</tbody></table></div>';
-    });
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales este mes.</p>'; }
-  html += '</div>';
-
-  // Inventario
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del mes</div>';
-  if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen</div><div>Valor stock</div></div>';
-    var totalValM=0;
-    productos.forEach(function(p){
-      var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var vs=p.cantidad*p.precioCosto; totalValM+=vs;
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+mg+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
-    });
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL VALOR INVENTARIO</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValM)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
-
-  html += rptFooter();
-  return html;
-}
-
-// ─── REPORTE INVENTARIO ───
-function buildReporteInventario(){
-  var html = rptHeader('Estado de Inventario', 'Fecha de corte: '+fmtDateObj(currentDate));
-
-  var totalValor=0, totalCosto=0;
-  var sinStock=[], stockBajo=[], stockOk=[];
-  productos.forEach(function(p){
-    if(p.cantidad<=0) sinStock.push(p);
-    else if(p.cantidad<=5) stockBajo.push(p);
-    else stockOk.push(p);
-    totalValor+=p.cantidad*p.precioCosto;
-    totalCosto+=p.precioCosto;
-  });
-
-  // KPIs
-  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de inventario</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Total productos', productos.length+' items', '', '#0a3d2e');
-  html += rptKPI('Valor en stock', fmtPDF(totalValor), 'a precio de costo', '#1d9e75');
-  html += rptKPI('Stock bajo / sin stock', stockBajo.length+' / '+sinStock.length, 'requieren atención', '#d44f2e');
-  html += rptKPI('En stock normal', stockOk.length+' productos', '', '#1d9e75');
-  html += '</div></div>';
-
-  // Tabla completa
-  html += '<div class="rpt-section"><div class="rpt-section-title">Inventario completo</div>';
-  if(productos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Producto</th><th>Fecha ingreso</th><th class="center">Stock</th><th>Unidad</th><th>Costo unit.</th><th>Precio venta</th><th>Margen</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
-    productos.forEach(function(p){
-      var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Stock bajo':'En stock';
-      var fd=''; if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
-      html += '<tr><td><strong>'+esc(p.nombre)+'</strong>'+(p.notas?'<br><span style="font-size:10px;color:#888">'+esc(p.notas)+'</span>':'')+'</td><td>'+fd+'</td><td class="center"><strong>'+p.cantidad+'</strong></td><td>'+esc(p.unidad)+'</td><td class="num">'+fmtPDF(p.precioCosto)+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(p.precioVenta)+'</td><td class="center">'+mg+'</td><td class="num" style="font-weight:700">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+sl+'</span></td></tr>';
-      totalValor+=0; // already counted
-    });
-    var totalV2=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
-    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="7">VALOR TOTAL EN STOCK</td><td class="num">'+fmtPDF(totalV2)+'</td><td></td></tr>';
-    html += '</tbody></table>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
-
-  // Alertas
-  if(sinStock.length||stockBajo.length){
-    html += '<div class="rpt-section no-break"><div class="rpt-section-title">⚠ Alertas de stock</div>';
-    if(sinStock.length){
-      html += '<div style="background:#fdeee9;border-radius:8px;padding:12px;margin-bottom:10px;border-left:3px solid #d44f2e"><div style="font-size:11px;font-weight:700;color:#993c1d;margin-bottom:6px">SIN STOCK — Requieren reposición urgente</div>';
-      sinStock.forEach(function(p){html+='<div style="font-size:12px;padding:3px 0;color:#333">• '+esc(p.nombre)+' — 0 '+esc(p.unidad)+'</div>';});
-      html += '</div>';
+  var html = '<div class="tx-list">';
+  items.forEach(function (it) {
+    var isV = tipo === 'ventas';
+    var bg = isV ? '#e8f7f1' : '#fdeee9';
+    var color = isV ? 'var(--green)' : 'var(--red)';
+    var total = isV ? saleRecordTotal(it) : Number(it.monto || 0);
+    var meta = '';
+    if (isV) {
+      meta = saleRecordSummary(it) || ('Cant: ' + fmtQty(it.cant || saleRecordQty(it)));
+      meta = (it.hora || '') + (meta ? ' &middot; ' + meta : '');
+    } else {
+      meta = 'Cant: ' + fmtQty(it.cant || 1) + ' &middot; ' + esc(it.hora);
     }
-    if(stockBajo.length){
-      html += '<div style="background:#fef9e7;border-radius:8px;padding:12px;border-left:3px solid #e8a020"><div style="font-size:11px;font-weight:700;color:#b7791f;margin-bottom:6px">STOCK BAJO — Considerar reposición pronto</div>';
-      stockBajo.forEach(function(p){html+='<div style="font-size:12px;padding:3px 0;color:#333">• '+esc(p.nombre)+' — '+p.cantidad+' '+esc(p.unidad)+' disponibles</div>';});
-      html += '</div>';
+    html += '<div class="tx-item">' +
+      '<div class="tx-icon" style="background:' + bg + '">' + (isV ? '💰' : '📋') + '</div>' +
+      '<div class="tx-info"><div class="tx-name">' + esc(it.desc) + '</div><div class="tx-meta">' + meta + '</div></div>' +
+      '<div class="tx-amount" style="color:' + color + '">' + (isV ? '+' : '-') + fmt(total) + '</div>' +
+      '<button class="tx-del" onclick="deleteRecord(\'' + tipo + '\',' + it.id + ')">&#215;</button>' +
+      '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderPedidos() {
+  var el = document.getElementById('listaPedidos');
+  var items = pedidosGlobal.filter(function (p) { return p.estado === pedidoTab; }).slice().sort(function (a, b) { return b.id - a.id; });
+
+  var activosHoy = getDayData(currentDate).pedidos.filter(pedidoActivo);
+  var totalDia = activosHoy.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var resCount = activosHoy.length;
+  document.getElementById('pedidosDiaMonto').textContent = fmt(totalDia);
+  document.getElementById('pedidosDiaSub').textContent = resCount + ' pedidos activos';
+
+  if (!items.length) {
+    var msgs = { pendiente: 'No hay pedidos pendientes.<br>Toca <strong>+</strong> para crear uno.', completado: 'No hay pedidos completados aún.', cancelado: 'No hay pedidos cancelados.' };
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">' + msgs[pedidoTab] + '</div></div>';
+    return;
+  }
+
+  var colores = { 'Pollo Rico': '#e8a020', 'Pollo Indio': '#d44f2e', 'Sello de Oro': '#c4860a' };
+  var html = '';
+  items.forEach(function (it) {
+    var color = colores[it.tipo] || '#888';
+    var prod = it.productoId ? getProducto(it.productoId) : null;
+    var prodInfo = prod ? 'Producto a recibir: <strong>' + esc(prod.nombre) + '</strong>' : 'Sin producto asignado al stock';
+    var statusClass = 'ped-status-' + (it.estado === 'pendiente' ? 'pending' : it.estado === 'completado' ? 'done' : 'cancelled');
+    var statusLabel = it.estado === 'pendiente' ? '⏳ Pendiente' : it.estado === 'completado' ? '✅ Completado' : '❌ Cancelado';
+    var fechaDisplay = it.fecha ? it.fecha.split('-').reverse().join('/') : '-';
+    var fechaComp = it.fechaCompletado ? (' &middot; Entregado: ' + it.fechaCompletado.split('-').reverse().join('/')) : '';
+
+    html += '<div class="ped-card">' +
+      '<div class="ped-card-top">' +
+      '<div class="ped-card-info">' +
+      '<div class="ped-card-name" style="color:' + color + '">' + esc(it.tipo) + '</div>' +
+      '<div class="ped-card-meta">' +
+      esc(it.desc) + ' &middot; Cant: ' + fmtQty(it.cant) + ' &middot; ' + esc(it.hora) + '<br>' +
+      'Pedido: ' + fechaDisplay + fechaComp + '<br>' +
+      prodInfo +
+      '</div>' +
+      '<span class="ped-status ' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="ped-card-amount" style="color:' + color + '">' + fmt(it.monto) + '</div>' +
+      '</div>';
+
+    if (it.estado === 'pendiente') {
+      html += '<div class="ped-actions">' +
+        '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal(' + it.id + ')">Eliminar</button>' +
+        '<button class="ped-btn ped-btn-cancel" onclick="cancelarPedido(' + it.id + ')">Cancelar</button>' +
+        '<button class="ped-btn ped-btn-complete" onclick="completarPedido(' + it.id + ')">Completar</button>' +
+        '</div>';
+    } else if (it.estado === 'completado') {
+      html += '<div class="ped-actions">' +
+        '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal(' + it.id + ')">Eliminar</button>' +
+        '</div>';
+    } else {
+      html += '<div class="ped-actions">' +
+        '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal(' + it.id + ')">Eliminar</button>' +
+        '</div>';
     }
     html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderEncargos() {
+  var el = document.getElementById('listaEncargos');
+  var day = getDayData(currentDate);
+  var items = encargosGlobal.filter(function (e) { return e.fecha === dateKey(currentDate); }).slice().sort(function (a, b) { return b.id - a.id; });
+  var total = day.encargos.reduce(function (a, x) { return a + encargoTotal(x); }, 0);
+  document.getElementById('encargosDiaMonto').textContent = fmt(total);
+  document.getElementById('encargosDiaSub').textContent = items.length + ' encargos registrados';
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">No hay encargos registrados para la fecha seleccionada.<br>Toca <strong>+</strong> para crear uno.</div></div>';
+    return;
+  }
+  var html = '';
+  items.forEach(function (it) {
+    html += '<div class="ped-card">' +
+      '<div class="ped-card-top">' +
+      '<div class="ped-card-info">' +
+      '<div class="ped-card-name" style="color:var(--primary)">' + esc(it.cliente) + '</div>' +
+      '<div class="ped-card-meta">Productos: ' + esc(it.productos) + '<br>Fecha: ' + (it.fecha ? it.fecha.split('-').reverse().join('/') : '-') + '<br>Anticipo: ' + fmt(it.anticipo || 0) + (it.notas ? '<br>Notas: ' + esc(it.notas) : '') + '</div>' +
+      '</div>' +
+      '<div class="ped-card-amount" style="color:var(--primary)">' + fmt(encargoTotal(it)) + '</div>' +
+      '</div>' +
+      '<div class="ped-actions">' +
+      '<button class="ped-btn ped-btn-del" onclick="eliminarEncargo(' + it.id + ')">Eliminar</button>' +
+      '<button class="ped-btn ped-btn-complete" onclick="openEncargoModal(' + it.id + ')">Editar</button>' +
+      '</div>' +
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderInventario() {
+  var el = document.getElementById('listaInventario');
+  var totalValor = 0;
+  var sinStock = [], stockBajo = [], stockOk = [];
+  productos.forEach(function (p) {
+    if (Number(p.cantidad || 0) <= 0) sinStock.push(p);
+    else if (Number(p.cantidad || 0) <= 5) stockBajo.push(p);
+    else stockOk.push(p);
+    totalValor += Number(p.cantidad || 0) * Number(p.precioCosto || 0);
+  });
+
+  if (!productos.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No hay productos en inventario.<br>Toca <strong>+ Producto</strong> para crear uno.</div></div>';
+    return;
   }
 
-  // Pedidos pendientes que afectan inventario
-  var pendStk = pedidosGlobal.filter(function(p){return p.estado==='pendiente'&&p.productoId;});
-  if(pendStk.length){
-    html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos pendientes con impacto en inventario</div>';
-    html += '<table class="rpt-table"><thead><tr><th>Proveedor</th><th>Descripción</th><th>Producto a recibir</th><th class="center">Cant. esperada</th><th>Fecha pedido</th></tr></thead><tbody>';
-    pendStk.forEach(function(p){
-      var prod=getProducto(p.productoId);
-      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td>'+(prod?esc(prod.nombre):'-')+'</td><td class="center">'+p.cant+'</td><td>'+fmtDate(p.fecha)+'</td></tr>';
+  var html = '';
+  productos.slice().sort(function (a, b) { return a.nombre.localeCompare(b.nombre); }).forEach(function (p) {
+    var stockClass = Number(p.cantidad || 0) <= 0 ? 'stock-out' : Number(p.cantidad || 0) <= 5 ? 'stock-low' : 'stock-ok';
+    var badgeText = Number(p.cantidad || 0) <= 0 ? 'Sin stock' : Number(p.cantidad || 0) <= 5 ? 'Stock bajo' : 'En stock';
+    var fecha = p.fecha ? p.fecha.split('-').reverse().join('/') : '-';
+    html += '<div class="inv-card">' +
+      '<div class="inv-card-header">' +
+      '<div>' +
+      '<div class="inv-card-name">' + esc(p.nombre) + '</div>' +
+      '<div class="inv-card-date">Ingreso: ' + fecha + (p.notas ? ' · ' + esc(p.notas) : '') + '</div>' +
+      '</div>' +
+      '<span class="stock-badge ' + stockClass + '">' + badgeText + '</span>' +
+      '</div>' +
+      '<div class="inv-card-body">' +
+      '<div class="inv-stat"><div class="inv-stat-label">Stock</div><div class="inv-stat-value">' + fmtQty(p.cantidad) + '</div></div>' +
+      '<div class="inv-stat"><div class="inv-stat-label">Costo</div><div class="inv-stat-value">' + fmt(p.precioCosto) + '</div></div>' +
+      '<div class="inv-stat"><div class="inv-stat-label">Venta</div><div class="inv-stat-value">' + fmt(p.precioVenta) + '</div></div>' +
+      '</div>' +
+      '<div class="inv-card-footer">' +
+      '<button class="inv-btn" onclick="openStockModal(' + p.id + ')">Ajustar</button>' +
+      '<button class="inv-btn inv-btn-primary" onclick="openProductoModal(' + p.id + ')">Editar</button>' +
+      '<button class="inv-btn inv-btn-danger" onclick="eliminarProducto(' + p.id + ')">Eliminar</button>' +
+      '</div>' +
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderVentaSelects() {
+  poblarSelectProductos('ventaProductoSel');
+  poblarSelectProductos('pedidoProductoSel');
+}
+
+function renderHistorial() {
+  var el = document.getElementById('listaHistorial');
+  var keys = Object.keys(data).sort().reverse();
+  if (!keys.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Aún no hay registros históricos.</div></div>'; return; }
+
+  var html = '';
+  keys.forEach(function (k) {
+    var d = data[k];
+    if (!d.ventas.length && !d.gastos.length && !d.pedidos.length && !d.encargos.length) return;
+    var tv = d.ventas.reduce(function (a, x) { return a + saleRecordTotal(x); }, 0);
+    var tg = d.gastos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+    var tp = d.pedidos.reduce(function (a, x) { return a + pedidoMontoContable(x); }, 0);
+    var te = d.encargos.reduce(function (a, x) { return a + encargoTotal(x); }, 0);
+    var fecha = parseDateKey(k).toLocaleDateString('es-SV', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+    html += '<div class="hist-day"><div class="hist-day-header">' + fecha + '</div><div class="tx-list">';
+    d.ventas.forEach(function (it) {
+      var meta = it.hora + (saleRecordSummary(it) ? ' · ' + saleRecordSummary(it) : '');
+      html += '<div class="tx-item"><div class="tx-icon" style="background:#e8f7f1">💰</div><div class="tx-info"><div class="tx-name">' + esc(it.desc) + '</div><div class="tx-meta">' + esc(meta) + '</div></div><div class="tx-amount" style="color:var(--green)">+' + fmt(saleRecordTotal(it)) + '</div></div>';
     });
-    html += '</tbody></table></div>';
-  }
+    d.gastos.forEach(function (it) {
+      html += '<div class="tx-item"><div class="tx-icon" style="background:#fdeee9">📋</div><div class="tx-info"><div class="tx-name">' + esc(it.desc) + '</div><div class="tx-meta">' + esc(it.hora) + '</div></div><div class="tx-amount" style="color:var(--red)">-' + fmt(Number(it.monto || 0)) + '</div></div>';
+    });
+    d.pedidos.forEach(function (it) {
+      var c2 = { 'Pollo Rico': '#e8a020', 'Pollo Indio': '#d44f2e', 'Sello de Oro': '#c4860a' }[it.tipo] || '#888';
+      var gped = getPedido(it.id);
+      var estadoLabel = gped ? (gped.estado === 'completado' ? ' ✅' : gped.estado === 'cancelado' ? ' ❌' : ' ⏳') : '';
+      html += '<div class="tx-item"><div class="tx-icon" style="background:#f5f0e0">📦</div><div class="tx-info"><div class="tx-name" style="color:' + c2 + '">' + esc(it.tipo) + estadoLabel + '</div><div class="tx-meta">' + esc(it.desc) + ' · ' + esc(it.hora) + '</div></div><div class="tx-amount" style="color:' + c2 + '">' + fmt(pedidoMontoContable(it)) + '</div></div>';
+    });
+    d.encargos.forEach(function (it) {
+      html += '<div class="tx-item"><div class="tx-icon" style="background:#eef4ff">📝</div><div class="tx-info"><div class="tx-name">' + esc(it.cliente) + '</div><div class="tx-meta">' + esc(it.productos) + ' · ' + esc(it.fecha) + '</div></div><div class="tx-amount" style="color:var(--blue)">' + fmt(encargoTotal(it)) + '</div></div>';
+    });
+    html += '</div><div class="hist-summary">' +
+      '<span class="hist-chip" style="background:#e8f7f1;color:#0f6e56">Ventas: ' + fmt(tv) + '</span>' +
+      '<span class="hist-chip" style="background:#fdeee9;color:#993c1d">Gastos: ' + fmt(tg) + '</span>' +
+      '<span class="hist-chip" style="background:#fef0d9;color:#854f0b">Pedidos: ' + fmt(tp) + '</span>' +
+      '<span class="hist-chip" style="background:#eef4ff;color:#2563eb">Encargos: ' + fmt(te) + '</span>' +
+      '<span class="hist-chip" style="background:#e8f7f1;color:#0f6e56;margin-left:auto">Bal: ' + fmt(tv - tg) + '</span>' +
+      '</div></div>';
+  });
+  el.innerHTML = html || '<div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Sin registros para mostrar.</div></div>';
+}
 
+// ══════════════════════════════════════════
+//  REPORTES
+// ══════════════════════════════════════════
+function fmtDate(k) { var p = String(k).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+function fmtDateObj(d) { return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); }
+
+function rptHeader(titulo, subtitulo) {
+  var now = new Date();
+  return '<div class="rpt-wrap">' +
+    '<div class="rpt-header">' +
+    '<div class="rpt-logo-area">' +
+    '<div class="rpt-logo-box">JR</div>' +
+    '<div><div class="rpt-biz-name">Control de Negocio</div><div class="rpt-biz-sub">JRventas</div></div>' +
+    '</div>' +
+    '<div class="rpt-meta">Generado: ' + fmtDateObj(now) + '<br>' + now.toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' }) + '</div>' +
+    '</div>' +
+    '<div class="rpt-title">' + titulo + '</div>' +
+    '<div class="rpt-subtitle">' + subtitulo + '</div>';
+}
+function rptFooter() {
+  return '<div class="rpt-footer"><span>Control de Ventas — Reporte generado automáticamente</span><span>Datos almacenados localmente en este dispositivo</span></div></div>';
+}
+function rptKPI(label, value, sub, color) {
+  return '<div class="rpt-kpi"><div class="rpt-kpi-label">' + label + '</div><div class="rpt-kpi-value" style="color:' + (color || '#0a3d2e') + '">' + value + '</div>' + (sub ? '<div class="rpt-kpi-sub">' + sub + '</div>' : '') + '</div>';
+}
+
+function getAllDayKeys() {
+  return Object.keys(data).sort();
+}
+function getPeriodKeys(period) {
+  return getKeysInPeriod(period);
+}
+function getDayDataByKey(key) {
+  var d = parseDateKey(key);
+  return getDayData(d);
+}
+function getPeriodSales(period) {
+  var keys = getPeriodKeys(period);
+  var out = [];
+  keys.forEach(function (k) { var d = data[k]; if (d && d.ventas.length) d.ventas.forEach(function (x) { out.push(x); }); });
+  return out;
+}
+function getPeriodGastos(period) {
+  var keys = getPeriodKeys(period);
+  var out = [];
+  keys.forEach(function (k) { var d = data[k]; if (d && d.gastos.length) d.gastos.forEach(function (x) { out.push(x); }); });
+  return out;
+}
+function getPeriodPedidos(period) {
+  var keys = getPeriodKeys(period);
+  var out = [];
+  keys.forEach(function (k) { var d = data[k]; if (d && d.pedidos.length) d.pedidos.forEach(function (x) { if (pedidoActivo(x)) out.push(x); }); });
+  return out;
+}
+function getPeriodEncargos(period) {
+  var keys = getPeriodKeys(period);
+  var out = [];
+  keys.forEach(function (k) { var d = data[k]; if (d && d.encargos.length) d.encargos.forEach(function (x) { out.push(x); }); });
+  return out;
+}
+function buildReporteVentas(period) {
+  var sales = getPeriodSales(period);
+  var gastos = getPeriodGastos(period);
+  var totalV = sales.reduce(function (a, x) { return a + saleRecordTotal(x); }, 0);
+  var totalG = gastos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var totalQty = sales.reduce(function (a, x) { return a + saleRecordQty(x); }, 0);
+  var avgTicket = sales.length ? (totalV / sales.length) : 0;
+
+  var html = rptHeader('Reporte de Ventas ' + cap(period), periodLabel(period));
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de ventas</div><div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Ventas', fmtPDF(totalV), sales.length + ' transacciones', '#1d9e75');
+  html += rptKPI('Gastos', fmtPDF(totalG), gastos.length + ' egresos', '#d44f2e');
+  html += rptKPI('Unidades vendidas', fmtQty(totalQty), '', '#0a3d2e');
+  html += rptKPI('Ticket promedio', fmtPDF(avgTicket), '', '#2563eb');
+  html += '</div></div>';
+
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de ventas</div>';
+  if (sales.length) {
+    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Hora</th><th>Descripción</th><th>Detalle</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    sales.forEach(function (v) {
+      var k = v.fecha || dateKey(currentDate);
+      html += '<tr><td>' + fmtDate(k) + '</td><td>' + esc(v.hora) + '</td><td>' + esc(v.desc) + '</td><td>' + esc(saleRecordSummary(v) || '-') + '</td><td class="center">' + fmtQty(saleRecordQty(v)) + '</td><td class="num" style="color:#1d9e75">' + fmtPDF(saleRecordTotal(v)) + '</td></tr>';
+    });
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="5">TOTAL</td><td class="num" style="color:#1d9e75">' + fmtPDF(totalV) + '</td></tr>';
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">Sin ventas registradas en este periodo.</p>';
+  }
+  html += '</div>';
+
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Top productos vendidos</div>';
+  var map = {};
+  sales.forEach(function (v) {
+    (v.items && v.items.length ? v.items : (v.productoId ? [{ productoId: v.productoId, productoNombre: v.productoNombre, cant: v.cant, subtotal: v.monto }] : [])).forEach(function (it) {
+      var k = it.productoNombre || it.desc || 'Manual';
+      if (!map[k]) map[k] = { cant: 0, monto: 0 };
+      map[k].cant += Number(it.cant || 0);
+      map[k].monto += Number(it.subtotal || 0);
+    });
+  });
+  var top = Object.keys(map).map(function (k) { return { nombre: k, cant: map[k].cant, monto: map[k].monto }; }).sort(function (a, b) { return b.monto - a.monto; }).slice(0, 10);
+  if (top.length) {
+    html += '<table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    top.forEach(function (r) {
+      html += '<tr><td>' + esc(r.nombre) + '</td><td class="center">' + fmtQty(r.cant) + '</td><td class="num" style="color:#1d9e75">' + fmtPDF(r.monto) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">No hay productos para analizar.</p>';
+  }
+  html += '</div>' + rptFooter();
+  return html;
+}
+
+function buildReportePedidos(period) {
+  var pedidos = getPeriodPedidos(period);
+  var total = pedidos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var pend = pedidos.filter(function (x) { return x.estado !== 'completado' && x.estado !== 'cancelado'; });
+  var comp = pedidos.filter(function (x) { return x.estado === 'completado'; });
+  var canc = getPeriodKeys(period).reduce(function (acc, k) {
+    var d = data[k]; if (!d) return acc;
+    return acc + d.pedidos.filter(function (x) { return x.estado === 'cancelado'; }).length;
+  }, 0);
+
+  var html = rptHeader('Reporte de Pedidos ' + cap(period), periodLabel(period));
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de pedidos</div><div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Costo total', fmtPDF(total), 'Pedidos activos', '#e8a020');
+  html += rptKPI('Pendientes', pend.length + ' pedidos', '', '#b7791f');
+  html += rptKPI('Completados', comp.length + ' pedidos', '', '#0f6e56');
+  html += rptKPI('Cancelados', canc + ' pedidos', 'No suman al total', '#d44f2e');
+  html += '</div></div>';
+
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Listado de pedidos</div>';
+  if (pedidos.length) {
+    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Estado</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    pedidos.forEach(function (p) {
+      var st = p.estado === 'completado' ? 'Completado' : p.estado === 'cancelado' ? 'Cancelado' : 'Pendiente';
+      html += '<tr><td>' + fmtDate(p.fecha || dateKey(currentDate)) + '</td><td>' + esc(p.tipo) + '</td><td>' + esc(p.desc) + '</td><td>' + st + '</td><td class="center">' + fmtQty(p.cant) + '</td><td class="num" style="color:#e8a020">' + fmtPDF(Number(p.monto || 0)) + '</td></tr>';
+    });
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="5">TOTAL ACTIVO</td><td class="num" style="color:#e8a020">' + fmtPDF(total) + '</td></tr>';
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">Sin pedidos en este periodo.</p>';
+  }
+  html += '</div>' + rptFooter();
+  return html;
+}
+
+function buildReporteEncargos(period) {
+  var encs = getPeriodEncargos(period);
+  var total = encs.reduce(function (a, x) { return a + encargoTotal(x); }, 0);
+  var totalBruto = encs.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+  var totalAnt = encs.reduce(function (a, x) { return a + Number(x.anticipo || 0); }, 0);
+
+  var html = rptHeader('Reporte de Encargos ' + cap(period), periodLabel(period));
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de encargos</div><div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Encargos', encs.length + ' registros', '', '#2563eb');
+  html += rptKPI('Monto bruto', fmtPDF(totalBruto), '', '#1d9e75');
+  html += rptKPI('Anticipos', fmtPDF(totalAnt), '', '#e8a020');
+  html += rptKPI('Saldo pendiente', fmtPDF(total), '', '#d44f2e');
+  html += '</div></div>';
+
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Listado de encargos</div>';
+  if (encs.length) {
+    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Costo</th><th>Anticipo</th><th>Saldo</th></tr></thead><tbody>';
+    encs.forEach(function (e) {
+      html += '<tr><td>' + fmtDate(e.fecha || dateKey(currentDate)) + '</td><td>' + esc(e.cliente) + '</td><td>' + esc(e.productos) + '</td><td class="num">' + fmtPDF(Number(e.monto || 0)) + '</td><td class="num">' + fmtPDF(Number(e.anticipo || 0)) + '</td><td class="num" style="color:#d44f2e">' + fmtPDF(encargoTotal(e)) + '</td></tr>';
+    });
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="5">SALDO TOTAL</td><td class="num" style="color:#d44f2e">' + fmtPDF(total) + '</td></tr>';
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">Sin encargos en este periodo.</p>';
+  }
+  html += '</div>' + rptFooter();
+  return html;
+}
+
+function buildReporteInventario(period) {
+  var sales = getPeriodSales(period);
+  var pedidos = getPeriodPedidos(period).filter(function (x) { return x.estado === 'completado' && x.productoId; });
+  var soldMap = {};
+  sales.forEach(function (v) {
+    (v.items && v.items.length ? v.items : (v.productoId ? [{ productoId: v.productoId, productoNombre: v.productoNombre, cant: v.cant, subtotal: v.monto }] : [])).forEach(function (it) {
+      if (!it.productoId) return;
+      if (!soldMap[it.productoId]) soldMap[it.productoId] = 0;
+      soldMap[it.productoId] += Number(it.cant || 0);
+    });
+  });
+  var addedMap = {};
+  pedidos.forEach(function (p) {
+    if (!addedMap[p.productoId]) addedMap[p.productoId] = 0;
+    addedMap[p.productoId] += Number(p.cant || 0);
+  });
+
+  var totalValor = 0, sinStock = [], stockBajo = [], stockOk = [];
+  productos.forEach(function (p) {
+    var stock = Number(p.cantidad || 0);
+    if (stock <= 0) sinStock.push(p);
+    else if (stock <= 5) stockBajo.push(p);
+    else stockOk.push(p);
+    totalValor += stock * Number(p.precioCosto || 0);
+  });
+
+  var html = rptHeader('Reporte de Inventario ' + cap(period), periodLabel(period));
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de inventario</div><div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Productos', productos.length + ' ítems', '', '#0a3d2e');
+  html += rptKPI('Valor en stock', fmtPDF(totalValor), 'a costo', '#1d9e75');
+  html += rptKPI('Stock bajo / sin stock', stockBajo.length + ' / ' + sinStock.length, '', '#d44f2e');
+  html += rptKPI('Con stock normal', stockOk.length + ' productos', '', '#2563eb');
+  html += '</div></div>';
+
+  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Inventario actual</div>';
+  if (productos.length) {
+    html += '<table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock</th><th>Unidad</th><th>Costo</th><th>Venta</th><th>Estado</th><th>Vendidos</th><th>Ingresados</th></tr></thead><tbody>';
+    productos.forEach(function (p) {
+      var stock = Number(p.cantidad || 0);
+      var st = stock <= 0 ? 'Sin stock' : stock <= 5 ? 'Stock bajo' : 'En stock';
+      var cls = stock <= 0 ? 'rpt-tag-red' : stock <= 5 ? 'rpt-tag-yellow' : 'rpt-tag-green';
+      html += '<tr><td><strong>' + esc(p.nombre) + '</strong></td><td class="center">' + fmtQty(stock) + '</td><td>' + esc(p.unidad) + '</td><td class="num">' + fmtPDF(Number(p.precioCosto || 0)) + '</td><td class="num" style="color:#1d9e75">' + fmtPDF(Number(p.precioVenta || 0)) + '</td><td><span class="rpt-tag ' + cls + '">' + st + '</span></td><td class="center">' + fmtQty(soldMap[p.id] || 0) + '</td><td class="center">' + fmtQty(addedMap[p.id] || 0) + '</td></tr>';
+    });
+    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="3">VALOR TOTAL</td><td class="num" colspan="5">' + fmtPDF(totalValor) + '</td></tr>';
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>';
+  }
+  html += '</div>' + rptFooter();
+  return html;
+}
+
+function buildReporteGeneral() {
+  var totalV = 0, totalG = 0, totalP = 0, totalE = 0;
+  getAllDayKeys().forEach(function (k) {
+    var d = data[k];
+    totalV += d.ventas.reduce(function (a, x) { return a + saleRecordTotal(x); }, 0);
+    totalG += d.gastos.reduce(function (a, x) { return a + Number(x.monto || 0); }, 0);
+    totalP += d.pedidos.reduce(function (a, x) { return a + pedidoMontoContable(x); }, 0);
+    totalE += d.encargos.reduce(function (a, x) { return a + encargoTotal(x); }, 0);
+  });
+  var totalInv = productos.reduce(function (a, p) { return a + Number(p.cantidad || 0) * Number(p.precioCosto || 0); }, 0);
+  var html = rptHeader('Reporte General', 'Todas las áreas del negocio');
+  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen general</div><div class="rpt-kpi-row rpt-kpi-row-4">';
+  html += rptKPI('Ventas', fmtPDF(totalV), '', '#1d9e75');
+  html += rptKPI('Gastos', fmtPDF(totalG), '', '#d44f2e');
+  html += rptKPI('Pedidos', fmtPDF(totalP), '', '#e8a020');
+  html += rptKPI('Encargos', fmtPDF(totalE), '', '#2563eb');
+  html += '</div><div class="rpt-kpi-row" style="grid-template-columns:1fr 1fr;margin-top:8px">';
+  html += rptKPI('Balance general', fmtPDF(totalV - totalG), '', (totalV - totalG) >= 0 ? '#1d9e75' : '#d44f2e');
+  html += rptKPI('Valor de inventario', fmtPDF(totalInv), '', '#0a3d2e');
+  html += '</div></div>';
+  html += '<div class="rpt-section"><div class="rpt-section-title">Observación</div><p style="font-size:12px;color:#555;line-height:1.6">Este reporte consolida todas las áreas registradas en la aplicación: ventas, gastos, pedidos, encargos e inventario actual.</p></div>';
   html += rptFooter();
   return html;
 }
 
-// ─── DISPARAR REPORTE ───
-function generarReporte(tipo){
-  var html='';
-  if(tipo==='diario') html=buildReporteDiario();
-  else if(tipo==='semanal') html=buildReporteSemanal();
-  else if(tipo==='mensual') html=buildReporteMensual();
-  else if(tipo==='inventario') html=buildReporteInventario();
+function generarReporte(tipo) {
+  var html = '';
+  if (tipo === 'ventas-diario') html = buildReporteVentas('diario');
+  else if (tipo === 'ventas-semanal') html = buildReporteVentas('semanal');
+  else if (tipo === 'ventas-mensual') html = buildReporteVentas('mensual');
+  else if (tipo === 'pedidos-diario') html = buildReportePedidos('diario');
+  else if (tipo === 'pedidos-semanal') html = buildReportePedidos('semanal');
+  else if (tipo === 'pedidos-mensual') html = buildReportePedidos('mensual');
+  else if (tipo === 'encargos-diario') html = buildReporteEncargos('diario');
+  else if (tipo === 'encargos-semanal') html = buildReporteEncargos('semanal');
+  else if (tipo === 'encargos-mensual') html = buildReporteEncargos('mensual');
+  else if (tipo === 'inventario-semanal') html = buildReporteInventario('semanal');
+  else if (tipo === 'inventario-mensual') html = buildReporteInventario('mensual');
+  else if (tipo === 'general') html = buildReporteGeneral();
+  else if (tipo === 'inventario') html = buildReporteInventario('mensual');
+  else html = buildReporteGeneral();
 
-  // Abrir ventana de impresión con el reporte
-  var win = window.open('','_blank');
-  if(!win){ toast('⚠ Permite ventanas emergentes para generar el PDF'); return; }
+  var win = window.open('', '_blank');
+  if (!win) { toast('⚠ Permite ventanas emergentes para generar el PDF'); return; }
   win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Reporte</title><style>');
-  win.document.write('*{margin:0;padding:0;box-sizing:border-box}');
-  win.document.write('body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}');
-  // Copiar todos los estilos de reporte
+  win.document.write('*{margin:0;padding:0;box-sizing:border-box} body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}');
   var styleSheets = document.styleSheets;
-  for(var i=0;i<styleSheets.length;i++){
-    try{
-      var rules = styleSheets[i].cssRules||styleSheets[i].rules;
-      for(var j=0;j<rules.length;j++){
-        var rule = rules[j].cssText||'';
-        if(rule.indexOf('rpt-')!==-1||rule.indexOf('no-break')!==-1){
-          win.document.write(rule+'\n');
-        }
+  for (var i = 0; i < styleSheets.length; i++) {
+    try {
+      var rules = styleSheets[i].cssRules || styleSheets[i].rules;
+      for (var j = 0; j < rules.length; j++) {
+        var rule = rules[j].cssText || '';
+        if (rule.indexOf('rpt-') !== -1 || rule.indexOf('no-break') !== -1) win.document.write(rule + '\n');
       }
-    }catch(e){}
+    } catch (e) { }
   }
   win.document.write('@media print{.no-print{display:none}.no-break{page-break-inside:avoid}}');
   win.document.write('</style></head><body>');
@@ -1780,10 +2087,18 @@ function generarReporte(tipo){
   toast('✓ Reporte generado');
 }
 
+function renderReportesMenu() {
+  var el = document.getElementById('page-reportes-content');
+  if (el) return;
+}
+function fmtPDF(n) { return '$' + Number(n || 0).toFixed(2); }
+
 // ── INIT ──
 loadData();
 updateHeaderDate();
+renderVentaSelects();
 renderAll();
+
 </script>
 <!-- PRINT FRAME -->
 <div id="rpt-frame"></div>
