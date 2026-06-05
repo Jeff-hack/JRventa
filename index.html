@@ -347,7 +347,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           Ganancia Total Acumulada
         </div>
         <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
-        <div class="stat-sub">Precio venta − costo · todos los días</div>
+        <div class="stat-sub">Solo productos con costo registrado · acumulado</div>
       </div>
 
       <!-- Fondo inicial (histórico fijo) -->
@@ -1401,7 +1401,7 @@ function renderResumen(){
     fondoInicialFechaEl.textContent='Aún no registrado';
   }
 
-  // Ganancia acumulada: recorre TODOS los días registrados
+  // Ganancia acumulada: SOLO ventas con producto asignado que tenga precio de costo
   var ganancia=0;
   Object.keys(data).forEach(function(k){
     var d=data[k];
@@ -1410,11 +1410,11 @@ function renderResumen(){
       items.forEach(function(it){
         if(it.productoId){
           var prod=getProducto(it.productoId);
-          if(prod&&prod.precioCosto>0) ganancia+=(it.monto - prod.precioCosto*it.cant);
-          else ganancia+=it.monto;
-        } else {
-          ganancia+=it.monto;
+          if(prod && prod.precioCosto>0){
+            ganancia += it.monto - (prod.precioCosto * it.cant);
+          }
         }
+        // Si no tiene producto asignado, NO se suma a ganancia
       });
     });
   });
