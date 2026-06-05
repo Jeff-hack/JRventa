@@ -246,10 +246,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div class="header-sub">Ventas Diarias</div>
       </div>
     </div>
-    <button class="date-btn" onclick="openDateModal()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span id="headerDate"></span>
-    </button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="date-btn" onclick="openFondoModal()" title="Efectivo del día">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span id="fondoLabel">$0.00</span>
+      </button>
+      <button class="date-btn" onclick="openDateModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="headerDate"></span>
+      </button>
+    </div>
   </div>
 
   <div class="pages">
@@ -332,6 +338,37 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div class="semana-days" id="semanaDays"></div>
       </div>
 
+      <!-- Ganancia acumulada (ancho completo) -->
+      <div class="stat-card">
+        <div class="stat-label">
+          <div class="stat-icon" style="background:#fef0d9">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          Ganancia Total Acumulada
+        </div>
+        <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
+        <div class="stat-sub">Precio venta − costo · todos los días</div>
+      </div>
+
+      <!-- Fondo inicial (histórico fijo) -->
+      <div class="card" id="fondoInicialCard" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:10px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;margin-bottom:2px">Fondo Inicial del Negocio</div>
+              <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:#7c3aed" id="fondoInicialDisplay">—</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px" id="fondoInicialFecha">Aún no registrado</div>
+            </div>
+          </div>
+          <div id="fondoInicialAccion">
+            <button onclick="openFondoInicialModal()" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">Registrar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Balance neto del día -->
       <div class="balance-card">
         <div class="balance-label">Balance Neto del Día</div>
@@ -400,12 +437,26 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="section-title">Pedidos especiales</div>
       <!-- Total del día (solo no cancelados) -->
       <div class="card" style="padding:12px 16px;margin-bottom:4px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div>
             <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:3px">Total pedidos del día</div>
             <div style="font-size:11px;color:var(--text3)" id="pedidosDiaCnt">0 pedidos activos</div>
           </div>
           <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico</div>
+            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
+          </div>
+          <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio</div>
+            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro</div>
+            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
+          </div>
         </div>
       </div>
       <!-- Tabs pendientes / completados / cancelados -->
@@ -571,6 +622,51 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span>Reportes</span>
     </button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: FONDO INICIAL (HISTÓRICO, UNA SOLA VEZ) ═══ -->
+<div class="modal-overlay" id="fondoInicialModal" onclick="overlayClose(event,'fondoInicialModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Capital inicial del negocio</div>
+    <div class="form-section">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">⚠ Este dato es histórico y no se podrá modificar después de guardarlo. Registra el monto exacto con el que abriste el negocio.</div>
+      <div>
+        <label class="form-label">Monto ($)</label>
+        <input class="form-input" type="number" id="fondoInicialInput" placeholder="Ej: 302.50" step="0.01" min="0">
+      </div>
+      <div>
+        <label class="form-label">Fecha de apertura</label>
+        <input class="form-input" type="date" id="fondoInicialDate">
+      </div>
+      <button class="btn-primary" onclick="saveFondoInicial()">✓ Registrar (permanente)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: FONDO INICIAL ═══ -->
+
+<!-- ═══ MODAL: EFECTIVO DEL DÍA ═══ -->
+<div class="modal-overlay" id="fondoModal" onclick="overlayClose(event,'fondoModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Efectivo del día</div>
+    <div class="form-section">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Monto de dinero con el que cuentas hoy. Solo visible en el encabezado.</div>
+      <label class="form-label">Monto ($)</label>
+      <input class="form-input" type="number" id="fondoInput" placeholder="0.00" step="0.01" min="0">
+      <button class="btn-primary" onclick="saveFondo()">✓ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: DETALLE VENTA ═══ -->
+<div class="modal-overlay" id="detalleVentaModal" onclick="overlayClose(event,'detalleVentaModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Detalle de venta</div>
+    <div class="form-section" id="detalleVentaBody"></div>
   </div>
 </div>
 
@@ -805,6 +901,8 @@ var productos = []; // inventario global
 var pedidosGlobal = [];
 // encargos
 var encargos = [];
+// fondos diarios {YYYY-MM-DD: monto}
+var fondos = {};
 // items temporales de venta multi-producto
 var ventaItems = [];
 
@@ -814,11 +912,51 @@ function loadData() {
   try { var s=localStorage.getItem('cvd_productos'); if(s) productos=JSON.parse(s); } catch(e){productos=[];}
   try { var s=localStorage.getItem('cvd_pedidos'); if(s) pedidosGlobal=JSON.parse(s); } catch(e){pedidosGlobal=[];}
   try { var s=localStorage.getItem('cvd_encargos'); if(s) encargos=JSON.parse(s); } catch(e){encargos=[];}
+  try { var s=localStorage.getItem('cvd_fondos'); if(s) fondos=JSON.parse(s); } catch(e){fondos={};}
 }
 function saveData(){ try{localStorage.setItem('cvd_data',JSON.stringify(data));}catch(e){toast('Error al guardar');} }
 function saveProductos(){ try{localStorage.setItem('cvd_productos',JSON.stringify(productos));}catch(e){toast('Error al guardar');} }
 function savePedidos(){ try{localStorage.setItem('cvd_pedidos',JSON.stringify(pedidosGlobal));}catch(e){toast('Error al guardar');} }
 function saveEncargos(){ try{localStorage.setItem('cvd_encargos',JSON.stringify(encargos));}catch(e){toast('Error al guardar');} }
+function saveFondos(){ try{localStorage.setItem('cvd_fondos',JSON.stringify(fondos));}catch(e){toast('Error al guardar');} }
+
+function openFondoModal(){
+  var k=dateKey(currentDate);
+  document.getElementById('fondoInput').value=fondos[k]||'';
+  document.getElementById('fondoModal').classList.add('open');
+}
+function saveFondo(){
+  var k=dateKey(currentDate);
+  var v=parseFloat(document.getElementById('fondoInput').value)||0;
+  fondos[k]=v;
+  saveFondos();
+  closeModal('fondoModal');
+  updateFondoLabel();
+  toast('✓ Efectivo guardado');
+}
+function updateFondoLabel(){
+  var k=dateKey(currentDate);
+  var v=fondos[k]||0;
+  document.getElementById('fondoLabel').textContent=v>0?fmt(v):'$0.00';
+}
+
+function openFondoInicialModal(){
+  if(fondos['inicial']!=null) return; // ya registrado, no se puede editar
+  document.getElementById('fondoInicialInput').value='';
+  document.getElementById('fondoInicialDate').value=dateKey(new Date());
+  document.getElementById('fondoInicialModal').classList.add('open');
+}
+function saveFondoInicial(){
+  var v=parseFloat(document.getElementById('fondoInicialInput').value)||0;
+  var fecha=document.getElementById('fondoInicialDate').value||dateKey(new Date());
+  if(v<=0){toast('⚠ Ingresa un monto válido');return;}
+  fondos['inicial']=v;
+  fondos['inicialFecha']=fecha;
+  saveFondos();
+  closeModal('fondoInicialModal');
+  renderResumen();
+  toast('✓ Capital inicial registrado');
+}
 
 // ── HELPERS ──
 function dateKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -863,7 +1001,7 @@ function openDateModal(){ document.getElementById('dateInput').value=dateKey(cur
 function applyDate(){
   var v=document.getElementById('dateInput').value;
   if(v){var p=v.split('-');currentDate=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
-  closeModal('dateModal'); updateHeaderDate(); renderAll();
+  closeModal('dateModal'); updateHeaderDate(); updateFondoLabel(); renderAll();
 }
 
 // ══════════════════════════════════════════
@@ -988,23 +1126,16 @@ function saveRecord(){
   var day=getDayData(currentDate);
 
   if(selectedTipo==='venta'){
-    // Si hay items en la lista multi-producto, guardar cada uno
+    // Si hay items en la lista multi-producto, agrupar en un solo registro
     if(ventaItems.length>0){
-      var alguno=false;
+      var rec={id:Date.now(),monto:0,desc:'Venta múltiple ('+ventaItems.length+' productos)',cant:1,hora:hora,items:[]};
       ventaItems.forEach(function(it){
-        var rec={id:Date.now()+Math.random(),monto:it.monto,desc:it.desc,cant:it.cant,hora:hora};
-        if(it.productoId){
-          var prod=getProducto(it.productoId);
-          if(prod){
-            prod.cantidad=Math.max(0, prod.cantidad-it.cant);
-            rec.productoId=it.productoId;
-            rec.productoNombre=it.productoNombre;
-          }
-        }
-        day.ventas.push(rec);
-        alguno=true;
+        if(it.productoId){var prod=getProducto(it.productoId);if(prod) prod.cantidad=Math.max(0,prod.cantidad-it.cant);}
+        rec.items.push({desc:it.desc,cant:it.cant,monto:it.monto,productoId:it.productoId,productoNombre:it.productoNombre});
+        rec.monto+=it.monto;
       });
-      if(alguno){ saveProductos(); saveData(); }
+      day.ventas.push(rec);
+      saveProductos(); saveData();
       ventaItems=[];
     } else {
       // Venta manual simple (sin item list o con datos directos)
@@ -1256,6 +1387,40 @@ function renderResumen(){
   var totalPedidosDia=document.getElementById('totalPedidosDia');
   if(totalPedidosDia) totalPedidosDia.textContent=fmt(tpTotalDia);
 
+  // Fondo inicial (histórico, una sola vez)
+  var fondoInicialEl=document.getElementById('fondoInicialDisplay');
+  var fondoInicialFechaEl=document.getElementById('fondoInicialFecha');
+  var fondoInicialAccion=document.getElementById('fondoInicialAccion');
+  if(fondos['inicial']!=null){
+    fondoInicialEl.textContent=fmt(fondos['inicial']);
+    var fi=fondos['inicialFecha']||'';
+    fondoInicialFechaEl.textContent=fi?'Apertura: '+fi.split('-').reverse().join('/'):'Capital de apertura del negocio';
+    if(fondoInicialAccion) fondoInicialAccion.innerHTML='<span style="font-size:11px;color:var(--text3)">✓ Dato registrado</span>';
+  } else {
+    fondoInicialEl.textContent='—';
+    fondoInicialFechaEl.textContent='Aún no registrado';
+  }
+
+  // Ganancia acumulada: recorre TODOS los días registrados
+  var ganancia=0;
+  Object.keys(data).forEach(function(k){
+    var d=data[k];
+    (d.ventas||[]).forEach(function(v){
+      var items=v.items||[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
+      items.forEach(function(it){
+        if(it.productoId){
+          var prod=getProducto(it.productoId);
+          if(prod&&prod.precioCosto>0) ganancia+=(it.monto - prod.precioCosto*it.cant);
+          else ganancia+=it.monto;
+        } else {
+          ganancia+=it.monto;
+        }
+      });
+    });
+  });
+  var ganEl=document.getElementById('gananciaDia');
+  if(ganEl){ ganEl.textContent=fmt(ganancia); ganEl.style.color=ganancia>=0?'var(--gold)':'var(--red)'; }
+
   var maxVal=Math.max(tv,tg,tpr,tpi,tso,1);
   ['bVentas','bGastos','bPollo','bIndio','bSello'].forEach(function(bid,i){
     var vals=[tv,tg,tpr,tpi,tso];
@@ -1337,15 +1502,46 @@ function renderList(tipo){
     var color=isV?'var(--green)':'var(--red)';
     var meta='Cant: '+it.cant+' &middot; '+esc(it.hora);
     if(isV&&it.productoNombre) meta+=' &middot; 📦 '+esc(it.productoNombre);
+    // Si tiene items multi-producto, mostrar botón Ver
+    var verBtn=isV?'<button onclick="verDetalleVenta('+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px">Ver</button>':'';
     html+='<div class="tx-item">'+
       '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':'📋')+'</div>'+
       '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div>'+
+      '<div style="display:flex;align-items:center">'+verBtn+
       '<div class="tx-amount" style="color:'+color+'">'+(isV?'+':'-')+fmt(it.monto)+'</div>'+
+      '</div>'+
       '<button class="tx-del" onclick="deleteRecord(\''+tipo+'\','+it.id+')">&#215;</button>'+
     '</div>';
   });
   html+='</div>';
   el.innerHTML=html;
+}
+
+function verDetalleVenta(id){
+  var day=getDayData(currentDate);
+  var v=day.ventas.find(function(x){return x.id===id;});
+  if(!v) return;
+  var html='<div style="padding:4px 0">';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(v.hora)+'</strong></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong>'+esc(v.desc)+'</strong></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+v.cant+'</strong></div>';
+  if(v.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(v.productoNombre)+'</strong></div>';
+  // Si hay items adicionales (ventas multi-producto agrupadas)
+  if(v.items&&v.items.length){
+    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Productos incluidos</div>';
+    v.items.forEach(function(it){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'+
+        '<div><div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div></div>'+
+        '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(it.monto)+'</div>'+
+      '</div>';
+    });
+  }
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
+    '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:var(--green)">'+fmt(v.monto)+'</span></div>';
+  html+='</div>';
+  document.getElementById('detalleVentaBody').innerHTML=html;
+  document.getElementById('detalleVentaModal').classList.add('open');
 }
 
 function renderPedidos(){
@@ -1359,6 +1555,12 @@ function renderPedidos(){
   var cntHoyEl=document.getElementById('pedidosDiaCnt');
   if(totalHoyEl) totalHoyEl.textContent=fmt(totalHoy);
   if(cntHoyEl) cntHoyEl.textContent=pedidosHoy.length+' pedido'+(pedidosHoy.length!==1?'s':'')+' activo'+(pedidosHoy.length!==1?'s':'');
+  // Totales por proveedor del día
+  ['Pollo Rico','Pollo Indio','Sello de Oro'].forEach(function(t,i){
+    var ids=['pedDiaPR','pedDiaPI','pedDiaSO'];
+    var tot=pedidosHoy.filter(function(p){return p.tipo===t;}).reduce(function(a,p){return a+p.monto;},0);
+    var el2=document.getElementById(ids[i]); if(el2) el2.textContent=fmt(tot);
+  });
 
   // Filtrar pedidos globales por tab
   var items=pedidosGlobal.filter(function(p){return p.estado===pedidoTab;});
@@ -2324,6 +2526,7 @@ function generarReporte(tipo){
 // ── INIT ──
 loadData();
 updateHeaderDate();
+updateFondoLabel();
 renderAll();
 </script>
 <!-- PRINT FRAME -->
