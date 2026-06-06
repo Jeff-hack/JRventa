@@ -1345,22 +1345,40 @@ function completarPedido(id){
   if(!ped)return;
   if(ped.estado!=='pendiente'){toast('Este pedido ya fue procesado');return;}
 
+  // Fecha de hoy = día en que llega y se paga
+  var hoy=new Date();
+  var fechaCompletado=dateKey(hoy);
+  var horaCompletado=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+
+  // Registrar como gasto en el día que se completa
+  var dayCompletado=getDayData(hoy);
+  var gastoRec={
+    id: Date.now(),
+    monto: ped.monto,
+    desc: 'Pedido: '+ped.desc+' ('+ped.tipo+')',
+    cant: ped.cant,
+    hora: horaCompletado,
+    pedidoId: ped.id  // referencia para saber que viene de un pedido
+  };
+  dayCompletado.gastos.push(gastoRec);
+  saveData();
+
   // Sumar al stock si tiene producto asignado
   if(ped.productoId){
     var prod=getProducto(ped.productoId);
     if(prod){
       prod.cantidad+=ped.cant;
       saveProductos();
-      toast('✓ Pedido completado — +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre);
+      toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado · +'+ped.cant+' '+prod.unidad+' en stock');
     } else {
-      toast('✓ Pedido marcado como completado');
+      toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado en gastos del día');
     }
   } else {
-    toast('✓ Pedido marcado como completado');
+    toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado en gastos del día');
   }
 
   ped.estado='completado';
-  ped.fechaCompletado=dateKey(new Date());
+  ped.fechaCompletado=fechaCompletado;
   savePedidos();
   renderAll();
 }
