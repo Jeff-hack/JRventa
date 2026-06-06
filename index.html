@@ -569,6 +569,29 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
           </div>
         </div>
       </div>
+
+      <!-- RESPALDO -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🔒 Respaldo de datos</div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬇️</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Exportar datos</div>
+            <div style="font-size:11px;color:var(--text3)">Descarga un .json con todos tus registros</div>
+          </div>
+          <button onclick="exportarDatos()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Exportar</button>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆️</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">Importar datos</div>
+            <div style="font-size:11px;color:var(--text3)">Restaura desde un archivo .json exportado</div>
+          </div>
+          <label style="background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">
+            Importar<input type="file" accept=".json" onchange="importarDatos(event)" style="display:none">
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- ══ ENCARGOS ══ -->
@@ -1781,6 +1804,48 @@ function renderEncargos(){
     '</div>';
   });
   el.innerHTML=html;
+}
+
+// ── EXPORTAR / IMPORTAR ──
+function exportarDatos(){
+  var backup={
+    cvd_data: localStorage.getItem('cvd_data'),
+    cvd_productos: localStorage.getItem('cvd_productos'),
+    cvd_pedidos: localStorage.getItem('cvd_pedidos'),
+    cvd_encargos: localStorage.getItem('cvd_encargos'),
+    cvd_fondos: localStorage.getItem('cvd_fondos'),
+    exportado: new Date().toISOString()
+  };
+  var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='backup_negocio_'+dateKey(new Date())+'.json';
+  a.click();
+  toast('✓ Datos exportados correctamente');
+}
+
+function importarDatos(event){
+  var file=event.target.files[0];
+  if(!file) return;
+  if(!confirm('⚠ Esto reemplazará TODOS tus datos actuales con los del archivo. ¿Continuar?')){event.target.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var backup=JSON.parse(e.target.result);
+      if(backup.cvd_data) localStorage.setItem('cvd_data',backup.cvd_data);
+      if(backup.cvd_productos) localStorage.setItem('cvd_productos',backup.cvd_productos);
+      if(backup.cvd_pedidos) localStorage.setItem('cvd_pedidos',backup.cvd_pedidos);
+      if(backup.cvd_encargos) localStorage.setItem('cvd_encargos',backup.cvd_encargos);
+      if(backup.cvd_fondos) localStorage.setItem('cvd_fondos',backup.cvd_fondos);
+      loadData();
+      renderAll();
+      toast('✓ Datos restaurados correctamente');
+    } catch(err){
+      toast('⚠ Archivo inválido, no se pudo importar');
+    }
+    event.target.value='';
+  };
+  reader.readAsText(file);
 }
 
 // ── TOAST ──
