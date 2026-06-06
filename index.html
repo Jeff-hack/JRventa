@@ -784,20 +784,30 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <!-- PEDIDO: tipo y producto a recibir -->
       <div id="pedidoWrap" style="display:none">
         <div style="margin-bottom:12px">
-          <label class="form-label">Tipo de pedido especial</label>
+          <label class="form-label">Proveedor del pedido</label>
           <select class="form-input" id="pedidoTipo">
             <option value="Pollo Rico">Pollo Rico</option>
             <option value="Pollo Indio">Pollo Indio</option>
             <option value="Sello de Oro">Sello de Oro</option>
           </select>
         </div>
-        <div>
-          <label class="form-label">Producto que recibirás en inventario <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
-          <select class="form-input" id="pedidoProductoSel">
-            <option value="">— Seleccionar producto —</option>
+
+        <!-- Selector de producto para agregar al pedido -->
+        <div style="margin-bottom:8px">
+          <label class="form-label">Producto del pedido <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <select class="form-input" id="pedidoProductoSel" onchange="onPedidoProductoChange()">
+            <option value="">— Sin producto específico —</option>
           </select>
-          <div style="font-size:11px;color:var(--text3);margin-top:4px">Al completar el pedido, se sumará la cantidad al stock seleccionado.</div>
+          <div id="pedidoStockInfo" style="display:none;font-size:11px;color:var(--text3);margin-top:4px;padding:6px 8px;background:var(--surface2);border-radius:6px"></div>
         </div>
+
+        <!-- Items acumulados del pedido -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="form-label" style="margin:0">Productos del pedido</label>
+          <button type="button" onclick="agregarItemPedido()" style="background:var(--orange);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Agregar</button>
+        </div>
+        <div id="pedidoItemsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Agrega cada producto por separado. El total se calcula automáticamente.</div>
       </div>
 
       <div>
@@ -940,6 +950,8 @@ var encargos = [];
 var fondos = {};
 // items temporales de venta multi-producto
 var ventaItems = [];
+// items temporales de pedido multi-producto
+var pedidoItems = [];
 
 // ── FIREBASE CONFIG ──
 var firebaseConfig = {
@@ -1139,6 +1151,7 @@ function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal
 // ─ Modal registro ─
 function openAddModal(){
   ventaItems=[];
+  pedidoItems=[];
   setTipo('venta');
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
@@ -1148,6 +1161,7 @@ function openAddModal(){
   poblarSelectProductos('ventaProductoSel');
   poblarSelectProductos('pedidoProductoSel');
   renderVentaItems();
+  renderPedidoItems();
   document.getElementById('addModal').classList.add('open');
 }
 
@@ -1170,6 +1184,7 @@ function setTipo(t){
   document.getElementById('ventaProductoWrap').style.display=(t==='venta')?'block':'none';
   document.getElementById('ventaItemsWrap').style.display=(t==='venta')?'block':'none';
   if(t==='venta') renderVentaItems();
+  if(t==='pedido') renderPedidoItems();
 }
 
 function onProductoSelChange(){
@@ -1292,19 +1307,41 @@ function saveRecord(){
 
   } else {
     // PEDIDO ESPECIAL → va a pedidosGlobal con estado pendiente
-    if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
-    if(!desc) desc='Pedido';
-    var pedRec={
-      id:Date.now(),
-      tipo:document.getElementById('pedidoTipo').value,
-      desc:desc, cant:cant, monto:monto, hora:hora,
-      fecha:dateKey(currentDate),
-      estado:'pendiente',  // pendiente | completado | cancelado
-      productoId:parseInt(document.getElementById('pedidoProductoSel').value)||null
-    };
-    // también guardar en el día para historial de pedidos especiales
-    day.pedidos.push({id:pedRec.id,tipo:pedRec.tipo,desc:desc,cant:cant,monto:monto,hora:hora});
-    pedidosGlobal.push(pedRec);
+    var tipo=document.getElementById('pedidoTipo').value;
+
+    if(pedidoItems.length>0){
+      // Multi-producto: un solo pedido global con array de items
+      var totalMontoPed=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
+      var descPed='Pedido múltiple ('+pedidoItems.length+' productos)';
+      var pedRec={
+        id:Date.now(),
+        tipo:tipo,
+        desc:descPed,
+        cant:1,
+        monto:totalMontoPed,
+        hora:hora,
+        fecha:dateKey(currentDate),
+        estado:'pendiente',
+        items:pedidoItems.slice() // guardar items para completar stock después
+      };
+      day.pedidos.push({id:pedRec.id,tipo:tipo,desc:descPed,cant:1,monto:totalMontoPed,hora:hora});
+      pedidosGlobal.push(pedRec);
+      pedidoItems=[];
+    } else {
+      // Pedido manual simple
+      if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
+      if(!desc) desc='Pedido';
+      var pedRec={
+        id:Date.now(),
+        tipo:tipo,
+        desc:desc, cant:cant, monto:monto, hora:hora,
+        fecha:dateKey(currentDate),
+        estado:'pendiente',
+        productoId:parseInt(document.getElementById('pedidoProductoSel').value)||null
+      };
+      day.pedidos.push({id:pedRec.id,tipo:tipo,desc:desc,cant:cant,monto:monto,hora:hora});
+      pedidosGlobal.push(pedRec);
+    }
     saveData();
     savePedidos();
   }
@@ -1345,42 +1382,51 @@ function completarPedido(id){
   if(!ped)return;
   if(ped.estado!=='pendiente'){toast('Este pedido ya fue procesado');return;}
 
-  // Fecha de hoy = día en que llega y se paga
   var hoy=new Date();
   var fechaCompletado=dateKey(hoy);
   var horaCompletado=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
 
   // Registrar como gasto en el día que se completa
   var dayCompletado=getDayData(hoy);
-  var gastoRec={
-    id: Date.now(),
-    monto: ped.monto,
-    desc: 'Pedido: '+ped.desc+' ('+ped.tipo+')',
-    cant: ped.cant,
-    hora: horaCompletado,
-    pedidoId: ped.id  // referencia para saber que viene de un pedido
-  };
-  dayCompletado.gastos.push(gastoRec);
+  dayCompletado.gastos.push({
+    id:Date.now(),
+    monto:ped.monto,
+    desc:'Pedido: '+ped.desc+' ('+ped.tipo+')',
+    cant:ped.cant,
+    hora:horaCompletado,
+    pedidoId:ped.id
+  });
   saveData();
 
-  // Sumar al stock si tiene producto asignado
-  if(ped.productoId){
+  // Sumar stock — soporta tanto pedido simple como multi-producto
+  var stockMsg='';
+  if(ped.items&&ped.items.length){
+    // Multi-producto: restaurar cada item
+    ped.items.forEach(function(it){
+      if(it.productoId){
+        var prod=getProducto(it.productoId);
+        if(prod){
+          prod.cantidad+=it.cant;
+          stockMsg+=' +'+it.cant+' '+it.unidad+' '+prod.nombre+';';
+        }
+      }
+    });
+    if(stockMsg) saveProductos();
+  } else if(ped.productoId){
+    // Pedido simple con producto
     var prod=getProducto(ped.productoId);
     if(prod){
       prod.cantidad+=ped.cant;
       saveProductos();
-      toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado · +'+ped.cant+' '+prod.unidad+' en stock');
-    } else {
-      toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado en gastos del día');
+      stockMsg=' +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre;
     }
-  } else {
-    toast('✓ Pedido completado — gasto $'+ped.monto.toFixed(2)+' registrado en gastos del día');
   }
 
   ped.estado='completado';
   ped.fechaCompletado=fechaCompletado;
   savePedidos();
   renderAll();
+  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' en gastos'+(stockMsg?' ·'+stockMsg:''));
 }
 
 function cancelarPedido(id){
@@ -1970,7 +2016,72 @@ function importarDatos(event){
   reader.readAsText(file);
 }
 
-// ── TOAST ──
+// ── PEDIDO MULTI-PRODUCTO ──
+function onPedidoProductoChange(){
+  var pid=parseInt(document.getElementById('pedidoProductoSel').value);
+  var info=document.getElementById('pedidoStockInfo');
+  if(!pid){info.style.display='none';return;}
+  var p=getProducto(pid);
+  if(!p){info.style.display='none';return;}
+  info.style.display='block';
+  info.innerHTML='Costo: <strong>'+fmt(p.precioCosto)+'</strong> &nbsp;|&nbsp; Stock actual: <strong>'+p.cantidad+' '+p.unidad+'</strong>';
+  // Pre-rellenar descripción y monto con precio de costo
+  document.getElementById('fDesc').value=p.nombre;
+  document.getElementById('fMonto').value=p.precioCosto>0?p.precioCosto:'';
+  onCantChange();
+}
+
+function agregarItemPedido(){
+  var pid=parseInt(document.getElementById('pedidoProductoSel').value);
+  var cant=parseFloat(document.getElementById('fCant').value)||1;
+  var monto=parseFloat(document.getElementById('fMonto').value)||0;
+  var desc=document.getElementById('fDesc').value.trim();
+  if(cant<=0){toast('⚠ Ingresa una cantidad válida');return;}
+  if(monto<=0){toast('⚠ Ingresa un monto válido');return;}
+  if(!desc) desc='Producto';
+  var prod=pid?getProducto(pid):null;
+  pedidoItems.push({
+    productoId:prod?prod.id:null,
+    productoNombre:prod?prod.nombre:null,
+    desc:desc, cant:cant, monto:monto,
+    unidad:prod?prod.unidad:'unidad'
+  });
+  // reset campos
+  document.getElementById('pedidoProductoSel').value='';
+  document.getElementById('pedidoStockInfo').style.display='none';
+  document.getElementById('fDesc').value='';
+  document.getElementById('fCant').value='1';
+  document.getElementById('fMonto').value='';
+  renderPedidoItems();
+}
+
+function removePedidoItem(i){
+  pedidoItems.splice(i,1);
+  renderPedidoItems();
+}
+
+function renderPedidoItems(){
+  var el=document.getElementById('pedidoItemsList');
+  if(!el) return;
+  if(!pedidoItems.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;background:var(--surface2);border-radius:var(--radius-sm)">Selecciona un producto y presiona <strong>+ Agregar</strong>, o registra el pedido manualmente abajo.</div>';
+    return;
+  }
+  var total=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
+  var html='';
+  pedidoItems.forEach(function(it,i){
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+it.unidad+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div>'+
+      '</div>'+
+      '<div style="font-family:DM Mono,monospace;font-size:13px;color:var(--orange);font-weight:500">'+fmt(it.monto)+'</div>'+
+      '<button onclick="removePedidoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1">×</button>'+
+    '</div>';
+  });
+  html+='<div style="text-align:right;font-size:13px;font-weight:700;color:var(--orange);padding:4px 2px">Total: '+fmt(total)+'</div>';
+  el.innerHTML=html;
+}
 function toast(msg){
   var n=document.getElementById('notif');
   n.textContent=msg;
