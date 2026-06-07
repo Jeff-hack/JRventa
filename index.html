@@ -1644,7 +1644,11 @@ function renderResumen(){
         }
       });
     });
-    (d.gastos||[]).forEach(function(g){ if(!g.pedidoId) gastosTotal+=g.monto; });
+    // Gastos SOLO operativos: excluye cualquier gasto originado por pedido completado
+    (d.gastos||[]).forEach(function(g){
+      var esDePedido = g.pedidoId || (g.desc&&g.desc.indexOf('Pedido:')===0);
+      if(!esDePedido) gastosTotal+=g.monto;
+    });
   });
   var gananciaNeta=ganancia-gastosTotal;
   var mesLabel=currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
@@ -2297,7 +2301,10 @@ function buildReporteDiario(){
         if(it.productoId){var prod=getProducto(it.productoId);if(prod&&prod.precioCosto>0) ganMes+=it.monto-(prod.precioCosto*it.cant);}
       });
     });
-    (dd.gastos||[]).forEach(function(g){if(!g.pedidoId) gastosMes+=g.monto;});
+    (dd.gastos||[]).forEach(function(g){
+      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
+      if(!esDePedido) gastosMes+=g.monto;
+    });
   });
   var ganNetaMes=ganMes-gastosMes;
 
@@ -2522,7 +2529,10 @@ function buildReporteMensual(){
         if(it.productoId){var prod=getProducto(it.productoId);if(prod&&prod.precioCosto>0) ganMesRpt+=it.monto-(prod.precioCosto*it.cant);}
       });
     });
-    (dd2.gastos||[]).forEach(function(g){if(!g.pedidoId) gastosMesRpt+=g.monto;});
+    (dd2.gastos||[]).forEach(function(g){
+      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
+      if(!esDePedido) gastosMesRpt+=g.monto;
+    });
   });
   var ganNetaMesRpt=ganMesRpt-gastosMesRpt;
 
