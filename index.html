@@ -210,13 +210,14 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-subtitle { font-size:13px; color:#666; margin:0 0 24px; }
 .rpt-section { margin-bottom:22px; }
 .rpt-section-title { font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#0a3d2e; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e0ddd8; display:flex; align-items:center; gap:6px; }
-.rpt-kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8px; }
-.rpt-kpi-row-4 { grid-template-columns:repeat(4,1fr); }
+.rpt-kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:8px; }
+.rpt-kpi-row-4 { grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); }
 .rpt-kpi { background:#f8f7f3; border-radius:8px; padding:12px; border-left:3px solid #0a3d2e; }
 .rpt-kpi-label { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#888; margin-bottom:5px; }
 .rpt-kpi-value { font-size:18px; font-weight:700; font-family:'Courier New',monospace; }
 .rpt-kpi-sub { font-size:10px; color:#888; margin-top:3px; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:4px; }
+.rpt-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .rpt-table th { background:#0a3d2e; color:#fff; padding:7px 10px; text-align:left; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; font-weight:600; }
 .rpt-table td { padding:7px 10px; border-bottom:1px solid #eee; vertical-align:top; }
 .rpt-table tr:nth-child(even) td { background:#fafaf8; }
@@ -450,6 +451,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <!-- ══ GASTOS ══ -->
     <div class="page" id="page-gastos">
       <div class="section-title">Gastos del día <span class="badge" id="badgeGastos">0</span></div>
+      <!-- Resumen por categoría -->
+      <div class="card" style="padding:12px 16px;margin-bottom:8px" id="gastosCatResumen"></div>
       <div id="listaGastos"></div>
     </div>
 
@@ -815,9 +818,20 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div id="ventaStockInfo" style="font-size:12px;color:var(--text3);margin-top:4px;display:none"></div>
       </div>
 
-      <!-- PEDIDO: tipo y producto a recibir -->
+      <!-- GASTO: categoría -->
+      <div id="gastoWrap" style="display:none">
+        <label class="form-label">Categoría del gasto</label>
+        <select class="form-input" id="gastoCat">
+          <option value="pasaje">🚌 Pasajes / Transporte</option>
+          <option value="alimentacion">🍽 Alimentación</option>
+          <option value="alcaldia">🏛 Impuesto Alcaldía</option>
+          <option value="electricidad">⚡ Energía Eléctrica</option>
+          <option value="otro">📋 Otro gasto operativo</option>
+        </select>
+      </div>
+
+      <!-- PEDIDO: tipo y productos -->
       <div id="pedidoWrap" style="display:none">
-        <div style="margin-bottom:12px">
           <label class="form-label">Proveedor del pedido</label>
           <select class="form-input" id="pedidoTipo">
             <option value="Pollo Rico">Pollo Rico</option>
@@ -1217,6 +1231,7 @@ function setTipo(t){
   document.getElementById('pedidoWrap').style.display=(t==='pedido')?'block':'none';
   document.getElementById('ventaProductoWrap').style.display=(t==='venta')?'block':'none';
   document.getElementById('ventaItemsWrap').style.display=(t==='venta')?'block':'none';
+  document.getElementById('gastoWrap').style.display=(t==='gasto')?'block':'none';
   if(t==='venta') renderVentaItems();
   if(t==='pedido') renderPedidoItems();
 }
@@ -1337,8 +1352,9 @@ function saveRecord(){
 
   } else if(selectedTipo==='gasto'){
     if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
-    if(!desc) desc='Gasto';
-    var record={id:Date.now(),monto:monto,desc:desc,cant:cant,hora:hora};
+    var cat=document.getElementById('gastoCat').value||'otro';
+    if(!desc) desc=({pasaje:'Pasaje/Transporte',alimentacion:'Alimentación',alcaldia:'Alcaldía',electricidad:'Energía Eléctrica',otro:'Gasto operativo'})[cat]||'Gasto';
+    var record={id:Date.now(),monto:monto,desc:desc,cant:cant,hora:hora,categoria:cat};
     day.gastos.push(record);
     saveData();
 
@@ -1775,6 +1791,34 @@ function renderList(tipo){
   var el=document.getElementById('lista'+cap(tipo));
   var badge=document.getElementById('badge'+cap(tipo));
   if(badge) badge.textContent=items.length;
+  var CATS={pasaje:{label:'Transporte',icon:'🚌',color:'#2563eb'},alimentacion:{label:'Alimentación',icon:'🍽',color:'#c4860a'},alcaldia:{label:'Alcaldía',icon:'🏛',color:'#7c3aed'},electricidad:{label:'Electricidad',icon:'⚡',color:'#d44f2e'},otro:{label:'Operativo',icon:'📋',color:'#666'},pedido:{label:'Pedido',icon:'📦',color:'#e8a020'}};
+
+  // Resumen por categoría (solo gastos)
+  if(tipo==='gastos'){
+    var porCat={};
+    items.forEach(function(it){
+      var cat=it.pedidoId?'pedido':(it.categoria||'otro');
+      if(!porCat[cat]) porCat[cat]=0;
+      porCat[cat]+=it.monto;
+    });
+    var resEl=document.getElementById('gastosCatResumen');
+    if(resEl){
+      if(Object.keys(porCat).length){
+        var rh='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">Resumen por categoría</div>';
+        rh+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+        Object.keys(porCat).forEach(function(c){
+          var ci=CATS[c]||CATS.otro;
+          rh+='<div style="flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:8px;border-left:3px solid '+ci.color+'">'+
+            '<div style="font-size:10px;color:var(--text3)">'+ci.icon+' '+ci.label+'</div>'+
+            '<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:600;color:'+ci.color+'">'+fmt(porCat[c])+'</div></div>';
+        });
+        rh+='</div>';
+        resEl.innerHTML=rh;
+        resEl.style.display='block';
+      } else { resEl.style.display='none'; }
+    }
+  }
+
   if(!items.length){
     el.innerHTML='<div class="empty"><div class="empty-icon">'+(tipo==='ventas'?'💰':'📋')+'</div><div class="empty-text">No hay '+tipo+' registradas hoy.<br>Toca <strong>+</strong> para agregar.</div></div>';
     return;
@@ -1786,10 +1830,17 @@ function renderList(tipo){
     var color=isV?'var(--green)':'var(--red)';
     var meta='Cant: '+it.cant+' &middot; '+esc(it.hora);
     if(isV&&it.productoNombre) meta+=' &middot; 📦 '+esc(it.productoNombre);
+    // Category badge for gastos
+    var catBadge='';
+    if(!isV){
+      var cat=it.pedidoId?'pedido':(it.categoria||'otro');
+      var ci=CATS[cat]||CATS.otro;
+      catBadge='<span style="font-size:9px;font-weight:600;color:'+ci.color+';background:'+ci.color+'18;border-radius:4px;padding:2px 5px;margin-left:4px">'+ci.icon+' '+ci.label+'</span>';
+    }
     var verBtn='<button onclick="verDetalle(\''+tipo+'\','+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px;flex-shrink:0">Ver</button>';
     html+='<div class="tx-item">'+
-      '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':'📋')+'</div>'+
-      '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div>'+
+      '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':(it.pedidoId?'📦':'📋'))+'</div>'+
+      '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+catBadge+'</div><div class="tx-meta">'+meta+'</div></div>'+
       '<div style="display:flex;align-items:center">'+verBtn+
       '<div class="tx-amount" style="color:'+color+'">'+(isV?'+':'-')+fmt(it.monto)+'</div>'+
       '</div>'+
@@ -1805,7 +1856,12 @@ function verDetalle(tipo, id){
   var it=day[tipo].find(function(x){return x.id===id;});
   if(!it) return;
   var isV=tipo==='ventas';
+  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',otro:'📋 Gasto operativo',pedido:'📦 Pedido completado'};
   var html='<div style="padding:4px 0">';
+  if(!isV&&(it.categoria||it.pedidoId)){
+    var cat=it.pedidoId?'pedido':(it.categoria||'otro');
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Categoría</span><strong>'+(CATS2[cat]||cat)+'</strong></div>';
+  }
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
   html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+it.cant+'</strong></div>';
@@ -2325,31 +2381,31 @@ function buildReporteDiario(){
   // Ventas
   html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas del día</div>';
   if(day.ventas.length){
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     day.ventas.forEach(function(v){
       html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
     });
     html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL VENTAS</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
-    html += '</tbody></table>';
+    html += '</tbody></table></div></div>';
   } else { html += '<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
   html += '</div>';
 
   // Gastos
   html += '<div class="rpt-section no-break"><div class="rpt-section-title">Gastos del día</div>';
   if(day.gastos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     day.gastos.forEach(function(g){
       html += '<tr><td>'+esc(g.hora)+'</td><td>'+esc(g.desc)+'</td><td class="center">'+g.cant+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(g.monto)+'</td></tr>';
     });
     html += '<tr><td colspan="3" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL GASTOS</td><td class="num" style="font-weight:700;color:#d44f2e;background:#f0f0f0">'+fmtPDF(tg)+'</td></tr>';
-    html += '</tbody></table>';
+    html += '</tbody></table></div></div>';
   } else { html += '<p style="font-size:12px;color:#aaa">Sin gastos registrados.</p>'; }
   html += '</div>';
 
   // Pedidos especiales del día
   html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos especiales del día</div>';
   if(day.pedidos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
     day.pedidos.forEach(function(p){
       var gped=getPedido(p.id);
       var estado=gped?gped.estado:'pendiente';
@@ -2358,7 +2414,7 @@ function buildReporteDiario(){
       html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
     });
     html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL PEDIDOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
-    html += '</tbody></table>';
+    html += '</tbody></table></div></div>';
   } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales.</p>'; }
   html += '</div>';
 
@@ -2411,12 +2467,12 @@ function buildReporteSemanal(){
 
   // Tabla por día
   html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas y gastos por día</div>';
-  html += '<table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th># Ventas</th><th>Ventas $</th><th># Gastos</th><th>Gastos $</th><th>Pedidos $</th><th>Balance</th></tr></thead><tbody>';
+  html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th># Ventas</th><th>Ventas $</th><th># Gastos</th><th>Gastos $</th><th>Pedidos $</th><th>Balance</th></tr></thead><tbody>';
   dayRows.forEach(function(r){
     html += '<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="center">'+r.ng+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
   });
   html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td><td></td><td class="num" style="color:#d44f2e">'+fmtPDF(semG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(semP)+'</td><td class="num" style="color:'+(semV-semG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(semV-semG)+'</td></tr>';
-  html += '</tbody></table></div>';
+  html += '</tbody></table></div></div>';
 
   // Detalle ventas por día de la semana
   html += '<div class="rpt-section"><div class="rpt-section-title">Detalle de ventas por día</div>';
@@ -2424,11 +2480,11 @@ function buildReporteSemanal(){
     var dd=getDayData(d);
     if(!dd.ventas.length) return;
     html += '<div class="no-break" style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;">'+DIAS[i]+' '+fmtDate(dateKey(d))+'</div>';
-    html += '<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     dd.ventas.forEach(function(v){
       html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table></div></div>';
   });
   html += '</div>';
 
@@ -2453,14 +2509,14 @@ function buildReporteSemanal(){
         ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+'</span>'+
         ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+'</span>'+
         ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+'</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha pedido</th><th>Descripción</th><th>Cant.</th><th>Producto stock</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha pedido</th><th>Descripción</th><th>Cant.</th><th>Producto stock</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
         var prodN=p.productoId?(getProducto(p.productoId)?getProducto(p.productoId).nombre:'—'):'—';
         var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
         var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
         html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td>'+esc(prodN)+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html += '</tbody></table></div>';
+      html += '</tbody></table></div></div>';
     });
   } else {
     html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales esta semana.</p>';
@@ -2547,12 +2603,12 @@ function buildReporteMensual(){
   // Tabla diaria del mes
   html += '<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día del mes</div>';
   if(dayRows.length){
-    html += '<table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th><th>Gastos</th><th>Pedidos</th><th>Balance día</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th><th>Gastos</th><th>Pedidos</th><th>Balance día</th></tr></thead><tbody>';
     dayRows.forEach(function(r){
       html += '<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
     });
     html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(mG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(mP)+'</td><td class="num" style="color:'+(mV-mG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(mV-mG)+'</td></tr>';
-    html += '</tbody></table>';
+    html += '</tbody></table></div></div>';
   } else { html += '<p style="font-size:12px;color:#aaa">Sin datos registrados este mes.</p>'; }
   html += '</div>';
 
@@ -2576,13 +2632,13 @@ function buildReporteMensual(){
         ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+' completados</span>'+
         ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+' pendientes</span>'+
         ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+' cancelados</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
         var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
         var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
         html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html += '</tbody></table></div>';
+      html += '</tbody></table></div></div>';
     });
   } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales este mes.</p>'; }
   html += '</div>';
@@ -2632,7 +2688,7 @@ function buildReporteInventario(){
   // Tabla completa
   html += '<div class="rpt-section"><div class="rpt-section-title">Inventario completo</div>';
   if(productos.length){
-    html += '<table class="rpt-table"><thead><tr><th>Producto</th><th>Fecha ingreso</th><th class="center">Stock</th><th>Unidad</th><th>Costo unit.</th><th>Precio venta</th><th>Margen</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th>Fecha ingreso</th><th class="center">Stock</th><th>Unidad</th><th>Costo unit.</th><th>Precio venta</th><th>Margen</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
     productos.forEach(function(p){
       var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
       var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
@@ -2643,7 +2699,7 @@ function buildReporteInventario(){
     });
     var totalV2=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
     html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="7">VALOR TOTAL EN STOCK</td><td class="num">'+fmtPDF(totalV2)+'</td><td></td></tr>';
-    html += '</tbody></table>';
+    html += '</tbody></table></div></div>';
   } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
   html += '</div>';
 
@@ -2667,12 +2723,12 @@ function buildReporteInventario(){
   var pendStk = pedidosGlobal.filter(function(p){return p.estado==='pendiente'&&p.productoId;});
   if(pendStk.length){
     html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos pendientes con impacto en inventario</div>';
-    html += '<table class="rpt-table"><thead><tr><th>Proveedor</th><th>Descripción</th><th>Producto a recibir</th><th class="center">Cant. esperada</th><th>Fecha pedido</th></tr></thead><tbody>';
+    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Proveedor</th><th>Descripción</th><th>Producto a recibir</th><th class="center">Cant. esperada</th><th>Fecha pedido</th></tr></thead><tbody>';
     pendStk.forEach(function(p){
       var prod=getProducto(p.productoId);
       html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td>'+(prod?esc(prod.nombre):'-')+'</td><td class="center">'+p.cant+'</td><td>'+fmtDate(p.fecha)+'</td></tr>';
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table></div></div>';
   }
 
   html += rptFooter();
@@ -2693,10 +2749,10 @@ function buildReporteVentasDiario(){
   html+='</div></div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de ventas</div>';
   if(day.ventas.length){
-    html+='<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     day.ventas.forEach(function(v){html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';});
     html+='<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
-    html+='</tbody></table>';
+    html+='</tbody></table></div></div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
@@ -2722,16 +2778,16 @@ function buildReporteVentasSemanal(){
   html+=rptKPI('Promedio diario',diasConV?fmtPDF(semV/diasConV):'$0.00','','#2563eb');
   html+='</div></div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Ventas por día</div>';
-  html+='<table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th class="center"># Ventas</th><th>Total Ventas</th></tr></thead><tbody>';
+  html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th class="center"># Ventas</th><th>Total Ventas</th></tr></thead><tbody>';
   dayRows.forEach(function(r){html+='<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
   html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTAL</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td></tr>';
-  html+='</tbody></table></div>';
+  html+='</tbody></table></div></div>';
   dayRows.forEach(function(r){
     if(!r.ventas.length) return;
     html+='<div class="rpt-section no-break"><div class="rpt-section-title">'+r.dia+' '+fmtDate(r.k)+'</div>';
-    html+='<table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     r.ventas.forEach(function(v){html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';});
-    html+='</tbody></table></div>';
+    html+='</tbody></table></div></div>';
   });
   html+=rptFooter(); return html;
 }
@@ -2759,10 +2815,10 @@ function buildReporteVentasMensual(){
   html+='</div></div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día</div>';
   if(dayRows.length){
-    html+='<table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th></tr></thead><tbody>';
     dayRows.forEach(function(r){html+='<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
     html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTAL MES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td></tr>';
-    html+='</tbody></table>';
+    html+='</tbody></table></div></div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin ventas este mes.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
@@ -2787,7 +2843,7 @@ function buildReportePedidosDiario(){
   html+='</div></div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de pedidos</div>';
   if(day.pedidos.length){
-    html+='<table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
     day.pedidos.forEach(function(p){
       var gped=getPedido(p.id); var estado=gped?gped.estado:'pendiente';
       var ec=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
@@ -2796,7 +2852,7 @@ function buildReportePedidosDiario(){
       html+='<tr'+rowStyle+'><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
     });
     html+='<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL ACTIVOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
-    html+='</tbody></table>';
+    html+='</tbody></table></div></div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos registrados.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
@@ -2832,14 +2888,14 @@ function buildReportePedidosSemanal(){
         ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+(g.completados||0)+'</span>'+
         ' &nbsp;<span style="color:#e8a020">⏳ '+(g.pendientes||0)+'</span>'+
         ' &nbsp;<span style="color:#d44f2e">✗ '+(g.cancelados||0)+'</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
         var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
         var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
         var rs=p.estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
         html+='<tr'+rs+'><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html+='</tbody></table></div>';
+      html+='</tbody></table></div></div>';
     });
     html+='</div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos esta semana.</p>'; }
@@ -2879,14 +2935,14 @@ function buildReportePedidosMensual(){
         ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+(g.completados||0)+' completados</span>'+
         ' &nbsp;<span style="color:#e8a020">⏳ '+(g.pendientes||0)+' pendientes</span>'+
         ' &nbsp;<span style="color:#d44f2e">✗ '+(g.cancelados||0)+' cancelados</span></div>'+
-        '<table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
         var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
         var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
         var rs=p.estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
         html+='<tr'+rs+'><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html+='</tbody></table></div>';
+      html+='</tbody></table></div></div>';
     });
     html+='</div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos este mes.</p>'; }
@@ -2911,7 +2967,7 @@ function buildReporteInventarioSemanal(){
   });
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Estado actual del inventario</div>';
   if(productos.length){
-    html+='<table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock actual</th><th>Unidad</th><th>Vendido semana</th><th>Ingresado semana</th><th>Estado</th><th>Valor stock</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock actual</th><th>Unidad</th><th>Vendido semana</th><th>Ingresado semana</th><th>Estado</th><th>Valor stock</th></tr></thead><tbody>';
     productos.forEach(function(p){
       var vend=ventasProd[p.id]||{cant:0,monto:0};
       // pedidos completados que afectan este producto esta semana
@@ -2920,7 +2976,7 @@ function buildReporteInventarioSemanal(){
       var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
       html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="center"><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></td><td>'+esc(p.unidad)+'</td><td class="center">'+(vend.cant>0?'-'+vend.cant:'-')+'</td><td class="center">'+(ingresado>0?'+'+ingresado:'-')+'</td><td><span class="rpt-tag '+sc+'">'+(p.cantidad<=0?'Sin stock':p.cantidad<=5?'Bajo':'OK')+'</span></td><td class="num">'+fmtPDF(p.cantidad*p.precioCosto)+'</td></tr>';
     });
-    html+='</tbody></table>';
+    html+='</tbody></table></div></div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin productos.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
@@ -2959,7 +3015,7 @@ function buildReporteInventarioMensual(){
   });
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Inventario completo con movimientos del mes</div>';
   if(productos.length){
-    html+='<table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock</th><th>Unidad</th><th>Vendido mes</th><th>Ingresos mes</th><th>Costo unit.</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
+    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock</th><th>Unidad</th><th>Vendido mes</th><th>Ingresos mes</th><th>Costo unit.</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
     productos.forEach(function(p){
       var vend=ventasProd[p.id]||{cant:0,monto:0};
       var ingresado=pedidosGlobal.filter(function(ped){return ped.productoId===p.id&&ped.estado==='completado'&&monthKeys.indexOf(ped.fecha)!==-1;}).reduce(function(a,ped){return a+ped.cant;},0);
@@ -2968,7 +3024,7 @@ function buildReporteInventarioMensual(){
       html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="center">'+p.cantidad+'</td><td>'+esc(p.unidad)+'</td><td class="center">'+(vend.cant>0?vend.cant:'-')+'</td><td class="center">'+(ingresado>0?ingresado:'-')+'</td><td class="num">'+fmtPDF(p.precioCosto)+'</td><td class="num" style="font-weight:700">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+sl+'</span></td></tr>';
     });
     html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="6">VALOR TOTAL</td><td class="num">'+fmtPDF(totalValor)+'</td><td></td></tr>';
-    html+='</tbody></table>';
+    html+='</tbody></table></div></div>';
   } else { html+='<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
