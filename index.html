@@ -42,11 +42,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 /* CARDS */
 .card{background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid var(--border)}
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border)}
-.stat-label{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);min-width:0;overflow:hidden}
+.stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
 .stat-icon{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.stat-value{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:-0.5px}
-.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.stat-value{font-family:'DM Mono',monospace;font-size:clamp(15px,4.5vw,22px);font-weight:500;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* SEMANA CARD */
 .semana-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
@@ -342,16 +342,28 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
         <div class="semana-days" id="semanaDays"></div>
       </div>
 
-      <!-- Ganancia acumulada (ancho completo) -->
-      <div class="stat-card">
-        <div class="stat-label">
-          <div class="stat-icon" style="background:#fef0d9">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <!-- Ganancia bruta + neta -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#fef0d9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Bruta
           </div>
-          Ganancia Total Acumulada
+          <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
+          <div class="stat-sub">Venta − costo producto</div>
         </div>
-        <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
-        <div class="stat-sub">Solo productos con costo registrado · acumulado</div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#e8f7f1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Neta
+          </div>
+          <div class="stat-value" id="gananciaNeta" style="color:var(--green)">$0.00</div>
+          <div class="stat-sub">Bruta − gastos acumulados</div>
+        </div>
       </div>
 
       <!-- Fondo inicial (histórico fijo) -->
@@ -477,6 +489,23 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="section-title">
         Inventario
         <button onclick="openProductoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Producto</button>
+      </div>
+      <!-- Total invertido -->
+      <div class="card" style="padding:12px 16px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">💰 Total invertido en stock</div>
+            <div style="font-size:11px;color:var(--text3)" id="invProductosCnt">0 productos</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
+        </div>
+      </div>
+      <!-- Filtro stock -->
+      <div class="tabs" style="margin-bottom:8px">
+        <button class="tab-btn active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
+        <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
+        <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
+        <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
       </div>
       <div id="listaInventario"></div>
     </div>
@@ -1201,12 +1230,15 @@ function onProductoSelChange(){
 }
 
 function onCantChange(){
-  var pid=parseInt(document.getElementById('ventaProductoSel').value);
-  if(!pid)return;
-  var p=getProducto(pid);
-  if(!p)return;
   var cant=parseFloat(document.getElementById('fCant').value)||1;
-  document.getElementById('fMonto').value=(p.precioVenta*cant).toFixed(2);
+  // Venta: usa precioVenta
+  var pidV=parseInt(document.getElementById('ventaProductoSel').value);
+  if(pidV){ var pV=getProducto(pidV); if(pV) document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); return; }
+  // Pedido: usa precioCosto
+  if(selectedTipo==='pedido'){
+    var pidP=parseInt(document.getElementById('pedidoProductoSel').value);
+    if(pidP){ var pP=getProducto(pidP); if(pP&&pP.precioCosto>0) document.getElementById('fMonto').value=(pP.precioCosto*cant).toFixed(2); }
+  }
 }
 
 // Multi-producto: agregar item a la lista de venta
@@ -1591,8 +1623,9 @@ function renderResumen(){
     fondoInicialFechaEl.textContent='Aún no registrado';
   }
 
-  // Ganancia acumulada: SOLO ventas con producto asignado que tenga precio de costo
+  // Ganancia bruta acumulada (solo productos con costo)
   var ganancia=0;
+  var gastosTotal=0;
   Object.keys(data).forEach(function(k){
     var d=data[k];
     (d.ventas||[]).forEach(function(v){
@@ -1600,16 +1633,18 @@ function renderResumen(){
       items.forEach(function(it){
         if(it.productoId){
           var prod=getProducto(it.productoId);
-          if(prod && prod.precioCosto>0){
-            ganancia += it.monto - (prod.precioCosto * it.cant);
-          }
+          if(prod&&prod.precioCosto>0) ganancia+=it.monto-(prod.precioCosto*it.cant);
         }
-        // Si no tiene producto asignado, NO se suma a ganancia
       });
     });
+    // Gastos acumulados (excluyendo los que vienen de pedidos para no doble contar)
+    (d.gastos||[]).forEach(function(g){ gastosTotal+=g.monto; });
   });
+  var gananciaNeta=ganancia-gastosTotal;
   var ganEl=document.getElementById('gananciaDia');
+  var ganNetaEl=document.getElementById('gananciaNeta');
   if(ganEl){ ganEl.textContent=fmt(ganancia); ganEl.style.color=ganancia>=0?'var(--gold)':'var(--red)'; }
+  if(ganNetaEl){ ganNetaEl.textContent=fmt(gananciaNeta); ganNetaEl.style.color=gananciaNeta>=0?'var(--green)':'var(--red)'; }
 
   var maxVal=Math.max(tv,tg,tpr,tpi,tso,1);
   ['bVentas','bGastos','bPollo','bIndio','bSello'].forEach(function(bid,i){
@@ -1692,8 +1727,7 @@ function renderList(tipo){
     var color=isV?'var(--green)':'var(--red)';
     var meta='Cant: '+it.cant+' &middot; '+esc(it.hora);
     if(isV&&it.productoNombre) meta+=' &middot; 📦 '+esc(it.productoNombre);
-    // Si tiene items multi-producto, mostrar botón Ver
-    var verBtn=isV?'<button onclick="verDetalleVenta('+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px">Ver</button>':'';
+    var verBtn='<button onclick="verDetalle(\''+tipo+'\','+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px;flex-shrink:0">Ver</button>';
     html+='<div class="tx-item">'+
       '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':'📋')+'</div>'+
       '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+'</div><div class="tx-meta">'+meta+'</div></div>'+
@@ -1707,28 +1741,30 @@ function renderList(tipo){
   el.innerHTML=html;
 }
 
-function verDetalleVenta(id){
+function verDetalle(tipo, id){
   var day=getDayData(currentDate);
-  var v=day.ventas.find(function(x){return x.id===id;});
-  if(!v) return;
+  var it=day[tipo].find(function(x){return x.id===id;});
+  if(!it) return;
+  var isV=tipo==='ventas';
   var html='<div style="padding:4px 0">';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(v.hora)+'</strong></div>';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong>'+esc(v.desc)+'</strong></div>';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+v.cant+'</strong></div>';
-  if(v.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(v.productoNombre)+'</strong></div>';
-  // Si hay items adicionales (ventas multi-producto agrupadas)
-  if(v.items&&v.items.length){
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+it.cant+'</strong></div>';
+  if(isV&&it.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(it.productoNombre)+'</strong></div>';
+  if(it.pedidoId) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Origen</span><strong>📦 Pedido completado</strong></div>';
+  if(it.items&&it.items.length){
     html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Productos incluidos</div>';
-    v.items.forEach(function(it){
+    it.items.forEach(function(x){
       html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'+
-        '<div><div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
-        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div></div>'+
-        '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(it.monto)+'</div>'+
+        '<div><div style="font-size:13px;font-weight:500">'+esc(x.desc)+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · '+esc(x.productoNombre):'')+'</div></div>'+
+        '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:'+(isV?'var(--green)':'var(--red)')+'">'+fmt(x.monto)+'</div>'+
       '</div>';
     });
   }
+  var color=isV?'var(--green)':'var(--red)';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
-    '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:var(--green)">'+fmt(v.monto)+'</span></div>';
+    '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
   html+='</div>';
   document.getElementById('detalleVentaBody').innerHTML=html;
   document.getElementById('detalleVentaModal').classList.add('open');
@@ -1804,14 +1840,43 @@ function renderPedidos(){
   el.innerHTML=html;
 }
 
+var invFiltroActual='todos';
+function setInvFiltro(f){
+  invFiltroActual=f;
+  ['Todos','Alto','Medio','Bajo'].forEach(function(x){
+    var el=document.getElementById('invFiltro'+x); if(el) el.classList.remove('active');
+  });
+  var actEl=document.getElementById('invFiltro'+f.charAt(0).toUpperCase()+f.slice(1));
+  if(actEl) actEl.classList.add('active');
+  renderInventario();
+}
+
 function renderInventario(){
   var el=document.getElementById('listaInventario');
   if(!productos.length){
     el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">No tienes productos en inventario.<br>Toca <strong>+ Producto</strong> para agregar.</div></div>';
     return;
   }
+  // Total invertido
+  var totalInv=productos.reduce(function(a,p){return a+p.precioCosto*p.cantidad;},0);
+  var totalInvEl=document.getElementById('invTotalInvertido');
+  var cntEl=document.getElementById('invProductosCnt');
+  if(totalInvEl) totalInvEl.textContent=fmt(totalInv);
+  if(cntEl) cntEl.textContent=productos.length+' productos';
+
+  // Filtro
+  var filtrados=productos.filter(function(p){
+    if(invFiltroActual==='bajo') return p.cantidad<=5;
+    if(invFiltroActual==='medio') return p.cantidad>5&&p.cantidad<=20;
+    if(invFiltroActual==='alto') return p.cantidad>20;
+    return true;
+  });
+  if(!filtrados.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Sin productos en este rango de stock.</div></div>';
+    return;
+  }
   var html='';
-  productos.forEach(function(p){
+  filtrados.forEach(function(p){
     var sc=p.cantidad<=0?'stock-out':p.cantidad<=5?'stock-low':'stock-ok';
     var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Stock bajo':'En stock';
     var fd='';if(p.fecha){var fp=p.fecha.split('-');fd=fp[2]+'/'+fp[1]+'/'+fp[0];}
