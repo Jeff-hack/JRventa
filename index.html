@@ -24,6 +24,7 @@
 }
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+.pages{flex:1;overflow:hidden;position:relative;-webkit-overflow-scrolling:touch}
 
 /* HEADER */
 .header{background:var(--primary);color:#fff;padding:16px 20px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -35,7 +36,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
 /* PAGES */
 .pages{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;padding:16px 16px 80px;display:none;flex-direction:column;gap:12px}
+.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 80px;display:none;flex-direction:column;gap:12px}
 .page.active{display:flex}
 .page::-webkit-scrollbar{display:none}
 
@@ -1086,8 +1087,8 @@ function _fbLoad(){
       try{ if(d.fondos) { fondos=JSON.parse(d.fondos); localStorage.setItem('cvd_fondos',d.fondos); } }catch(e){}
       renderAll();
       updateSyncIndicator();
-      migrarDatos(); // migración silenciosa al cargar
-      toast('☁ Datos sincronizados con la nube');
+      migrarDatos(true); // migrar silenciosamente y escribir de vuelta a Firebase
+      toast('☁ Sincronizado');
     } else {
       // Firebase vacío → subir los datos locales existentes
       _fbWrite();
@@ -2210,35 +2211,46 @@ function renderEncargos(){
 }
 
 // ── MIGRACIÓN DE DATOS ──
-function migrarDatos(){
+function migrarDatos(silencioso){
   var cambios=0;
+  // Descriptores conocidos de compras de mercancía registradas manualmente como gastos
+  var keywordsMercancia=['pedidos de dia','total de pedidos','pago a abuela por producto',
+    'alas búfalo','alas bufalo','bolsa muslo','menudos','alas rojas','pechuga congelada',
+    'libras de mollejas','sacos de muslo','bolsas menudo','bolsas de patas','libras de muslo',
+    'saco de pollo','saco de pechuga','pedido sello','pedido pollo','compra de'];
+
   Object.keys(data).forEach(function(k){
-    var d=data[k];
-    (d.gastos||[]).forEach(function(g){
-      // Marcar gastos de pedidos que no tienen pedidoId
-      if(!g.pedidoId && g.desc && g.desc.indexOf('Pedido:')===0){
-        g.pedidoId='legacy'; // marcar como legacy para excluirlos de ganancia neta
+    (data[k].gastos||[]).forEach(function(g){
+      // Ya marcado como pedido del sistema — ok
+      if(g.pedidoId && g.pedidoId!=='legacy') return;
+
+      var descLow=(g.desc||'').toLowerCase();
+
+      // Marcar como mercancía si coincide con keywords O empieza con "Pedido:"
+      var esMercancia = (g.desc&&g.desc.indexOf('Pedido:')===0) ||
+        keywordsMercancia.some(function(kw){ return descLow.indexOf(kw)!==-1; });
+
+      if(esMercancia && !g.pedidoId){
+        g.pedidoId='legacy';
+        g.categoria='pedido_mercancia';
         cambios++;
       }
-      // Asignar categoría por defecto a gastos sin categoría
-      if(!g.categoria && !g.pedidoId){
-        var d2=g.desc?g.desc.toLowerCase():'';
-        if(d2.indexOf('pasaje')!==-1||d2.indexOf('transporte')!==-1||d2.indexOf('bus')!==-1) g.categoria='pasaje';
-        else if(d2.indexOf('aliment')!==-1||d2.indexOf('comida')!==-1||d2.indexOf('almuerzo')!==-1||d2.indexOf('desayuno')!==-1) g.categoria='alimentacion';
-        else if(d2.indexOf('alcald')!==-1||d2.indexOf('impuesto')!==-1||d2.indexOf('municipal')!==-1) g.categoria='alcaldia';
-        else if(d2.indexOf('luz')!==-1||d2.indexOf('electric')!==-1||d2.indexOf('energía')!==-1||d2.indexOf('energ')!==-1) g.categoria='electricidad';
+
+      // Asignar categoría a gastos operativos sin categoría
+      if(!g.pedidoId && (!g.categoria||g.categoria==='otro'||g.categoria==='SIN_CAT')){
+        if(/pasaje|bus|transporte/.test(descLow)) g.categoria='pasaje';
+        else if(/desayuno|almuerzo|cena|café|cafe|comida|atole|mango|fruta/.test(descLow)) g.categoria='alimentacion';
+        else if(/alcald|impuesto|municipal/.test(descLow)) g.categoria='alcaldia';
+        else if(/luz|electric|energ/.test(descLow)) g.categoria='electricidad';
         else g.categoria='otro';
         cambios++;
       }
     });
   });
-  if(cambios>0){
-    saveData();
-    _fbWrite();
-    toast('✓ Migración completa: '+cambios+' registros actualizados');
-  } else {
-    toast('Sin cambios — datos ya están al día');
-  }
+
+  _lsSave('cvd_data', data);
+  _fbWrite(); // siempre escribir a Firebase para que la migración persista
+  if(!silencioso) toast(cambios>0?('✓ '+cambios+' registros clasificados'):'✓ Datos verificados');
   renderAll();
 }
 
