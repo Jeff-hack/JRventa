@@ -189,7 +189,18 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .notif{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;max-width:90vw}
 .notif.show{opacity:1}
 
-/* ══ PRINT / PDF STYLES ══ */
+/* ══ V2 SECTIONS ══ */
+.v2-section{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.v2-section.active{display:block}
+.v2-section .page{position:static;overflow:visible;padding:16px 16px 80px;display:flex;flex-direction:column;gap:12px}
+.v2-section .page.active{display:flex}
+.v2-section-tabs{display:flex;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;gap:2px;margin:0 0 8px;flex-shrink:0}
+.v2-stab{flex:1;padding:9px 4px;border:none;border-radius:6px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s}
+.v2-stab.active{background:var(--surface);color:var(--primary);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+/* Dash hero card */
+.balance-card{position:relative}
+
+
 @media print {
   body { background:#fff !important; overflow:auto !important; font-family:Arial,sans-serif !important; }
   #app, .fab, .bottom-nav, .modal-overlay, .notif { display:none !important; }
@@ -341,12 +352,81 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 
   <div class="pages">
 
+    <!-- ══════ SECCIÓN: INICIO (Dashboard) ══════ -->
+    <div class="v2-section active" id="section-inicio">
     <!-- ══ RESUMEN ══ -->
     <div class="page active" id="page-resumen">
 
-      <!-- Ventas y gastos del día -->
+      <!-- HERO: Caja Actual -->
+      <div class="balance-card" style="position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
+        <div style="position:absolute;right:20px;top:-40px;width:80px;height:80px;background:rgba(255,255,255,0.04);border-radius:50%"></div>
+        <div class="balance-label">💵 Caja Actual</div>
+        <div class="balance-value" id="balanceNeto">$0.00</div>
+        <div class="balance-meta">
+          <span>Meta diaria</span>
+          <span class="balance-tag" id="balanceTag">Neutro</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="balance-meta" style="margin-top:6px">
+          <span id="metaText">0% de meta ($500.00)</span>
+        </div>
+      </div>
+
+      <!-- Fila: Patrimonio + Ganancia Neta Mes -->
+      <div class="stats-row">
+        <div class="stat-card" id="fondoInicialCard">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#f3e8ff">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            </div>
+            Patrimonio
+          </div>
+          <div class="stat-value" style="color:#7c3aed;font-size:clamp(13px,3.8vw,18px)" id="fondoInicialDisplay">—</div>
+          <div class="stat-sub" id="fondoInicialFecha">Aún no registrado</div>
+          <div id="fondoInicialAccion" style="margin-top:6px">
+            <button onclick="openFondoInicialModal()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer">Registrar</button>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#e8f7f1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Neta
+          </div>
+          <div class="stat-value" id="gananciaNeta" style="color:var(--green)">$0.00</div>
+          <div class="stat-sub" id="gananciaNetaSub">Bruta − gastos</div>
+        </div>
+      </div>
+
+      <!-- Fila: Inventario valorizado + Ganancia Bruta -->
       <div class="stats-row">
         <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#e8f0fe">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            Inventario
+          </div>
+          <div class="stat-value" id="invTotalInvertidoDash" style="color:#2563eb">$0.00</div>
+          <div class="stat-sub" id="invProductosCntDash">Valor en stock</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <div class="stat-icon" style="background:#fef0d9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            Ganancia Bruta
+          </div>
+          <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
+          <div class="stat-sub" id="gananciaBrutaSub">Venta − costo</div>
+        </div>
+      </div>
+
+      <!-- Fila 2x2: Ventas / Gastos / Pedidos / Encargos hoy -->
+      <div class="stats-row">
+        <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('ventas')">
           <div class="stat-label">
             <div class="stat-icon" style="background:#e8f7f1">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -356,7 +436,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-value" id="totalVentas" style="color:var(--green)">$0.00</div>
           <div class="stat-sub" id="cntVentas">0 transacciones</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showSection('operaciones',document.getElementById('navOps'));setOpsTab('gastos')">
           <div class="stat-label">
             <div class="stat-icon" style="background:#fdeee9">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d44f2e" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
@@ -367,32 +447,30 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="stat-sub" id="cntGastos">0 egresos</div>
         </div>
       </div>
-
-      <!-- Ventas y gastos de la semana -->
       <div class="stats-row">
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showSection('inventario',document.getElementById('navInv'));setInvMainTab('pedidos')">
           <div class="stat-label">
-            <div class="stat-icon" style="background:#e8f7f1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <div class="stat-icon" style="background:#fef0d9">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e8a020" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
             </div>
-            Ventas Semana
+            Pedidos
           </div>
-          <div class="stat-value" id="semVentasCard" style="color:var(--green)">$0.00</div>
-          <div class="stat-sub" id="cntSemVentas">0 transacciones</div>
+          <div class="stat-value" id="dashPedPend" style="color:var(--orange)">0</div>
+          <div class="stat-sub">Pendientes hoy</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" style="cursor:pointer" onclick="showSection('ordenes',document.getElementById('navOrd'))">
           <div class="stat-label">
-            <div class="stat-icon" style="background:#fdeee9">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d44f2e" stroke-width="2.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <div class="stat-icon" style="background:#e8f0fe">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
             </div>
-            Gastos Semana
+            Encargos
           </div>
-          <div class="stat-value" id="semGastosCard" style="color:var(--red)">$0.00</div>
-          <div class="stat-sub" id="cntSemGastos">0 egresos</div>
+          <div class="stat-value" id="dashEncPend" style="color:#2563eb">0</div>
+          <div class="stat-sub">Pendientes</div>
         </div>
       </div>
 
-      <!-- ★ RESUMEN SEMANAL -->
+      <!-- Resumen semanal -->
       <div class="semana-card">
         <div class="semana-header">
           <div class="semana-title">
@@ -415,92 +493,10 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             <div class="semana-stat-value" id="semBalance">$0</div>
           </div>
         </div>
-        <!-- mini barras diarias -->
         <div class="semana-days" id="semanaDays"></div>
       </div>
 
-      <!-- Ganancia bruta + neta -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">
-            <div class="stat-icon" style="background:#fef0d9">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4860a" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            </div>
-            Ganancia Bruta
-          </div>
-          <div class="stat-value" id="gananciaDia" style="color:var(--gold)">$0.00</div>
-          <div class="stat-sub" id="gananciaBrutaSub">Venta − costo producto</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">
-            <div class="stat-icon" style="background:#e8f7f1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            </div>
-            Ganancia Neta
-          </div>
-          <div class="stat-value" id="gananciaNeta" style="color:var(--green)">$0.00</div>
-          <div class="stat-sub" id="gananciaNetaSub">Bruta − gastos acumulados</div>
-        </div>
-      </div>
-
-      <!-- Fondo inicial (histórico fijo) -->
-      <div class="card" id="fondoInicialCard" style="padding:14px 16px">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:36px;height:36px;border-radius:10px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-            </div>
-            <div>
-              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7c3aed;margin-bottom:2px">Fondo Inicial del Negocio</div>
-              <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:#7c3aed" id="fondoInicialDisplay">—</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:2px" id="fondoInicialFecha">Aún no registrado</div>
-            </div>
-          </div>
-          <div id="fondoInicialAccion">
-            <button onclick="openFondoInicialModal()" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">Registrar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Balance neto del día -->
-      <div class="balance-card">
-        <div class="balance-label">Balance Neto del Día</div>
-        <div class="balance-value" id="balanceNeto">$0.00</div>
-        <div class="balance-meta">
-          <span>Meta diaria</span>
-          <span class="balance-tag" id="balanceTag">Neutro</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-        <div class="balance-meta" style="margin-top:6px">
-          <span id="metaText">0% de meta ($500.00)</span>
-        </div>
-      </div>
-
-      <!-- Pedidos especiales resumen -->
-      <div class="card">
-        <div class="card-section-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Pedidos especiales de hoy
-        </div>
-        <div class="pedido-item">
-          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#e8a020"></div><div class="pedido-name">Pollo Rico</div></div>
-          <div class="pedido-val" style="color:var(--orange)" id="sumPolloRico">$0.00</div>
-        </div>
-        <div class="pedido-item">
-          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#d44f2e"></div><div class="pedido-name">Pollo Indio</div></div>
-          <div class="pedido-val" style="color:var(--red)" id="sumPolloIndio">$0.00</div>
-        </div>
-        <div class="pedido-item" style="margin-bottom:0">
-          <div style="display:flex;align-items:center"><div class="pedido-dot" style="background:#c4860a"></div><div class="pedido-name">Sello de Oro</div></div>
-          <div class="pedido-val" style="color:var(--gold)" id="sumSelloOro">$0.00</div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid var(--border);margin-top:6px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2)">Total pedidos del día</div>
-          <div style="font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--primary)" id="totalPedidosDia">$0.00</div>
-        </div>
-      </div>
-
-      <!-- Gráfico -->
+      <!-- Gráfico distribución -->
       <div class="card">
         <div class="chart-title">Distribución Financiera</div>
         <div class="bar-chart">
@@ -511,91 +507,158 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <div class="bar-wrap"><div class="bar" id="bSello" style="background:#c4860a;height:4px"></div><div class="bar-label">S. Oro</div></div>
         </div>
       </div>
-    </div>
 
-    <!-- ══ VENTAS ══ -->
-    <div class="page" id="page-ventas">
-      <div class="section-title">Ventas del día <span class="badge" id="badgeVentas">0</span></div>
-      <!-- Filtro: lista normal / ranking productos -->
-      <div class="tabs" style="margin-bottom:8px">
-        <button class="tab-btn active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">📋 Lista</button>
-        <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Más vendidos</button>
+      <!-- Hidden stats for JS compatibility -->
+      <span id="semVentasCard" style="display:none">$0.00</span>
+      <span id="semGastosCard" style="display:none">$0.00</span>
+      <span id="cntSemVentas" style="display:none">0</span>
+      <span id="cntSemGastos" style="display:none">0</span>
+    </div>
+    </div><!-- /section-inicio -->
+
+    <!-- ══════ SECCIÓN: OPERACIONES ══════ -->
+    <div class="v2-section" id="section-operaciones">
+    <!-- Tabs Ventas / Gastos -->
+    <div class="page active" id="page-ops">
+      <div class="v2-section-tabs">
+        <button class="v2-stab active" id="opsTabVentas" onclick="setOpsTab('ventas')">💰 Ventas</button>
+        <button class="v2-stab" id="opsTabGastos" onclick="setOpsTab('gastos')">📋 Gastos</button>
       </div>
-      <div id="listaVentas"></div>
-    </div>
 
-    <!-- ══ GASTOS ══ -->
-    <div class="page" id="page-gastos">
-      <div class="section-title">Gastos del día <span class="badge" id="badgeGastos">0</span></div>
-      <!-- Resumen por categoría -->
-      <div class="card" style="padding:12px 16px;margin-bottom:8px" id="gastosCatResumen"></div>
-      <div id="listaGastos"></div>
-    </div>
-
-    <!-- ══ PEDIDOS ══ -->
-    <div class="page" id="page-pedidos">
-      <div class="section-title">Pedidos especiales</div>
-      <!-- Total del día (solo no cancelados) -->
-      <div class="card" style="padding:12px 16px;margin-bottom:4px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div>
-            <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:3px">Total pedidos del día</div>
-            <div style="font-size:11px;color:var(--text3)" id="pedidosDiaCnt">0 pedidos activos</div>
-          </div>
-          <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
+      <!-- Panel Ventas -->
+      <div id="opsPanelVentas">
+        <div class="section-title" style="margin-bottom:8px">Ventas del día <span class="badge" id="badgeVentas">0</span></div>
+        <div class="tabs" style="margin-bottom:8px">
+          <button class="tab-btn active" id="ventaFiltroLista" onclick="setVentaFiltro('lista')">📋 Lista</button>
+          <button class="tab-btn" id="ventaFiltroRanking" onclick="setVentaFiltro('ranking')">🏆 Más vendidos</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
-          <div style="text-align:center">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico</div>
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
-          </div>
-          <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio</div>
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro</div>
-            <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
-          </div>
-        </div>
+        <div id="listaVentas"></div>
       </div>
-      <!-- Tabs pendientes / completados / cancelados -->
-      <div class="tabs">
-        <button class="tab-btn active" id="tabPend" onclick="setPedidoTab('pendiente')">⏳ Pendientes</button>
-        <button class="tab-btn" id="tabDone" onclick="setPedidoTab('completado')">✅ Completados</button>
-        <button class="tab-btn" id="tabCanc" onclick="setPedidoTab('cancelado')">❌ Cancelados</button>
+
+      <!-- Panel Gastos -->
+      <div id="opsPanelGastos" style="display:none">
+        <div class="section-title" style="margin-bottom:8px">Gastos del día <span class="badge" id="badgeGastos">0</span></div>
+        <div class="card" style="padding:12px 16px;margin-bottom:8px" id="gastosCatResumen"></div>
+        <div id="listaGastos"></div>
       </div>
-      <div id="listaPedidos"></div>
     </div>
 
-    <!-- ══ INVENTARIO ══ -->
-    <div class="page" id="page-inventario">
+    <!-- Hidden pages for JS compatibility -->
+    <div class="page" id="page-ventas" style="display:none!important"></div>
+    <div class="page" id="page-gastos" style="display:none!important"></div>
+    </div><!-- /section-operaciones -->
+
+    <!-- ══════ SECCIÓN: INVENTARIO ══════ -->
+    <div class="v2-section" id="section-inventario">
+    <div class="page active" id="page-inv-main">
+      <div class="v2-section-tabs">
+        <button class="v2-stab active" id="invMainTabStock" onclick="setInvMainTab('stock')">📦 Stock</button>
+        <button class="v2-stab" id="invMainTabPedidos" onclick="setInvMainTab('pedidos')">🚚 Pedidos</button>
+      </div>
+
+      <!-- Panel Stock -->
+      <div id="invPanelStock">
+        <div class="section-title" style="margin-bottom:8px">
+          Inventario
+          <button onclick="openProductoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Producto</button>
+        </div>
+        <div class="card" style="padding:12px 16px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">💰 Total invertido en stock</div>
+              <div style="font-size:11px;color:var(--text3)" id="invProductosCnt">0 productos</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
+          </div>
+        </div>
+        <div class="tabs" style="margin-bottom:8px">
+          <button class="tab-btn active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
+          <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
+          <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
+          <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
+        </div>
+        <div id="listaInventario"></div>
+      </div>
+
+      <!-- Panel Pedidos Proveedor -->
+      <div id="invPanelPedidos" style="display:none">
+        <div class="section-title" style="margin-bottom:8px">Pedidos especiales</div>
+        <div class="card" style="padding:12px 16px;margin-bottom:4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:3px">Total pedidos del día</div>
+              <div style="font-size:11px;color:var(--text3)" id="pedidosDiaCnt">0 pedidos activos</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--primary)" id="pedidosDiaTotal">$0.00</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid var(--border);padding-top:10px">
+            <div style="text-align:center">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#e8a020;margin-bottom:3px">Pollo Rico</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:#e8a020" id="pedDiaPR">$0.00</div>
+            </div>
+            <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--red);margin-bottom:3px">Pollo Indio</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--red)" id="pedDiaPI">$0.00</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">Sello de Oro</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--gold)" id="pedDiaSO">$0.00</div>
+            </div>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" id="tabPend" onclick="setPedidoTab('pendiente')">⏳ Pendientes</button>
+          <button class="tab-btn" id="tabDone" onclick="setPedidoTab('completado')">✅ Completados</button>
+          <button class="tab-btn" id="tabCanc" onclick="setPedidoTab('cancelado')">❌ Cancelados</button>
+        </div>
+        <div id="listaPedidos"></div>
+      </div>
+    </div>
+
+    <!-- Hidden pages for JS compat -->
+    <div class="page" id="page-inventario" style="display:none!important"></div>
+    <div class="page" id="page-pedidos" style="display:none!important"></div>
+    </div><!-- /section-inventario -->
+
+    <!-- ══════ SECCIÓN: ÓRDENES (Encargos) ══════ -->
+    <div class="v2-section" id="section-ordenes">
+    <div class="page active" id="page-ordenes">
       <div class="section-title">
-        Inventario
-        <button onclick="openProductoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Producto</button>
+        Órdenes / Encargos
+        <button onclick="openEncargoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Encargo</button>
       </div>
-      <!-- Total invertido -->
-      <div class="card" style="padding:12px 16px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:2px">💰 Total invertido en stock</div>
-            <div style="font-size:11px;color:var(--text3)" id="invProductosCnt">0 productos</div>
-          </div>
-          <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--primary)" id="invTotalInvertido">$0.00</div>
-        </div>
-      </div>
-      <!-- Filtro stock -->
+      <!-- Tabs estado -->
       <div class="tabs" style="margin-bottom:8px">
-        <button class="tab-btn active" id="invFiltroTodos" onclick="setInvFiltro('todos')">Todos</button>
-        <button class="tab-btn" id="invFiltroAlto" onclick="setInvFiltro('alto')" style="color:var(--green)">↑ Alto</button>
-        <button class="tab-btn" id="invFiltroMedio" onclick="setInvFiltro('medio')" style="color:var(--orange)">~ Medio</button>
-        <button class="tab-btn" id="invFiltroBajo" onclick="setInvFiltro('bajo')" style="color:var(--red)">↓ Bajo</button>
+        <button class="tab-btn active" id="ordTabTodos" onclick="setOrdTab('todos')">Todos</button>
+        <button class="tab-btn" id="ordTabPend" onclick="setOrdTab('pendiente')">⏳ Pendiente</button>
+        <button class="tab-btn" id="ordTabListo" onclick="setOrdTab('listo')">✅ Listo</button>
+        <button class="tab-btn" id="ordTabEntr" onclick="setOrdTab('entregado')">📦 Entregado</button>
       </div>
-      <div id="listaInventario"></div>
+      <div id="listaEncargos"></div>
     </div>
 
-    <!-- ══ REPORTES ══ -->
-    <div class="page" id="page-reportes">
+    <!-- Hidden for JS compat -->
+    <div class="page" id="page-encargos" style="display:none!important"></div>
+    </div><!-- /section-ordenes -->
+
+    <!-- ══════ SECCIÓN: MÁS ══════ -->
+    <div class="v2-section" id="section-mas">
+    <div class="page active" id="page-mas">
+      <div class="v2-section-tabs" style="margin-bottom:12px">
+        <button class="v2-stab active" id="masTabHistorial" onclick="setMasTab('historial')">📅 Historial</button>
+        <button class="v2-stab" id="masTabReportes" onclick="setMasTab('reportes')">📊 Reportes</button>
+        <button class="v2-stab" id="masTabDatos" onclick="setMasTab('datos')">🔒 Datos</button>
+      </div>
+
+      <!-- Panel Historial -->
+      <div id="masPanelHistorial">
+        <div class="section-title">Historial completo</div>
+        <div id="listaHistorial"></div>
+      </div>
+
+      <!-- Panel Reportes -->
+      <div id="masPanelReportes" style="display:none">
+    <div class="page" id="page-reportes" style="position:static;overflow:visible;padding:0;display:flex;flex-direction:column;gap:0">
 
       <!-- VENTAS -->
       <div class="rpt-section-header" style="--c:#1d9e75">
@@ -731,58 +794,62 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           </label>
         </div>
       </div>
-    </div>
+    </div><!-- /page-reportes -->
+      </div><!-- /masPanelReportes -->
 
-    <!-- ══ ENCARGOS ══ -->
-    <div class="page" id="page-encargos">
-      <div class="section-title">
-        Encargos
-        <button onclick="openEncargoModal(null)" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Encargo</button>
-      </div>
-      <div id="listaEncargos"></div>
-    </div>
-
-    <!-- ══ HISTORIAL ══ -->
-    <div class="page" id="page-historial">
-      <div class="section-title">Historial completo</div>
-      <div id="listaHistorial"></div>
-    </div>
+      <!-- Panel Datos -->
+      <div id="masPanelDatos" style="display:none">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text2);margin:4px 0 6px;padding-left:2px">🔒 Respaldo de datos</div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔧</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Migrar datos históricos</div><div style="font-size:11px;color:var(--text3)">Clasifica gastos y corrige ganancia neta</div></div>
+            <button onclick="migrarDatos()" style="background:#7c3aed;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Migrar</button>
+          </div>
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">☁️</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Sincronizar ahora</div><div style="font-size:11px;color:var(--text3)">Fuerza la sincronización con Firebase</div></div>
+            <button onclick="_fbWrite();toast('☁ Sincronizando...')" style="background:#2563eb;color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Sync</button>
+          </div>
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬇️</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Exportar datos</div><div style="font-size:11px;color:var(--text3)">Descarga un .json con todos tus registros</div></div>
+            <button onclick="exportarDatos()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Exportar</button>
+          </div>
+          <div style="padding:14px 16px;display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆️</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600">Importar datos</div><div style="font-size:11px;color:var(--text3)">Restaura desde un archivo .json exportado</div></div>
+            <label style="background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Importar<input type="file" accept=".json" onchange="importarDatos(event)" style="display:none"></label>
+          </div>
+        </div>
+      </div><!-- /masPanelDatos -->
+    </div><!-- /page-mas -->
+    <div class="page" id="page-historial" style="display:none!important"></div>
+    </div><!-- /section-mas -->
 
   </div><!-- /pages -->
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV v2 -->
   <div class="bottom-nav">
-    <button class="nav-btn active" onclick="showPage('resumen',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Resumen</span>
+    <button class="nav-btn active" id="navInicio" onclick="showSection('inicio',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Inicio</span>
     </button>
-    <button class="nav-btn" onclick="showPage('ventas',this)">
+    <button class="nav-btn" id="navOps" onclick="showSection('operaciones',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span>Ventas</span>
+      <span>Operaciones</span>
     </button>
-    <button class="nav-btn" onclick="showPage('gastos',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <span>Gastos</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('pedidos',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      <span>Pedidos</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('inventario',this)">
+    <button class="nav-btn" id="navInv" onclick="showSection('inventario',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Inventario</span>
     </button>
-    <button class="nav-btn" onclick="showPage('encargos',this)">
+    <button class="nav-btn" id="navOrd" onclick="showSection('ordenes',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
-      <span>Encargos</span>
+      <span>Órdenes</span>
     </button>
-    <button class="nav-btn" onclick="showPage('historial',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
-      <span>Historial</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('reportes',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span>Reportes</span>
+    <button class="nav-btn" id="navMas" onclick="showSection('mas',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <span>Más</span>
     </button>
   </div>
 </div>
@@ -1256,19 +1323,90 @@ function getWeekDays(d){
   return days;
 }
 
-// ══════════════════════════════════════════
-//  NAVEGACIÓN
-// ══════════════════════════════════════════
 function showPage(name,btn){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  // Legacy compat: map old page names to sections
+  var sectionMap={resumen:'inicio',ventas:'operaciones',gastos:'operaciones',pedidos:'inventario',inventario:'inventario',encargos:'ordenes',historial:'mas',reportes:'mas'};
+  var sec=sectionMap[name]||name;
+  var navMap={inicio:'navInicio',operaciones:'navOps',inventario:'navInv',ordenes:'navOrd',mas:'navMas'};
+  var navBtn=document.getElementById(navMap[sec]);
+  showSection(sec,navBtn);
+  // Also set sub-tab if needed
+  if(name==='ventas') setOpsTab('ventas');
+  if(name==='gastos') setOpsTab('gastos');
+  if(name==='pedidos') setInvMainTab('pedidos');
+  if(name==='historial') setMasTab('historial');
+  if(name==='reportes') setMasTab('reportes');
+}
+
+// ══ V2 SECTION NAVIGATION ══
+function showSection(name,btn){
+  document.querySelectorAll('.v2-section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('page-'+name).classList.add('active');
+  var sec=document.getElementById('section-'+name);
+  if(sec) sec.classList.add('active');
   if(btn) btn.classList.add('active');
   currentPage=name;
-  renderPage(name);
-  var hideFab=(name==='historial'||name==='inventario'||name==='encargos'||name==='reportes');
+  // render relevant data
+  if(name==='inicio') renderResumen();
+  if(name==='operaciones'){ renderVentas(); renderGastos(); }
+  if(name==='inventario'){ renderInventario(); renderPedidos(); }
+  if(name==='ordenes') renderEncargos();
+  if(name==='mas') renderHistorial();
+  // FAB visibility
+  var hideFab=(name==='mas'||name==='ordenes');
   document.getElementById('fabBtn').style.display=hideFab?'none':'flex';
 }
+
+// ── OPS TABS ──
+var opsTab='ventas';
+function setOpsTab(tab){
+  opsTab=tab;
+  document.getElementById('opsTabVentas').classList.toggle('active',tab==='ventas');
+  document.getElementById('opsTabGastos').classList.toggle('active',tab==='gastos');
+  document.getElementById('opsPanelVentas').style.display=tab==='ventas'?'':'none';
+  document.getElementById('opsPanelGastos').style.display=tab==='gastos'?'':'none';
+  if(tab==='ventas') renderVentas();
+  if(tab==='gastos') renderGastos();
+}
+
+// ── INV TABS ──
+var invMainTab='stock';
+function setInvMainTab(tab){
+  invMainTab=tab;
+  document.getElementById('invMainTabStock').classList.toggle('active',tab==='stock');
+  document.getElementById('invMainTabPedidos').classList.toggle('active',tab==='pedidos');
+  document.getElementById('invPanelStock').style.display=tab==='stock'?'':'none';
+  document.getElementById('invPanelPedidos').style.display=tab==='pedidos'?'':'none';
+  if(tab==='stock') renderInventario();
+  if(tab==='pedidos') renderPedidos();
+}
+
+// ── ORDENES TABS ──
+var ordTab='todos';
+function setOrdTab(tab){
+  ordTab=tab;
+  ['ordTabTodos','ordTabPend','ordTabListo','ordTabEntr'].forEach(function(id){
+    document.getElementById(id).classList.remove('active');
+  });
+  var map={todos:'ordTabTodos',pendiente:'ordTabPend',listo:'ordTabListo',entregado:'ordTabEntr'};
+  if(map[tab]) document.getElementById(map[tab]).classList.add('active');
+  renderEncargos();
+}
+
+// ── MAS TABS ──
+var masTab='historial';
+function setMasTab(tab){
+  masTab=tab;
+  document.getElementById('masTabHistorial').classList.toggle('active',tab==='historial');
+  document.getElementById('masTabReportes').classList.toggle('active',tab==='reportes');
+  document.getElementById('masTabDatos').classList.toggle('active',tab==='datos');
+  document.getElementById('masPanelHistorial').style.display=tab==='historial'?'':'none';
+  document.getElementById('masPanelReportes').style.display=tab==='reportes'?'':'none';
+  document.getElementById('masPanelDatos').style.display=tab==='datos'?'':'none';
+  if(tab==='historial') renderHistorial();
+}
+
+
 
 // ══════════════════════════════════════════
 //  FECHA
@@ -1681,17 +1819,31 @@ function saveStockAjuste(){
 // ══════════════════════════════════════════
 //  RENDER
 // ══════════════════════════════════════════
-function renderAll(){ renderResumen(); renderPage(currentPage); }
+function renderAll(){
+  renderResumen();
+  // Update dashboard counters
+  var pedPend=pedidosGlobal.filter(function(p){return p.estado==='pendiente';}).length;
+  var encPend=encargos.filter(function(e){return e.estado==='pendiente';}).length;
+  var dashPP=document.getElementById('dashPedPend'); if(dashPP) dashPP.textContent=pedPend;
+  var dashEP=document.getElementById('dashEncPend'); if(dashEP) dashEP.textContent=encPend;
+  // Inventory dash
+  var totalInv=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
+  var invDash=document.getElementById('invTotalInvertidoDash'); if(invDash) invDash.textContent=fmt(totalInv);
+  var invCntDash=document.getElementById('invProductosCntDash'); if(invCntDash) invCntDash.textContent=productos.length+' productos';
+}
 
 function renderPage(name){
-  if(name==='resumen') renderResumen();
-  else if(name==='ventas') renderList('ventas');
-  else if(name==='gastos') renderList('gastos');
-  else if(name==='pedidos') renderPedidos();
-  else if(name==='inventario') renderInventario();
-  else if(name==='encargos') renderEncargos();
-  else if(name==='historial') renderHistorial();
+  if(name==='resumen'||name==='inicio') renderResumen();
+  else if(name==='ventas'||name==='operaciones') { renderVentas(); renderGastos(); }
+  else if(name==='gastos') renderGastos();
+  else if(name==='pedidos'||name==='inventario') { renderPedidos(); renderInventario(); }
+  else if(name==='encargos'||name==='ordenes') renderEncargos();
+  else if(name==='historial'||name==='mas') renderHistorial();
 }
+
+function renderVentas(){ renderList('ventas'); }
+function renderGastos(){ renderList('gastos'); }
+
 
 function renderResumen(){
   var day=getDayData(currentDate);
@@ -1715,9 +1867,9 @@ function renderResumen(){
   document.getElementById('balanceTag').textContent=bal>0?'Positivo':bal<0?'Negativo':'Neutro';
   document.getElementById('metaText').textContent=Math.round(pct)+'% de meta ('+fmt(META)+')';
   document.getElementById('progressFill').style.width=pct+'%';
-  document.getElementById('sumPolloRico').textContent=fmt(tpr);
-  document.getElementById('sumPolloIndio').textContent=fmt(tpi);
-  document.getElementById('sumSelloOro').textContent=fmt(tso);
+  var sumPR=document.getElementById('sumPolloRico'); if(sumPR) sumPR.textContent=fmt(tpr);
+  var sumPI=document.getElementById('sumPolloIndio'); if(sumPI) sumPI.textContent=fmt(tpi);
+  var sumSO=document.getElementById('sumSelloOro'); if(sumSO) sumSO.textContent=fmt(tso);
   var totalPedidosDia=document.getElementById('totalPedidosDia');
   if(totalPedidosDia) totalPedidosDia.textContent=fmt(tpTotalDia);
 
@@ -2285,14 +2437,22 @@ function eliminarEncargo(id){
 
 function renderEncargos(){
   var el=document.getElementById('listaEncargos');
+  if(!el) return;
   if(!encargos.length){
     el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No hay encargos registrados.<br>Toca <strong>+ Encargo</strong> para agregar.</div></div>';
     return;
   }
   // Ordenar por fecha
   var sorted=encargos.slice().sort(function(a,b){return a.fecha>b.fecha?1:-1;});
+  // Filtrar por ordTab
+  if(typeof ordTab!=='undefined' && ordTab && ordTab!=='todos'){
+    sorted=sorted.filter(function(e){return e.estado===ordTab;});
+  }
   var estadoInfo={pendiente:{label:'⏳ Pendiente',cls:'ped-status-pending'},listo:{label:'✅ Listo',cls:'ped-status-done'},entregado:{label:'📦 Entregado',cls:'ped-status-done'},cancelado:{label:'❌ Cancelado',cls:'ped-status-cancelled'}};
   var html='';
+  if(!sorted.length){
+    html='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No hay encargos con este estado.</div></div>';
+  }
   sorted.forEach(function(e){
     var ei=estadoInfo[e.estado]||{label:e.estado,cls:'ped-status-pending'};
     var saldo=e.costo-(e.anticipo||0);
@@ -2314,6 +2474,7 @@ function renderEncargos(){
   });
   el.innerHTML=html;
 }
+
 
 // ── MIGRACIÓN DE DATOS ──
 function migrarDatos(silencioso){
