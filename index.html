@@ -521,95 +521,101 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 
     <!-- ══ REPORTES ══ -->
     <div class="page" id="page-reportes">
-      <div class="section-title">Reportes PDF</div>
 
       <!-- VENTAS -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--green);margin:4px 0 6px;padding-left:2px">💰 Reportes de Ventas</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📅</div>
-          <div><div style="font-size:13px;font-weight:600">Ventas del Día</div><div style="font-size:11px;color:var(--text3)">Ventas del día seleccionado</div></div>
-          <button onclick="generarReporte('ventasDiario')" style="margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
-          <div><div style="font-size:13px;font-weight:600">Ventas de la Semana</div><div style="font-size:11px;color:var(--text3)">Ventas de la semana actual</div></div>
-          <button onclick="generarReporte('ventasSemanal')" style="margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-          <div><div style="font-size:13px;font-weight:600">Ventas del Mes</div><div style="font-size:11px;color:var(--text3)">Ventas del mes en curso</div></div>
-          <button onclick="generarReporte('ventasMensual')" style="margin-left:auto;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
+      <div class="rpt-section-header" style="--c:#1d9e75">
+        <span class="rpt-section-icon">💰</span>
+        <span>Ventas</span>
+      </div>
+      <div class="rpt-grid">
+        <button class="rpt-btn" onclick="generarReporte('ventasDiario')" style="--c:#1d9e75">
+          <span class="rpt-btn-period">Día</span>
+          <span class="rpt-btn-label">Ventas</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('ventasSemanal')" style="--c:#1d9e75">
+          <span class="rpt-btn-period">Semana</span>
+          <span class="rpt-btn-label">Ventas</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('ventasMensual')" style="--c:#1d9e75">
+          <span class="rpt-btn-period">Mes</span>
+          <span class="rpt-btn-label">Ventas</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
       </div>
 
       <!-- PEDIDOS -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--orange);margin:4px 0 6px;padding-left:2px">📦 Reportes de Pedidos</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📅</div>
-          <div><div style="font-size:13px;font-weight:600">Pedidos del Día</div><div style="font-size:11px;color:var(--text3)">Pedidos del día seleccionado</div></div>
-          <button onclick="generarReporte('pedidosDiario')" style="margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
-          <div><div style="font-size:13px;font-weight:600">Pedidos de la Semana</div><div style="font-size:11px;color:var(--text3)">Pedidos de la semana actual</div></div>
-          <button onclick="generarReporte('pedidosSemanal')" style="margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#fef0d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-          <div><div style="font-size:13px;font-weight:600">Pedidos del Mes</div><div style="font-size:11px;color:var(--text3)">Pedidos del mes en curso</div></div>
-          <button onclick="generarReporte('pedidosMensual')" style="margin-left:auto;background:var(--orange);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
+      <div class="rpt-section-header" style="--c:#e8a020">
+        <span class="rpt-section-icon">📦</span>
+        <span>Pedidos</span>
+      </div>
+      <div class="rpt-grid">
+        <button class="rpt-btn" onclick="generarReporte('pedidosDiario')" style="--c:#e8a020">
+          <span class="rpt-btn-period">Día</span>
+          <span class="rpt-btn-label">Pedidos</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('pedidosSemanal')" style="--c:#e8a020">
+          <span class="rpt-btn-period">Semana</span>
+          <span class="rpt-btn-label">Pedidos</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('pedidosMensual')" style="--c:#e8a020">
+          <span class="rpt-btn-period">Mes</span>
+          <span class="rpt-btn-label">Pedidos</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
       </div>
 
       <!-- INVENTARIO -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue);margin:4px 0 6px;padding-left:2px">📦 Reportes de Inventario</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📅</div>
-          <div><div style="font-size:13px;font-weight:600">Inventario Diario</div><div style="font-size:11px;color:var(--text3)">Estado actual del inventario</div></div>
-          <button onclick="generarReporte('inventario')" style="margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
-          <div><div style="font-size:13px;font-weight:600">Inventario Semanal</div><div style="font-size:11px;color:var(--text3)">Movimientos de inventario esta semana</div></div>
-          <button onclick="generarReporte('inventarioSemanal')" style="margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-          <div><div style="font-size:13px;font-weight:600">Inventario Mensual</div><div style="font-size:11px;color:var(--text3)">Resumen de inventario del mes</div></div>
-          <button onclick="generarReporte('inventarioMensual')" style="margin-left:auto;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
+      <div class="rpt-section-header" style="--c:#2563eb">
+        <span class="rpt-section-icon">🗄</span>
+        <span>Inventario</span>
+      </div>
+      <div class="rpt-grid">
+        <button class="rpt-btn" onclick="generarReporte('inventario')" style="--c:#2563eb">
+          <span class="rpt-btn-period">Hoy</span>
+          <span class="rpt-btn-label">Stock</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('inventarioSemanal')" style="--c:#2563eb">
+          <span class="rpt-btn-period">Semana</span>
+          <span class="rpt-btn-label">Inventario</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn" onclick="generarReporte('inventarioMensual')" style="--c:#2563eb">
+          <span class="rpt-btn-period">Mes</span>
+          <span class="rpt-btn-label">Inventario</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
       </div>
 
       <!-- GENERAL -->
-      <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);margin:4px 0 6px;padding-left:2px">📋 Reporte General</div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📅</div>
-          <div><div style="font-size:13px;font-weight:600">Reporte General Diario</div><div style="font-size:11px;color:var(--text3)">Ventas, gastos y pedidos del día</div></div>
-          <button onclick="generarReporte('diario')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
-          <div><div style="font-size:13px;font-weight:600">Reporte General Semanal</div><div style="font-size:11px;color:var(--text3)">Todas las áreas de la semana</div></div>
-          <button onclick="generarReporte('semanal')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
-        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;border-radius:8px;background:#e8f7f1;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-          <div><div style="font-size:13px;font-weight:600">Reporte General Mensual</div><div style="font-size:11px;color:var(--text3)">Todas las áreas del mes</div></div>
-          <button onclick="generarReporte('mensual')" style="margin-left:auto;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">Ver</button>
-        </div>
+      <div class="rpt-section-header" style="--c:#0a3d2e">
+        <span class="rpt-section-icon">📋</span>
+        <span>General</span>
+      </div>
+      <div class="rpt-grid">
+        <button class="rpt-btn rpt-btn-dark" onclick="generarReporte('diario')" style="--c:#0a3d2e">
+          <span class="rpt-btn-period">Día</span>
+          <span class="rpt-btn-label">General</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn rpt-btn-dark" onclick="generarReporte('semanal')" style="--c:#0a3d2e">
+          <span class="rpt-btn-period">Semana</span>
+          <span class="rpt-btn-label">General</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
+        <button class="rpt-btn rpt-btn-dark" onclick="generarReporte('mensual')" style="--c:#0a3d2e">
+          <span class="rpt-btn-period">Mes</span>
+          <span class="rpt-btn-label">General</span>
+          <span class="rpt-btn-arrow">→</span>
+        </button>
       </div>
 
-      <div class="card" style="background:var(--surface2);border-style:dashed">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <span style="font-size:18px">💡</span>
-          <div style="font-size:12px;color:var(--text2);line-height:1.6">
-            Al generar un reporte se abre una vista de impresión. Toca <strong>Guardar como PDF</strong> para descargarlo. Funciona en Chrome, Safari y cualquier navegador moderno.
-          </div>
-        </div>
+      <div style="font-size:11px;color:var(--text3);text-align:center;padding:4px 0 8px;line-height:1.6">
+        💡 Al abrir el reporte toca <strong style="color:var(--text2)">Guardar como PDF</strong> en la vista de impresión.
       </div>
 
       <!-- RESPALDO -->
@@ -2156,18 +2162,42 @@ function saveEncargo(){
   if(!cliente){toast('⚠ Ingresa el nombre del cliente');return;}
   if(!fecha){toast('⚠ Selecciona la fecha de entrega');return;}
   if(!productos2){toast('⚠ Ingresa el tipo de productos');return;}
+
+  var estadoAnterior=null;
+
   if(idExist){
     var idx=encargos.findIndex(function(x){return x.id===parseInt(idExist);});
     if(idx!==-1){
+      estadoAnterior=encargos[idx].estado;
       encargos[idx]={id:encargos[idx].id,cliente:cliente,productos:productos2,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas};
     }
   } else {
     encargos.push({id:Date.now(),cliente:cliente,productos:productos2,fecha:fecha,costo:costo,anticipo:anticipo,estado:estado,notas:notas});
   }
+
+  // Si cambió a "entregado" → registrar automáticamente como venta del día
+  if(estado==='entregado' && estadoAnterior && estadoAnterior!=='entregado'){
+    var hoy=new Date();
+    var hora=hoy.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+    var day=getDayData(hoy);
+    day.ventas.push({
+      id:Date.now(),
+      monto:costo,
+      desc:'Encargo: '+productos2+' — '+cliente,
+      cant:1,
+      hora:hora,
+      encargoId:parseInt(idExist),
+      notas:notas
+    });
+    saveData();
+    toast('✓ Encargo entregado — venta de '+fmt(costo)+' registrada automáticamente');
+  } else {
+    toast('✓ Encargo guardado');
+  }
+
   saveEncargos();
   closeModal('encargoModal');
-  renderEncargos();
-  toast('✓ Encargo guardado');
+  renderAll();
 }
 
 function eliminarEncargo(id){
