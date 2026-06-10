@@ -238,6 +238,24 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-prov-block { background:#f8f7f3; border-radius:8px; padding:14px; margin-bottom:10px; border-left:3px solid #e8a020; }
 .rpt-prov-name { font-size:13px; font-weight:700; margin-bottom:8px; color:#0a3d2e; }
 .no-break { page-break-inside:avoid; }
+  .rpt-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.rpt-btn{
+    border:none;
+    border-radius:16px;
+    padding:16px;
+    background:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    cursor:pointer;
+}
 </style>
 
 <style id="modern-ui-upgrade">
