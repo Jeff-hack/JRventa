@@ -239,6 +239,63 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .rpt-prov-name { font-size:13px; font-weight:700; margin-bottom:8px; color:#0a3d2e; }
 .no-break { page-break-inside:avoid; }
 </style>
+
+<style id="modern-ui-upgrade">
+:root{
+ --bg:#f8fafc!important;
+ --surface:#ffffff!important;
+ --surface2:#f8fafc!important;
+ --primary:#0f172a!important;
+ --border:#e2e8f0!important;
+ --text:#0f172a!important;
+ --text2:#475569!important;
+ --text3:#94a3b8!important;
+ --radius:20px!important;
+ --radius-sm:14px!important;
+}
+body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
+.header{
+ background:rgba(15,23,42,.92)!important;
+ backdrop-filter:blur(14px)!important;
+ position:sticky!important;
+ top:0!important;
+ z-index:50!important;
+}
+.logo{
+ background:linear-gradient(135deg,#2563eb,#0f172a)!important;
+ color:#fff!important;
+}
+.card,.stat-card,.semana-card,.inv-card,.ped-card{
+ border:none!important;
+ box-shadow:0 8px 24px rgba(15,23,42,.08)!important;
+}
+.balance-card{
+ background:linear-gradient(135deg,#0f172a,#1e293b)!important;
+ box-shadow:0 12px 32px rgba(15,23,42,.25)!important;
+}
+.bottom-nav{
+ border-top:none!important;
+ box-shadow:0 -8px 24px rgba(15,23,42,.08)!important;
+}
+.nav-btn.active{
+ color:#2563eb!important;
+}
+.fab{
+ background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;
+ box-shadow:0 12px 30px rgba(37,99,235,.35)!important;
+}
+.form-input{
+ border:1px solid #dbe4ee!important;
+}
+.section-title{
+ font-size:13px!important;
+}
+.tx-item:hover,.inv-card:hover,.ped-card:hover{
+ transform:translateY(-1px);
+ transition:.2s;
+}
+</style>
+
 </head>
 <body>
 <div id="app">
