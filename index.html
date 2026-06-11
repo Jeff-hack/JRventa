@@ -893,7 +893,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="detalleVentaModal" onclick="overlayClose(event,'detalleVentaModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Detalle de venta</div>
+    <div class="modal-title" id="detalleVentaTitle">Detalle</div>
     <div class="form-section" id="detalleVentaBody"></div>
   </div>
 </div>
@@ -1137,6 +1137,7 @@ var currentDate = new Date();
 var currentPage = 'resumen';
 var data = {};      // data[YYYY-MM-DD] = {ventas,gastos,pedidos}
 var productos = []; // inventario global
+var invFiltroActual = 'todos'; // declared globally so setInvMainTab works on first call
 // pedidos especiales globales (multi-día)
 var pedidosGlobal = [];
 // encargos
@@ -1339,7 +1340,7 @@ function showSection(name,btn){
   // render relevant data
   if(name==='inicio') renderResumen();
   if(name==='operaciones'){ renderVentas(); renderGastos(); }
-  if(name==='inventario'){ renderInventario(); renderPedidos(); }
+  if(name==='inventario'){ setInvMainTab(invMainTab||'stock'); renderPedidos(); }
   if(name==='ordenes') renderEncargos();
   if(name==='mas') renderHistorial();
   // FAB visibility
@@ -1585,9 +1586,10 @@ function saveRecord(){
     var tipo=document.getElementById('pedidoTipo').value;
 
     if(pedidoItems.length>0){
-      // Multi-producto: un solo pedido global con array de items
+      // Multi-producto: descripción representativa
+      var firstPed=pedidoItems[0].desc||pedidoItems[0].productoNombre||'Producto';
+      var descPed=pedidoItems.length===1?firstPed:firstPed+' + '+(pedidoItems.length-1)+' más';
       var totalMontoPed=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
-      var descPed='Pedido múltiple ('+pedidoItems.length+' productos)';
       var pedRec={
         id:Date.now(),
         tipo:tipo,
@@ -2111,8 +2113,24 @@ function renderList(tipo){
     var isV=tipo==='ventas';
     var bg=isV?'#e8f7f1':'#fdeee9';
     var color=isV?'var(--green)':'var(--red)';
-    var meta='Cant: '+it.cant+' &middot; '+esc(it.hora);
-    if(isV&&it.productoNombre) meta+=' &middot; 📦 '+esc(it.productoNombre);
+
+    // Smart description: derive from items[] if stored desc is legacy placeholder
+    var displayDesc=it.desc||'';
+    if(it.items&&it.items.length){
+      var first=it.items[0].productoNombre||it.items[0].desc||'Producto';
+      displayDesc=it.items.length===1?first:first+' + '+(it.items.length-1)+' más';
+    } else if(!isV&&it.pedidoId){
+      // Gasto por pedido completado: mostrar proveedor desde pedidosGlobal
+      var pedOrig=getPedido(it.pedidoId);
+      if(pedOrig){
+        var firstProd=pedOrig.items&&pedOrig.items.length?(pedOrig.items[0].desc||pedOrig.items[0].productoNombre):pedOrig.desc;
+        displayDesc=pedOrig.tipo+(firstProd?' · '+firstProd:'');
+      }
+    }
+
+    var meta=esc(it.hora);
+    if(isV&&it.productoNombre) meta+=' · 📦 '+esc(it.productoNombre);
+    if(isV&&it.items&&it.items.length) meta+=it.items.length+' producto'+(it.items.length>1?'s':'');
     // Category badge for gastos
     var catBadge='';
     if(!isV){
@@ -2123,7 +2141,7 @@ function renderList(tipo){
     var verBtn='<button onclick="verDetalle(\''+tipo+'\','+it.id+')" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:\'DM Sans\',sans-serif;cursor:pointer;color:var(--text2);margin-right:4px;flex-shrink:0">Ver</button>';
     html+='<div class="tx-item">'+
       '<div class="tx-icon" style="background:'+bg+'">'+(isV?'💰':(it.pedidoId?'📦':'📋'))+'</div>'+
-      '<div class="tx-info"><div class="tx-name">'+esc(it.desc)+catBadge+'</div><div class="tx-meta">'+meta+'</div></div>'+
+      '<div class="tx-info"><div class="tx-name">'+esc(displayDesc)+catBadge+'</div><div class="tx-meta">'+meta+'</div></div>'+
       '<div style="display:flex;align-items:center">'+verBtn+
       '<div class="tx-amount" style="color:'+color+'">'+(isV?'+':'-')+fmt(it.monto)+'</div>'+
       '</div>'+
@@ -2139,27 +2157,75 @@ function verDetalle(tipo, id){
   var it=day[tipo].find(function(x){return x.id===id;});
   if(!it) return;
   var isV=tipo==='ventas';
-  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',otro:'📋 Gasto operativo',pedido:'📦 Pedido completado'};
+  var CATS2={pasaje:'🚌 Pasajes/Transporte',alimentacion:'🍽 Alimentación',alcaldia:'🏛 Impuesto Alcaldía',electricidad:'⚡ Energía Eléctrica',otro:'📋 Gasto operativo',pedido:'📦 Pedido de proveedor'};
+
+  // Dynamic modal title
+  var titleEl=document.getElementById('detalleVentaTitle');
+  if(titleEl){
+    if(isV) titleEl.textContent='Detalle de venta';
+    else if(it.pedidoId) titleEl.textContent='Detalle de pedido';
+    else titleEl.textContent='Detalle de gasto';
+  }
+
   var html='<div style="padding:4px 0">';
-  if(!isV&&(it.categoria||it.pedidoId)){
-    var cat=it.pedidoId?'pedido':(it.categoria||'otro');
-    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Categoría</span><strong>'+(CATS2[cat]||cat)+'</strong></div>';
-  }
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
-  html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+it.cant+'</strong></div>';
-  if(isV&&it.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(it.productoNombre)+'</strong></div>';
-  if(it.pedidoId) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Origen</span><strong>📦 Pedido completado</strong></div>';
-  if(it.items&&it.items.length){
-    html+='<div style="border-top:1px solid var(--border);margin:10px 0 8px;padding-top:8px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Productos incluidos</div>';
-    it.items.forEach(function(x){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'+
-        '<div><div style="font-size:13px;font-weight:500">'+esc(x.desc)+'</div>'+
-        '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · '+esc(x.productoNombre):'')+'</div></div>'+
-        '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:'+(isV?'var(--green)':'var(--red)')+'">'+fmt(x.monto)+'</div>'+
+
+  // ── GASTOS por pedido completado ──
+  if(!isV&&it.pedidoId){
+    var pedOrig=getPedido(it.pedidoId);
+    var provColor={'Pollo Rico':'#e8a020','Pollo Indio':'#d44f2e','Sello de Oro':'#c4860a'};
+    if(pedOrig){
+      var pcolor=provColor[pedOrig.tipo]||'var(--orange)';
+      html+='<div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:12px;border-left:3px solid '+pcolor+'">'+
+        '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Proveedor</div>'+
+        '<div style="font-size:15px;font-weight:700;color:'+pcolor+'">'+esc(pedOrig.tipo)+'</div>'+
       '</div>';
-    });
+      if(pedOrig.items&&pedOrig.items.length){
+        html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Productos del pedido</div>';
+        pedOrig.items.forEach(function(pr){
+          html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
+            '<div><div style="font-size:13px;font-weight:500">'+esc(pr.desc)+'</div>'+
+            '<div style="font-size:11px;color:var(--text3)">Cant: '+pr.cant+(pr.productoNombre?' · 📦 '+esc(pr.productoNombre):'')+'</div></div>'+
+            '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:'+pcolor+'">'+fmt(pr.monto)+'</div>'+
+          '</div>';
+        });
+      } else {
+        html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(pedOrig.desc)+'</strong></div>';
+      }
+    } else {
+      html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Categoría</span><strong>📦 Pedido de proveedor</strong></div>';
+      html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
+    }
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px;margin-top:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
+
+  // ── GASTOS normales ──
+  } else if(!isV){
+    var cat=it.categoria||'otro';
+    var ci=CATS2[cat]||'📋 Gasto';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Categoría</span><strong>'+ci+'</strong></div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+it.cant+'</strong></div>';
+
+  // ── VENTAS ──
+  } else {
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Hora</span><strong>'+esc(it.hora)+'</strong></div>';
+    if(it.productoNombre) html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Producto</span><strong>'+esc(it.productoNombre)+'</strong></div>';
+    if(!it.items||!it.items.length){
+      html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Descripción</span><strong style="text-align:right;max-width:65%">'+esc(it.desc)+'</strong></div>';
+      html+='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">Cantidad</span><strong>'+it.cant+'</strong></div>';
+    }
+    if(it.items&&it.items.length){
+      html+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin:8px 0">Productos vendidos</div>';
+      it.items.forEach(function(x){
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">'+
+          '<div><div style="font-size:13px;font-weight:500">'+esc(x.desc)+'</div>'+
+          '<div style="font-size:11px;color:var(--text3)">Cant: '+x.cant+(x.productoNombre?' · 📦 '+esc(x.productoNombre):'')+'</div></div>'+
+          '<div style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600;color:var(--green)">'+fmt(x.monto)+'</div>'+
+        '</div>';
+      });
+    }
   }
+
   var color=isV?'var(--green)':'var(--red)';
   html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid var(--border)">'+
     '<strong>Total</strong><span style="font-family:\'DM Mono\',monospace;font-size:18px;font-weight:700;color:'+color+'">'+fmt(it.monto)+'</span></div>';
