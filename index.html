@@ -210,63 +210,60 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 }
 #rpt-frame { display:none; }
 
-/* Reporte interno */
-.rpt-wrap { font-family:Arial,Helvetica,sans-serif; color:#1a1a1a; background:#fff; max-width:800px; margin:0 auto; padding:32px 28px; }
-.rpt-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #0a3d2e; }
-.rpt-logo-area { display:flex; align-items:center; gap:12px; }
-.rpt-logo-box { width:44px; height:44px; background:#0a3d2e; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:16px; }
-.rpt-biz-name { font-size:18px; font-weight:700; color:#0a3d2e; }
-.rpt-biz-sub { font-size:11px; color:#666; margin-top:2px; }
-.rpt-meta { text-align:right; font-size:11px; color:#666; line-height:1.8; }
-.rpt-title { font-size:22px; font-weight:700; color:#0a3d2e; margin:0 0 4px; }
-.rpt-subtitle { font-size:13px; color:#666; margin:0 0 24px; }
-.rpt-section { margin-bottom:22px; }
-.rpt-section-title { font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#0a3d2e; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e0ddd8; display:flex; align-items:center; gap:6px; }
-.rpt-kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:8px; }
-.rpt-kpi-row-4 { grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); }
-.rpt-kpi { background:#f8f7f3; border-radius:8px; padding:12px; border-left:3px solid #0a3d2e; }
-.rpt-kpi-label { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#888; margin-bottom:5px; }
-.rpt-kpi-value { font-size:18px; font-weight:700; font-family:'Courier New',monospace; }
-.rpt-kpi-sub { font-size:10px; color:#888; margin-top:3px; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:4px; }
-.rpt-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-.rpt-table th { background:#0a3d2e; color:#fff; padding:7px 10px; text-align:left; font-size:10px; letter-spacing:0.5px; text-transform:uppercase; font-weight:600; }
-.rpt-table td { padding:7px 10px; border-bottom:1px solid #eee; vertical-align:top; }
-.rpt-table tr:nth-child(even) td { background:#fafaf8; }
-.rpt-table tr:last-child td { border-bottom:none; }
-.rpt-table .num { text-align:right; font-family:'Courier New',monospace; font-weight:600; }
-.rpt-table .center { text-align:center; }
-.rpt-tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+/* ══ REPORT CSS — Compact Ledger Layout ══ */
+@media print {
+  body { background:#fff !important; overflow:auto !important; font-family:'Helvetica Neue',Arial,sans-serif !important; }
+  #app, .fab, .bottom-nav, .modal-overlay, .notif { display:none !important; }
+  #rpt-frame { display:block !important; }
+  .no-print { display:none !important; }
+  @page { margin:14mm 11mm; }
+}
+
+.rpt-wrap { font-family:'Helvetica Neue',Arial,Helvetica,sans-serif; color:#1a1a1a; background:#fff; max-width:780px; margin:0 auto; padding:24px 20px 16px; font-size:12px; line-height:1.4; }
+.rpt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:2.5px solid #0a3d2e; }
+.rpt-logo-area { display:flex; align-items:center; gap:10px; }
+.rpt-logo-box { width:38px; height:38px; background:#0a3d2e; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; letter-spacing:-0.5px; flex-shrink:0; }
+.rpt-biz-name { font-size:16px; font-weight:700; color:#0a3d2e; line-height:1.1; }
+.rpt-meta { text-align:right; font-size:10px; color:#888; line-height:1.7; }
+.rpt-titleblock { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; padding-bottom:5px; border-bottom:1px solid #e0ddd8; }
+.rpt-title { font-size:18px; font-weight:700; color:#0a3d2e; }
+.rpt-subtitle { font-size:10px; color:#777; text-align:right; }
+/* Summary strip — replaces KPI cards */
+.rpt-strip { display:flex; border:1px solid #d0cfc9; border-radius:5px; overflow:hidden; margin-bottom:14px; }
+.rpt-strip-cell { flex:1; padding:8px 10px; border-right:1px solid #d0cfc9; }
+.rpt-strip-cell:last-child { border-right:none; }
+.rpt-strip-label { font-size:8px; letter-spacing:1px; text-transform:uppercase; color:#999; margin-bottom:2px; font-weight:700; }
+.rpt-strip-value { font-size:15px; font-weight:700; font-family:'Courier New',Courier,monospace; line-height:1; }
+.rpt-strip-sub { font-size:9px; color:#aaa; margin-top:1px; }
+/* Section */
+.rpt-section { margin-bottom:14px; }
+.rpt-sh { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#fff; background:#0a3d2e; padding:4px 9px; border-radius:3px 3px 0 0; display:flex; justify-content:space-between; align-items:center; }
+/* Tables */
+.rpt-table-wrap { overflow-x:auto; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:11px; }
+.rpt-table th { background:#f0ede7; color:#4a4a4a; padding:4px 7px; text-align:left; font-size:9px; letter-spacing:0.3px; text-transform:uppercase; font-weight:700; border-bottom:1.5px solid #ccc; }
+.rpt-table th.r { text-align:right; }
+.rpt-table th.c { text-align:center; }
+.rpt-table td { padding:4px 7px; border-bottom:1px solid #ede9e3; vertical-align:top; }
+.rpt-table tr:nth-child(even) td { background:#faf9f6; }
+.rpt-table .num { text-align:right; font-family:'Courier New',Courier,monospace; font-weight:600; white-space:nowrap; }
+.rpt-table .cen { text-align:center; }
+.rpt-table .tot td { background:#e8f0ea !important; font-weight:700; border-top:1.5px solid #b8d4bc; border-bottom:none; }
+.rpt-table .empty-row td { color:#bbb; font-style:italic; text-align:center; padding:8px; }
+/* Day divider */
+.rpt-day-head { font-size:10px; font-weight:700; color:#0a3d2e; padding:4px 7px; background:#f0ede7; border-radius:3px; margin:8px 0 3px; display:flex; justify-content:space-between; }
+/* Tags */
+.rpt-tag { display:inline-block; padding:1px 5px; border-radius:8px; font-size:9px; font-weight:700; }
 .rpt-tag-green { background:#e8f7f1; color:#0f6e56; }
 .rpt-tag-red { background:#fdeee9; color:#993c1d; }
 .rpt-tag-yellow { background:#fef9e7; color:#b7791f; }
 .rpt-tag-grey { background:#f0f0f0; color:#666; }
-.rpt-footer { margin-top:28px; padding-top:12px; border-top:1px solid #e0ddd8; display:flex; justify-content:space-between; font-size:10px; color:#aaa; }
-.rpt-day-row { display:grid; grid-template-columns:80px 1fr 1fr 1fr 1fr; gap:0; font-size:12px; border-bottom:1px solid #eee; padding:6px 10px; align-items:center; }
-.rpt-day-row.header { background:#f0ede7; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#555; }
-.rpt-inv-row { display:grid; grid-template-columns:2fr 0.8fr 0.8fr 0.9fr 0.9fr 0.8fr 0.8fr; gap:0; font-size:11px; border-bottom:1px solid #eee; padding:6px 10px; align-items:center; }
-.rpt-inv-row.header { background:#f0ede7; font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#555; }
-.rpt-prov-block { background:#f8f7f3; border-radius:8px; padding:14px; margin-bottom:10px; border-left:3px solid #e8a020; }
-.rpt-prov-name { font-size:13px; font-weight:700; margin-bottom:8px; color:#0a3d2e; }
+/* Footer */
+.rpt-footer { display:flex; justify-content:space-between; margin-top:16px; padding-top:7px; border-top:1px solid #e0ddd8; font-size:9px; color:#bbb; }
 .no-break { page-break-inside:avoid; }
-  .rpt-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    margin-bottom:20px;
-}
-
-.rpt-btn{
-    border:none;
-    border-radius:16px;
-    padding:16px;
-    background:#fff;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    cursor:pointer;
-}
+/* App report buttons */
+.rpt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.rpt-btn { border:none; border-radius:16px; padding:16px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:8px; cursor:pointer; }
 </style>
 
 <style id="modern-ui-upgrade">
@@ -1340,12 +1337,12 @@ function showSection(name,btn){
   // render relevant data
   if(name==='inicio') renderResumen();
   if(name==='operaciones'){ renderVentas(); renderGastos(); }
-  if(name==='inventario'){ setInvMainTab(invMainTab||'stock'); renderPedidos(); }
+  if(name==='inventario'){ setInvMainTab('stock'); }  // setInvMainTab calls renderInventario internally
   if(name==='ordenes') renderEncargos();
   if(name==='mas') renderHistorial();
-  // FAB visibility
-  var hideFab=(name==='mas'||name==='ordenes');
-  document.getElementById('fabBtn').style.display=hideFab?'none':'flex';
+  // FAB: hide only on Más
+  var fabEl=document.getElementById('fabBtn');
+  if(fabEl) fabEl.style.display=(name==='mas')?'none':'flex';
 }
 
 // ── OPS TABS ──
@@ -1420,14 +1417,17 @@ function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal
 function openAddModal(){
   ventaItems=[];
   pedidoItems=[];
-  setTipo('venta');
+  // Decide default type based on current section
+  var defaultTipo='venta';
+  if(currentPage==='operaciones'&&opsTab==='gastos') defaultTipo='gasto';
+  if(currentPage==='inventario'&&invMainTab==='pedidos') defaultTipo='pedido';
+  setTipo(defaultTipo);
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
   poblarSelectProductos('ventaProductoSel');
-  poblarSelectProductos('pedidoProductoSel');
   renderVentaItems();
   renderPedidoItems();
   document.getElementById('addModal').classList.add('open');
@@ -1435,6 +1435,7 @@ function openAddModal(){
 
 function poblarSelectProductos(selId){
   var sel=document.getElementById(selId);
+  if(!sel) return;
   sel.innerHTML='<option value="">— Seleccionar producto —</option>';
   productos.forEach(function(p){
     var opt=document.createElement('option');
@@ -1471,14 +1472,8 @@ function onProductoSelChange(){
 
 function onCantChange(){
   var cant=parseFloat(document.getElementById('fCant').value)||1;
-  // Venta: usa precioVenta
   var pidV=parseInt(document.getElementById('ventaProductoSel').value);
-  if(pidV){ var pV=getProducto(pidV); if(pV) document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); return; }
-  // Pedido: usa precioCosto
-  if(selectedTipo==='pedido'){
-    var pidP=parseInt(document.getElementById('pedidoProductoSel').value);
-    if(pidP){ var pP=getProducto(pidP); if(pP&&pP.precioCosto>0) document.getElementById('fMonto').value=(pP.precioCosto*cant).toFixed(2); }
-  }
+  if(pidV){ var pV=getProducto(pidV); if(pV) document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); }
 }
 
 // Multi-producto: agregar item a la lista de venta
@@ -1614,7 +1609,7 @@ function saveRecord(){
         desc:desc, cant:cant, monto:monto, hora:hora,
         fecha:dateKey(currentDate),
         estado:'pendiente',
-        productoId:parseInt(document.getElementById('pedidoProductoSel').value)||null
+        productoId:null
       };
       day.pedidos.push({id:pedRec.id,tipo:tipo,desc:desc,cant:cant,monto:monto,hora:hora});
       pedidosGlobal.push(pedRec);
@@ -2670,37 +2665,23 @@ function importarDatos(event){
 
 // ── PEDIDO MULTI-PRODUCTO ──
 function onPedidoProductoChange(){
-  var pid=parseInt(document.getElementById('pedidoProductoSel').value);
-  var info=document.getElementById('pedidoStockInfo');
-  if(!pid){info.style.display='none';return;}
-  var p=getProducto(pid);
-  if(!p){info.style.display='none';return;}
-  info.style.display='block';
-  info.innerHTML='Costo: <strong>'+fmt(p.precioCosto)+'</strong> &nbsp;|&nbsp; Stock actual: <strong>'+p.cantidad+' '+p.unidad+'</strong>';
-  // Pre-rellenar descripción y monto con precio de costo
-  document.getElementById('fDesc').value=p.nombre;
-  document.getElementById('fMonto').value=p.precioCosto>0?p.precioCosto:'';
-  onCantChange();
+  // pedidoProductoSel was removed; no-op
 }
 
 function agregarItemPedido(){
-  var pid=parseInt(document.getElementById('pedidoProductoSel').value);
   var cant=parseFloat(document.getElementById('fCant').value)||1;
   var monto=parseFloat(document.getElementById('fMonto').value)||0;
   var desc=document.getElementById('fDesc').value.trim();
   if(cant<=0){toast('⚠ Ingresa una cantidad válida');return;}
   if(monto<=0){toast('⚠ Ingresa un monto válido');return;}
-  if(!desc) desc='Producto';
-  var prod=pid?getProducto(pid):null;
+  if(!desc){toast('⚠ Ingresa una descripción');return;}
   pedidoItems.push({
-    productoId:prod?prod.id:null,
-    productoNombre:prod?prod.nombre:null,
+    productoId:null,
+    productoNombre:null,
     desc:desc, cant:cant, monto:monto,
-    unidad:prod?prod.unidad:'unidad'
+    unidad:'unidad'
   });
   // reset campos
-  document.getElementById('pedidoProductoSel').value='';
-  document.getElementById('pedidoStockInfo').style.display='none';
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
@@ -2756,125 +2737,204 @@ function rptHeader(titulo, subtitulo){
     '<div class="rpt-header">'+
       '<div class="rpt-logo-area">'+
         '<div class="rpt-logo-box">JR</div>'+
-        '<div><div class="rpt-biz-name">Control de Negocio</div><div class="rpt-biz-sub">Ventas Diarias</div></div>'+
+        '<div class="rpt-biz-name">Control de Negocio</div>'+
       '</div>'+
-      '<div class="rpt-meta">Generado: '+fmtDateObj(now)+'<br>'+now.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})+'</div>'+
+      '<div class="rpt-meta">Generado: '+fmtDateObj(now)+' · '+now.toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'})+'</div>'+
     '</div>'+
-    '<div class="rpt-title">'+titulo+'</div>'+
-    '<div class="rpt-subtitle">'+subtitulo+'</div>';
+    '<div class="rpt-titleblock">'+
+      '<div class="rpt-title">'+titulo+'</div>'+
+      '<div class="rpt-subtitle">'+subtitulo+'</div>'+
+    '</div>';
 }
 
 function rptFooter(){
-  return '<div class="rpt-footer"><span>Control de Ventas — Reporte generado automáticamente</span><span>Datos almacenados localmente en este dispositivo</span></div></div>';
+  return '<div class="rpt-footer"><span>JR Control de Negocio</span><span>Datos almacenados localmente</span></div></div>';
 }
 
-function rptKPI(label, value, sub, color){
-  return '<div class="rpt-kpi"><div class="rpt-kpi-label">'+label+'</div><div class="rpt-kpi-value" style="color:'+(color||'#0a3d2e')+'">'+value+'</div>'+(sub?'<div class="rpt-kpi-sub">'+sub+'</div>':'')+'</div>';
+/* Strip: array of {label, value, sub, color} */
+function rptStrip(cells){
+  var h='<div class="rpt-strip">';
+  cells.forEach(function(c){
+    h+='<div class="rpt-strip-cell">'+
+      '<div class="rpt-strip-label">'+c.label+'</div>'+
+      '<div class="rpt-strip-value" style="color:'+(c.color||'#0a3d2e')+'">'+c.value+'</div>'+
+      (c.sub?'<div class="rpt-strip-sub">'+c.sub+'</div>':'')+
+    '</div>';
+  });
+  return h+'</div>';
 }
+
+/* rptKPI — compatibility shim: collects calls until rptKPIFlush() renders them as a strip */
+var _kpiQueue=[];
+function rptKPI(label,value,sub,color){
+  html+=rptKPIFlush();
+  _kpiQueue.push({label:label,value:value,sub:sub,color:color});
+  return '';  // accumulate, flush later
+}
+function rptKPIFlush(){
+  if(!_kpiQueue.length) return '';
+  var r=rptStrip(_kpiQueue);
+  _kpiQueue=[];
+  return r;
+}
+
+/* Section header */
+function rptSH(label, right){
+  return '<div class="rpt-sh">'+label+(right?'<span>'+right+'</span>':'')+'</div>';
+}
+
+/* Table builder: cols=[{h,key,cls,fn}], rows=[], totals={} */
+function rptTable(cols, rows, totRow){
+  var h='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr>';
+  cols.forEach(function(c){ h+='<th'+(c.cls?' class="'+c.cls+'"':'')+(c.style?' style="'+c.style+'"':'')+'>'+c.h+'</th>'; });
+  h+='</tr></thead><tbody>';
+  if(!rows.length){ h+='<tr class="empty-row"><td colspan="'+cols.length+'">Sin registros.</td></tr>'; }
+  rows.forEach(function(r){
+    h+='<tr>';
+    cols.forEach(function(c){
+      var val=c.fn?c.fn(r):(r[c.key]!==undefined?r[c.key]:'');
+      h+='<td'+(c.cls?' class="'+c.cls+'"':'')+(c.tdStyle?' style="'+c.tdStyle+'"':'')+'>'+val+'</td>';
+    });
+    h+='</tr>';
+  });
+  if(totRow){
+    h+='<tr class="tot">';
+    totRow.forEach(function(t){ h+='<td'+(t.cls?' class="'+t.cls+'"':'')+(t.colspan?' colspan="'+t.colspan+'"':'')+(t.style?' style="'+t.style+'"':'')+'>'+t.v+'</td>'; });
+    h+='</tr>';
+  }
+  return h+'</tbody></table></div>';
+}
+
 
 // ─── REPORTE DIARIO ───
+function rptInvTable(prods){
+  if(!prods.length) return '<p style="font-size:11px;color:#aaa;padding:6px 0">Sin productos en inventario.</p>';
+  var h='<table class="rpt-table" style="width:100%"><thead><tr>'+
+    '<th>Producto</th><th class="r">Stock</th><th>Unidad</th><th class="r">Costo</th><th class="r">P.Venta</th><th class="r">Margen</th><th class="r">Valor stock</th>'+
+  '</tr></thead><tbody>';
+  var tv=0;
+  prods.forEach(function(p){
+    var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
+    var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
+    var vs=p.cantidad*p.precioCosto; tv+=vs;
+    h+='<tr><td>'+esc(p.nombre)+'</td>'+
+      '<td class="num"><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></td>'+
+      '<td>'+esc(p.unidad)+'</td>'+
+      '<td class="num">'+fmtPDF(p.precioCosto)+'</td>'+
+      '<td class="num">'+fmtPDF(p.precioVenta)+'</td>'+
+      '<td class="num">'+mg+'</td>'+
+      '<td class="num" style="color:#0a3d2e">'+fmtPDF(vs)+'</td>'+
+    '</tr>';
+  });
+  h+='<tr class="tot"><td colspan="6" style="font-weight:700">TOTAL VALOR EN STOCK</td><td class="num" style="color:#0a3d2e">'+fmtPDF(tv)+'</td></tr>';
+  return h+'</tbody></table>';
+}
+
 function buildReporteDiario(){
   var day = getDayData(currentDate);
-  var k = dateKey(currentDate);
   var fechaLabel = currentDate.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
 
   var tv = day.ventas.reduce(function(a,x){return a+x.monto;},0);
   var tg = day.gastos.reduce(function(a,x){return a+x.monto;},0);
-  // Solo pedidos no cancelados
   var tp = day.pedidos.filter(function(p){var gp=getPedido(p.id);return !gp||(gp.estado!=='cancelado');}).reduce(function(a,x){return a+x.monto;},0);
   var bal = tv - tg;
 
-  // Ganancia mensual para el reporte
+  // Ganancia mes
   var mesKey=dateKey(currentDate).substring(0,7);
-  var ganMes=0; var gastosMes=0;
+  var ganMes=0,gastosMes=0;
   Object.keys(data).forEach(function(dk){
     if(dk.substring(0,7)!==mesKey) return;
     var dd=data[dk];
     (dd.ventas||[]).forEach(function(v){
-      var items=v.items||[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
-      items.forEach(function(it){
-        if(it.productoId){var prod=getProducto(it.productoId);if(prod&&prod.precioCosto>0) ganMes+=it.monto-(prod.precioCosto*it.cant);}
-      });
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
+      items.forEach(function(it){if(it.productoId){var p=getProducto(it.productoId);if(p&&p.precioCosto>0) ganMes+=it.monto-(p.precioCosto*it.cant);}});
     });
-    (dd.gastos||[]).forEach(function(g){
-      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
-      if(!esDePedido) gastosMes+=g.monto;
-    });
+    (dd.gastos||[]).forEach(function(g){if(!g.pedidoId&&!(g.desc&&g.desc.indexOf('Pedido:')===0)) gastosMes+=g.monto;});
   });
   var ganNetaMes=ganMes-gastosMes;
 
   var html = rptHeader('Reporte Diario', fechaLabel);
-  html += '<div class="rpt-section"><div class="rpt-section-title">Resumen del día</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas totales', fmtPDF(tv), day.ventas.length+' transacciones', '#1d9e75');
-  html += rptKPI('Gastos totales', fmtPDF(tg), day.gastos.length+' egresos', '#d44f2e');
-  html += rptKPI('Pedidos especiales', fmtPDF(tp), day.pedidos.length+' pedidos', '#e8a020');
-  html += rptKPI('Balance neto', fmtPDF(bal), bal>=0?'Positivo':'Negativo', bal>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
-  html += '<div class="rpt-section"><div class="rpt-section-title">Ganancias del mes en curso</div>';
-  html += '<div class="rpt-kpi-row">';
-  html += rptKPI('Ganancia Bruta Mes', fmtPDF(ganMes), 'Venta − costo producto', '#c4860a');
-  html += rptKPI('Ganancia Neta Mes', fmtPDF(ganNetaMes), 'Bruta − gastos operativos', ganNetaMes>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
+
+  // Strip resumen
+  html += rptStrip([
+    {label:'Ventas',value:fmtPDF(tv),sub:day.ventas.length+' tx',color:'#1d9e75'},
+    {label:'Gastos',value:fmtPDF(tg),sub:day.gastos.length+' egresos',color:'#d44f2e'},
+    {label:'Pedidos',value:fmtPDF(tp),sub:day.pedidos.length+' pedidos',color:'#e8a020'},
+    {label:'Balance',value:fmtPDF(bal),sub:bal>=0?'Positivo':'Negativo',color:bal>=0?'#1d9e75':'#d44f2e'},
+    {label:'G. Bruta Mes',value:fmtPDF(ganMes),sub:'venta-costo',color:'#c4860a'},
+    {label:'G. Neta Mes',value:fmtPDF(ganNetaMes),sub:'bruta-gastos',color:ganNetaMes>=0?'#1d9e75':'#d44f2e'}
+  ]);
 
   // Ventas
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas del día</div>';
+  html += '<div class="rpt-section no-break">';
+  html += rptSH('Ventas del día', fmtPDF(tv));
+  html += '<table class="rpt-table" style="width:100%"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="c">Cant</th><th class="r">Monto</th></tr></thead><tbody>';
   if(day.ventas.length){
-    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     day.ventas.forEach(function(v){
-      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+      // Smart desc
+      var vdesc=v.desc||'';
+      if(v.items&&v.items.length){var f=v.items[0].productoNombre||v.items[0].desc||'';vdesc=v.items.length===1?f:f+' +'+(v.items.length-1)+' más';}
+      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(vdesc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):v.items&&v.items.length?'<em style="color:#aaa;font-size:10px">ver desglose</em>':'-')+'</td><td class="cen">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+      // Desglose items
+      if(v.items&&v.items.length>1){
+        v.items.forEach(function(it){
+          html+='<tr style="background:#f8fdf9"><td style="color:#aaa;font-size:10px;padding-left:14px">↳</td><td style="font-size:10px;color:#555;padding-left:14px">'+esc(it.desc||it.productoNombre||'')+'</td><td style="font-size:10px;color:#555">'+(it.productoNombre?esc(it.productoNombre):'')+'</td><td class="cen" style="font-size:10px">'+it.cant+'</td><td class="num" style="font-size:10px;color:#6db89a">'+fmtPDF(it.monto)+'</td></tr>';
+        });
+      }
     });
-    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL VENTAS</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
-    html += '</tbody></table></div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
-  html += '</div>';
+    html += '<tr class="tot"><td colspan="4" class="r">TOTAL VENTAS</td><td class="num" style="color:#1d9e75">'+fmtPDF(tv)+'</td></tr>';
+  } else { html += '<tr class="empty-row"><td colspan="5">Sin ventas registradas.</td></tr>'; }
+  html += '</tbody></table></div>';
 
   // Gastos
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Gastos del día</div>';
+  html += '<div class="rpt-section no-break">';
+  html += rptSH('Gastos del día', fmtPDF(tg));
+  html += '<table class="rpt-table" style="width:100%"><thead><tr><th>Hora</th><th>Descripción</th><th>Categoría</th><th class="c">Cant</th><th class="r">Monto</th></tr></thead><tbody>';
+  var CATLBL={pasaje:'Transporte',alimentacion:'Alimentación',alcaldia:'Alcaldía',electricidad:'Electricidad',pedido:'Pedido',otro:'Operativo'};
   if(day.gastos.length){
-    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
     day.gastos.forEach(function(g){
-      html += '<tr><td>'+esc(g.hora)+'</td><td>'+esc(g.desc)+'</td><td class="center">'+g.cant+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(g.monto)+'</td></tr>';
+      var cat=g.pedidoId?'pedido':(g.categoria||'otro');
+      html += '<tr><td>'+esc(g.hora)+'</td><td>'+esc(g.desc)+'</td><td><span class="rpt-tag rpt-tag-grey">'+( CATLBL[cat]||cat)+'</span></td><td class="cen">'+g.cant+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(g.monto)+'</td></tr>';
     });
-    html += '<tr><td colspan="3" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL GASTOS</td><td class="num" style="font-weight:700;color:#d44f2e;background:#f0f0f0">'+fmtPDF(tg)+'</td></tr>';
-    html += '</tbody></table></div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin gastos registrados.</p>'; }
-  html += '</div>';
+    html += '<tr class="tot"><td colspan="4" class="r">TOTAL GASTOS</td><td class="num" style="color:#d44f2e">'+fmtPDF(tg)+'</td></tr>';
+  } else { html += '<tr class="empty-row"><td colspan="5">Sin gastos registrados.</td></tr>'; }
+  html += '</tbody></table></div>';
 
-  // Pedidos especiales del día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Pedidos especiales del día</div>';
+  // Pedidos
+  html += '<div class="rpt-section no-break">';
+  html += rptSH('Pedidos especiales del día', fmtPDF(tp));
+  html += '<table class="rpt-table" style="width:100%"><thead><tr><th>Tipo</th><th>Descripción</th><th>Estado</th><th class="r">Monto</th></tr></thead><tbody>';
   if(day.pedidos.length){
-    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
     day.pedidos.forEach(function(p){
       var gped=getPedido(p.id);
       var estado=gped?gped.estado:'pendiente';
-      var estadoClass=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-      var estadoTxt=estado==='completado'?'Completado':estado==='cancelado'?'Cancelado':'Pendiente';
-      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+      var ec=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+      var et=estado==='completado'?'Completado':estado==='cancelado'?'Cancelado':'Pendiente';
+      var pdesc=p.desc||'Pedido';
+      if(gped&&gped.items&&gped.items.length){var fi=gped.items[0].desc||gped.items[0].productoNombre||'';pdesc=gped.items.length===1?fi:fi+' +'+(gped.items.length-1)+' más';}
+      html += '<tr><td>'+esc(p.tipo)+'</td><td>'+esc(pdesc)+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+      // Desglose items si existen
+      if(gped&&gped.items&&gped.items.length>1){
+        gped.items.forEach(function(it){
+          html+='<tr style="background:#fffbf3"><td style="color:#aaa;font-size:10px;padding-left:14px">↳</td><td style="font-size:10px;color:#555">'+esc(it.desc||it.productoNombre||'')+'</td><td></td><td class="num" style="font-size:10px;color:#c9952a">'+fmtPDF(it.monto)+'</td></tr>';
+        });
+      }
     });
-    html += '<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL PEDIDOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
-    html += '</tbody></table></div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales.</p>'; }
-  html += '</div>';
+    html += '<tr class="tot"><td colspan="3" class="r">TOTAL PEDIDOS</td><td class="num" style="color:#e8a020">'+fmtPDF(tp)+'</td></tr>';
+  } else { html += '<tr class="empty-row"><td colspan="4">Sin pedidos especiales.</td></tr>'; }
+  html += '</tbody></table></div>';
 
-  // Inventario del día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del día</div>';
+  // Inventario
   if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Venta unit.</div><div>Margen</div><div>Valor stock</div></div>';
-    productos.forEach(function(p){
-      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.cantidad*p.precioCosto)+'</div></div>';
-    });
-    var totalValor=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValor)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
+    html += '<div class="rpt-section no-break">';
+    html += rptSH('Estado del inventario al cierre');
+    html += rptInvTable(productos);
+    html += '</div>';
+  }
 
   html += rptFooter();
   return html;
 }
-
 // ─── REPORTE SEMANAL ───
 function buildReporteSemanal(){
   var days = getWeekDays(currentDate);
@@ -2890,97 +2950,87 @@ function buildReporteSemanal(){
     var g=dd.gastos.reduce(function(a,x){return a+x.monto;},0);
     var p=dd.pedidos.filter(function(x){var gp=getPedido(x.id);return !gp||(gp.estado!=='cancelado');}).reduce(function(a,x){return a+x.monto;},0);
     semV+=v; semG+=g; semP+=p;
-    dayRows.push({dia:DIAS[i],k:dateKey(d),v:v,g:g,p:p,bal:v-g,nv:dd.ventas.length,ng:dd.gastos.length,np:dd.pedidos.length});
+    dayRows.push({dia:DIAS[i],k:dateKey(d),v:v,g:g,p:p,bal:v-g,nv:dd.ventas.length,ng:dd.gastos.length,hasData:v||g||p,ventas:dd.ventas,gastos:dd.gastos,pedidos:dd.pedidos});
   });
 
   var html = rptHeader('Reporte Semanal', 'Semana del '+rango);
 
-  // KPIs semana
-  html += '<div class="rpt-section"><div class="rpt-section-title">Totales de la semana</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas semana', fmtPDF(semV), '', '#1d9e75');
-  html += rptKPI('Gastos semana', fmtPDF(semG), '', '#d44f2e');
-  html += rptKPI('Pedidos semana', fmtPDF(semP), '', '#e8a020');
-  html += rptKPI('Balance semana', fmtPDF(semV-semG), (semV-semG)>=0?'Positivo':'Negativo', (semV-semG)>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
+  // Strip resumen
+  html += rptStrip([
+    {label:'Ventas',value:fmtPDF(semV),color:'#1d9e75'},
+    {label:'Gastos',value:fmtPDF(semG),color:'#d44f2e'},
+    {label:'Pedidos',value:fmtPDF(semP),color:'#e8a020'},
+    {label:'Balance',value:fmtPDF(semV-semG),color:semV-semG>=0?'#1d9e75':'#d44f2e'}
+  ]);
 
-  // Tabla por día
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Ventas y gastos por día</div>';
-  html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th># Ventas</th><th>Ventas $</th><th># Gastos</th><th>Gastos $</th><th>Pedidos $</th><th>Balance</th></tr></thead><tbody>';
+  // Tabla resumen por día
+  html += '<div class="rpt-section no-break">';
+  html += rptSH('Resumen por día');
+  html += '<table class="rpt-table" style="width:100%"><thead><tr><th>Día</th><th>Fecha</th><th class="c"># Tx</th><th class="r">Ventas</th><th class="r">Gastos</th><th class="r">Pedidos</th><th class="r">Balance</th></tr></thead><tbody>';
   dayRows.forEach(function(r){
-    html += '<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="center">'+r.ng+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
+    if(!r.hasData) return;
+    html += '<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="cen">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
   });
-  html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td><td></td><td class="num" style="color:#d44f2e">'+fmtPDF(semG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(semP)+'</td><td class="num" style="color:'+(semV-semG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(semV-semG)+'</td></tr>';
-  html += '</tbody></table></div></div>';
+  html += '<tr class="tot"><td colspan="3">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(semG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(semP)+'</td><td class="num" style="color:'+(semV-semG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(semV-semG)+'</td></tr>';
+  html += '</tbody></table></div>';
 
-  // Detalle ventas por día de la semana
-  html += '<div class="rpt-section"><div class="rpt-section-title">Detalle de ventas por día</div>';
-  days.forEach(function(d,i){
-    var dd=getDayData(d);
-    if(!dd.ventas.length) return;
-    html += '<div class="no-break" style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;">'+DIAS[i]+' '+fmtDate(dateKey(d))+'</div>';
-    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    dd.ventas.forEach(function(v){
-      html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+  // Detalle ventas por día (cada día que tenga ventas)
+  var hayVentas=dayRows.some(function(r){return r.ventas&&r.ventas.length;});
+  if(hayVentas){
+    html += '<div class="rpt-section">';
+    html += rptSH('Detalle de ventas por día');
+    dayRows.forEach(function(r){
+      if(!r.ventas||!r.ventas.length) return;
+      html += '<div class="no-break">';
+      html += '<div class="rpt-day-head"><span>'+r.dia+' — '+fmtDate(r.k)+'</span><span style="color:#1d9e75">'+fmtPDF(r.v)+'</span></div>';
+      html += '<table class="rpt-table" style="width:100%;margin-bottom:6px"><thead><tr><th>Hora</th><th>Descripción</th><th class="c">Cant</th><th class="r">Monto</th></tr></thead><tbody>';
+      r.ventas.forEach(function(v){
+        var vdesc=v.desc||'';
+        if(v.items&&v.items.length){var f=v.items[0].productoNombre||v.items[0].desc||'';vdesc=v.items.length===1?f:f+' +'+(v.items.length-1)+' más';}
+        html += '<tr><td>'+esc(v.hora)+'</td><td>'+esc(vdesc)+'</td><td class="cen">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
     });
-    html += '</tbody></table></div></div>';
-  });
-  html += '</div>';
+    html += '</div>';
+  }
 
   // Pedidos por proveedor
-  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales — agrupados por proveedor</div>';
   var semKeys = days.map(function(d){return dateKey(d);});
-  var pedsSem = pedidosGlobal.filter(function(p){ return semKeys.indexOf(p.fecha)!==-1; });
-
+  var pedsSem = pedidosGlobal.filter(function(p){return semKeys.indexOf(p.fecha)!==-1;});
   if(pedsSem.length){
-    // Agrupar por tipo (proveedor)
-    var byProv = {};
+    html += '<div class="rpt-section no-break">';
+    html += rptSH('Pedidos especiales — por proveedor', fmtPDF(semP));
+    var byProv={};
     pedsSem.forEach(function(p){
-      if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProv[p.tipo].peds.push(p);
-      byProv[p.tipo].total+=p.monto;
-      byProv[p.tipo][p.estado+'s']++;
+      if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0};
+      byProv[p.tipo].peds.push(p); byProv[p.tipo].total+=p.monto;
     });
     Object.keys(byProv).forEach(function(prov){
       var g=byProv[prov];
-      html += '<div class="rpt-prov-block no-break">'+
-        '<div class="rpt-prov-name">'+esc(prov)+' — Total: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+'</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+'</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+'</span></div>'+
-        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha pedido</th><th>Descripción</th><th>Cant.</th><th>Producto stock</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+      html += '<div style="font-size:10px;font-weight:700;color:#0a3d2e;padding:4px 7px;background:#f0ede7;margin-top:6px">'+esc(prov)+' — '+fmtPDF(g.total)+'</div>';
+      html += '<table class="rpt-table" style="width:100%;margin-bottom:4px"><thead><tr><th>Fecha</th><th>Descripción</th><th>Estado</th><th class="r">Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
-        var prodN=p.productoId?(getProducto(p.productoId)?getProducto(p.productoId).nombre:'—'):'—';
-        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td>'+esc(prodN)+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+        var pdesc=p.desc||'';
+        if(p.items&&p.items.length){var fi=p.items[0].desc||p.items[0].productoNombre||'';pdesc=p.items.length===1?fi:fi+' +'+(p.items.length-1)+' más';}
+        var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+        var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
+        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(pdesc)+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html += '</tbody></table></div></div>';
+      html += '</tbody></table>';
     });
-  } else {
-    html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales esta semana.</p>';
+    html += '</div>';
   }
-  html += '</div>';
 
-  // Inventario estado semanal
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario (semana)</div>';
   if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock actual</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen %</div><div>Valor en stock</div></div>';
-    var totalV=0;
-    productos.forEach(function(p){
-      var margen=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var vs=p.cantidad*p.precioCosto; totalV+=vs;
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+margen+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
-    });
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalV)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
+    html += '<div class="rpt-section no-break">';
+    html += rptSH('Estado del inventario (semana)');
+    html += rptInvTable(productos);
+    html += '</div>';
+  }
 
   html += rptFooter();
   return html;
 }
-
 // ─── REPORTE MENSUAL ───
 function buildReporteMensual(){
   var year = currentDate.getFullYear();
@@ -2988,7 +3038,7 @@ function buildReporteMensual(){
   var mesNombre = currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
   var totalDias = new Date(year, month+1, 0).getDate();
 
-  var mV=0,mG=0,mP=0;
+  var mV=0,mG=0,mP=0,ganMesRpt=0,gastosMesRpt=0;
   var dayRows=[];
   for(var d=1;d<=totalDias;d++){
     var dd=new Date(year,month,d);
@@ -2996,106 +3046,84 @@ function buildReporteMensual(){
     var dayD=data[k]||{ventas:[],gastos:[],pedidos:[]};
     var v=dayD.ventas.reduce(function(a,x){return a+x.monto;},0);
     var g=dayD.gastos.reduce(function(a,x){return a+x.monto;},0);
-    var p=dayD.pedidos.filter(function(x){var gp=getPedido(x.id);return !gp||(gp.estado!=='cancelado');}).reduce(function(a,x){return a+x.monto;},0);
+    var p=dayD.pedidos.filter(function(x){var gp=getPedido(x.id);return !gp||(gp.estado!=="cancelado");}).reduce(function(a,x){return a+x.monto;},0);
     if(v||g||p) dayRows.push({k:k,d:d,v:v,g:g,p:p,bal:v-g,nv:dayD.ventas.length});
     mV+=v; mG+=g; mP+=p;
+    // Ganancia
+    (dayD.ventas||[]).forEach(function(vx){
+      var items=vx.items&&vx.items.length?vx.items:[{productoId:vx.productoId,cant:vx.cant,monto:vx.monto}];
+      items.forEach(function(it){if(it.productoId){var pr=getProducto(it.productoId);if(pr&&pr.precioCosto>0) ganMesRpt+=it.monto-(pr.precioCosto*it.cant);}});
+    });
+    (dayD.gastos||[]).forEach(function(gx){if(!gx.pedidoId&&!(gx.desc&&gx.desc.indexOf("Pedido:")===0)) gastosMesRpt+=gx.monto;});
   }
-
-  var diasConVentas = dayRows.filter(function(r){return r.v>0;}).length;
-  var promDiario = diasConVentas>0 ? mV/diasConVentas : 0;
+  var diasConVentas=dayRows.filter(function(r){return r.v>0;}).length;
+  var promDiario=diasConVentas>0?mV/diasConVentas:0;
+  var ganNetaMesRpt=ganMesRpt-gastosMesRpt;
 
   var html = rptHeader('Reporte Mensual', cap(mesNombre));
 
-  html += '<div class="rpt-section"><div class="rpt-section-title">Totales del mes</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Ventas mes', fmtPDF(mV), diasConVentas+' días con ventas', '#1d9e75');
-  html += rptKPI('Gastos mes', fmtPDF(mG), '', '#d44f2e');
-  html += rptKPI('Pedidos mes', fmtPDF(mP), '', '#e8a020');
-  html += rptKPI('Balance mes', fmtPDF(mV-mG), (mV-mG)>=0?'Positivo':'Negativo', (mV-mG)>=0?'#1d9e75':'#d44f2e');
-  html += '</div>';
-  html += '<div class="rpt-kpi-row" style="grid-template-columns:1fr 1fr;margin-top:8px">';
-  // Calcular ganancia bruta y neta del mes
-  var ganMesRpt=0; var gastosMesRpt=0;
-  dayRows.forEach(function(r){
-    var dd2=data[r.k]||{ventas:[],gastos:[]};
-    (dd2.ventas||[]).forEach(function(v){
-      var items=v.items||[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
-      items.forEach(function(it){
-        if(it.productoId){var prod=getProducto(it.productoId);if(prod&&prod.precioCosto>0) ganMesRpt+=it.monto-(prod.precioCosto*it.cant);}
-      });
-    });
-    (dd2.gastos||[]).forEach(function(g){
-      var esDePedido=g.pedidoId||(g.desc&&g.desc.indexOf('Pedido:')===0);
-      if(!esDePedido) gastosMesRpt+=g.monto;
-    });
-  });
-  var ganNetaMesRpt=ganMesRpt-gastosMesRpt;
+  html += rptStrip([
+    {label:'Ventas mes',value:fmtPDF(mV),sub:diasConVentas+' días con ventas',color:'#1d9e75'},
+    {label:'Gastos mes',value:fmtPDF(mG),color:'#d44f2e'},
+    {label:'Pedidos mes',value:fmtPDF(mP),color:'#e8a020'},
+    {label:'Balance',value:fmtPDF(mV-mG),color:mV-mG>=0?'#1d9e75':'#d44f2e'},
+    {label:'G. Bruta',value:fmtPDF(ganMesRpt),sub:'venta−costo',color:'#c4860a'},
+    {label:'G. Neta',value:fmtPDF(ganNetaMesRpt),sub:'bruta−gastos',color:ganNetaMesRpt>=0?'#1d9e75':'#d44f2e'}
+  ]);
 
-  html += rptKPI('Promedio diario (días con ventas)', fmtPDF(promDiario), '', '#0a3d2e');
-  html += rptKPI('Meta diaria ($500) — días alcanzados', dayRows.filter(function(r){return r.v>=META;}).length+' / '+diasConVentas, '', '#c4860a');
+  // Promedio y meta en una fila compacta
+  var diasMeta=dayRows.filter(function(r){return r.v>=META;}).length;
+  html += '<div style="display:flex;gap:10px;margin-bottom:14px;">';
+  html += '<div style="flex:1;border:1px solid #d0cfc9;border-radius:5px;padding:7px 10px"><div style="font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#999;font-weight:700">Promedio diario</div><div style="font-size:14px;font-weight:700;font-family:Courier New;color:#0a3d2e">'+fmtPDF(promDiario)+'</div></div>';
+  html += '<div style="flex:1;border:1px solid #d0cfc9;border-radius:5px;padding:7px 10px"><div style="font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#999;font-weight:700">Días con meta ($'+META+')</div><div style="font-size:14px;font-weight:700;font-family:Courier New;color:#c4860a">'+diasMeta+' / '+diasConVentas+'</div></div>';
   html += '</div>';
-  html += '<div class="rpt-kpi-row" style="grid-template-columns:1fr 1fr;margin-top:8px">';
-  html += rptKPI('Ganancia Bruta Mes', fmtPDF(ganMesRpt), 'Venta − costo producto', '#c4860a');
-  html += rptKPI('Ganancia Neta Mes', fmtPDF(ganNetaMesRpt), 'Bruta − gastos operativos', ganNetaMesRpt>=0?'#1d9e75':'#d44f2e');
-  html += '</div></div>';
 
-  // Tabla diaria del mes
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día del mes</div>';
+  // Tabla por día
+  html += '<div class="rpt-section no-break">';
+  html += rptSH('Detalle por día del mes');
+  html += '<table class="rpt-table" style="width:100%"><thead><tr><th>Fecha</th><th class="c"># Tx</th><th class="r">Ventas</th><th class="r">Gastos</th><th class="r">Pedidos</th><th class="r">Balance</th></tr></thead><tbody>';
   if(dayRows.length){
-    html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th><th>Gastos</th><th>Pedidos</th><th>Balance día</th></tr></thead><tbody>';
     dayRows.forEach(function(r){
-      html += '<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
+      html += '<tr><td>'+fmtDate(r.k)+'</td><td class="cen">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(r.g)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(r.p)+'</td><td class="num" style="color:'+(r.bal>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(r.bal)+'</td></tr>';
     });
-    html += '<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(mG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(mP)+'</td><td class="num" style="color:'+(mV-mG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(mV-mG)+'</td></tr>';
-    html += '</tbody></table></div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin datos registrados este mes.</p>'; }
-  html += '</div>';
+    html += '<tr class="tot"><td colspan="2">TOTALES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td><td class="num" style="color:#d44f2e">'+fmtPDF(mG)+'</td><td class="num" style="color:#e8a020">'+fmtPDF(mP)+'</td><td class="num" style="color:'+(mV-mG>=0?'#1d9e75':'#d44f2e')+'">'+fmtPDF(mV-mG)+'</td></tr>';
+  } else { html += '<tr class="empty-row"><td colspan="6">Sin datos registrados este mes.</td></tr>'; }
+  html += '</tbody></table></div>';
 
   // Pedidos del mes por proveedor
-  html += '<div class="rpt-section"><div class="rpt-section-title">Pedidos especiales del mes — por proveedor</div>';
   var monthKeys=[];
   for(var d2=1;d2<=totalDias;d2++) monthKeys.push(dateKey(new Date(year,month,d2)));
   var pedsMes=pedidosGlobal.filter(function(p){return monthKeys.indexOf(p.fecha)!==-1;});
   if(pedsMes.length){
+    html += '<div class="rpt-section no-break">';
+    html += rptSH('Pedidos especiales del mes', fmtPDF(mP));
     var byProvM={};
     pedsMes.forEach(function(p){
-      if(!byProvM[p.tipo]) byProvM[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProvM[p.tipo].peds.push(p);
-      byProvM[p.tipo].total+=p.monto;
-      byProvM[p.tipo][p.estado+'s']++;
+      if(!byProvM[p.tipo]) byProvM[p.tipo]={peds:[],total:0};
+      byProvM[p.tipo].peds.push(p); byProvM[p.tipo].total+=p.monto;
     });
     Object.keys(byProvM).forEach(function(prov){
       var g=byProvM[prov];
-      html += '<div class="rpt-prov-block no-break">'+
-        '<div class="rpt-prov-name">'+esc(prov)+' — Total mes: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+g.completados+' completados</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+g.pendientes+' pendientes</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+g.cancelados+' cancelados</span></div>'+
-        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+      html += '<div style="font-size:10px;font-weight:700;color:#0a3d2e;padding:4px 7px;background:#f0ede7;margin-top:6px">'+esc(prov)+' — '+fmtPDF(g.total)+'</div>';
+      html += '<table class="rpt-table" style="width:100%;margin-bottom:4px"><thead><tr><th>Fecha</th><th>Descripción</th><th>Estado</th><th class="r">Monto</th></tr></thead><tbody>';
       g.peds.forEach(function(p){
-        var estadoClass=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var estadoTxt=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+estadoClass+'">'+estadoTxt+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+        var pdesc=p.desc||'';
+        if(p.items&&p.items.length){var fi=p.items[0].desc||p.items[0].productoNombre||'';pdesc=p.items.length===1?fi:fi+' +'+(p.items.length-1)+' más';}
+        var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+        var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
+        html += '<tr><td>'+fmtDate(p.fecha)+'</td><td>'+esc(pdesc)+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
       });
-      html += '</tbody></table></div></div>';
+      html += '</tbody></table>';
     });
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin pedidos especiales este mes.</p>'; }
-  html += '</div>';
+    html += '</div>';
+  }
 
-  // Inventario
-  html += '<div class="rpt-section no-break"><div class="rpt-section-title">Estado del inventario al cierre del mes</div>';
   if(productos.length){
-    html += '<div class="rpt-inv-row header"><div>Producto</div><div>Stock</div><div>Unidad</div><div>Costo unit.</div><div>Precio venta</div><div>Margen</div><div>Valor stock</div></div>';
-    var totalValM=0;
-    productos.forEach(function(p){
-      var mg=p.precioCosto>0?((p.precioVenta-p.precioCosto)/p.precioCosto*100).toFixed(0)+'%':'--';
-      var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var vs=p.cantidad*p.precioCosto; totalValM+=vs;
-      html += '<div class="rpt-inv-row"><div>'+esc(p.nombre)+'</div><div><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></div><div>'+esc(p.unidad)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioCosto)+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(p.precioVenta)+'</div><div>'+mg+'</div><div style="font-family:Courier New;font-weight:600">'+fmtPDF(vs)+'</div></div>';
-    });
-    html += '<div class="rpt-inv-row" style="font-weight:700;background:#f0ede7"><div>TOTAL VALOR INVENTARIO</div><div></div><div></div><div></div><div></div><div></div><div style="font-family:Courier New">'+fmtPDF(totalValM)+'</div></div>';
-  } else { html += '<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
-  html += '</div>';
+    html += '<div class="rpt-section no-break">';
+    html += rptSH('Estado del inventario al cierre del mes');
+    html += rptInvTable(productos);
+    html += '</div>';
+  }
 
   html += rptFooter();
   return html;
@@ -3117,15 +3145,15 @@ function buildReporteInventario(){
 
   // KPIs
   html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de inventario</div>';
-  html += '<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html += rptKPI('Total productos', productos.length+' items', '', '#0a3d2e');
+    html += rptKPI('Total productos', productos.length+' items', '', '#0a3d2e');
   html += rptKPI('Valor en stock', fmtPDF(totalValor), 'a precio de costo', '#1d9e75');
   html += rptKPI('Stock bajo / sin stock', stockBajo.length+' / '+sinStock.length, 'requieren atención', '#d44f2e');
   html += rptKPI('En stock normal', stockOk.length+' productos', '', '#1d9e75');
-  html += '</div></div>';
+  html+=rptKPIFlush();
+  html += rptKPIFlush()+'</div>';
 
   // Tabla completa
-  html += '<div class="rpt-section"><div class="rpt-section-title">Inventario completo</div>';
+  html += '<div class="rpt-section no-break">';
   if(productos.length){
     html += '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th>Fecha ingreso</th><th class="center">Stock</th><th>Unidad</th><th>Costo unit.</th><th>Precio venta</th><th>Margen</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
     productos.forEach(function(p){
@@ -3180,12 +3208,11 @@ function buildReporteVentasDiario(){
   var fechaLabel=currentDate.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   var tv=day.ventas.reduce(function(a,x){return a+x.monto;},0);
   var html=rptHeader('Reporte de Ventas — Diario',fechaLabel);
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen de ventas</div>';
-  html+='<div class="rpt-kpi-row">';
-  html+=rptKPI('Total ventas',fmtPDF(tv),day.ventas.length+' transacciones','#1d9e75');
-  html+=rptKPI('Promedio por venta',day.ventas.length?fmtPDF(tv/day.ventas.length):'$0.00','','#0a3d2e');
-  html+=rptKPI('Meta diaria ($'+META+')',Math.round((tv/META)*100)+'%',tv>=META?'✓ Alcanzada':'Pendiente',tv>=META?'#1d9e75':'#d44f2e');
-  html+='</div></div>';
+  html+=rptStrip([
+    {label:'Total ventas',value:fmtPDF(tv),sub:day.ventas.length+' transacciones',color:'#1d9e75'},
+    {label:'Promedio',value:day.ventas.length?fmtPDF(tv/day.ventas.length):'$0.00',color:'#0a3d2e'},
+    {label:'Meta $'+META,value:Math.round((tv/META)*100)+'%',sub:tv>=META?'✓ Alcanzada':'Pendiente',color:tv>=META?'#1d9e75':'#d44f2e'}
+  ]);
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de ventas</div>';
   if(day.ventas.length){
     html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
@@ -3210,12 +3237,13 @@ function buildReporteVentasSemanal(){
   });
   var html=rptHeader('Reporte de Ventas — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen semanal de ventas</div>';
-  html+='<div class="rpt-kpi-row">';
-  html+=rptKPI('Total ventas semana',fmtPDF(semV),'','#1d9e75');
+    html+=rptKPI('Total ventas semana',fmtPDF(semV),'','#1d9e75');
+  html+=rptKPIFlush();
   var diasConV=dayRows.filter(function(r){return r.v>0;}).length;
   html+=rptKPI('Días con ventas',diasConV+' días','','#0a3d2e');
   html+=rptKPI('Promedio diario',diasConV?fmtPDF(semV/diasConV):'$0.00','','#2563eb');
-  html+='</div></div>';
+  html+=rptKPIFlush();
+  html+=rptKPIFlush()+'</div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Ventas por día</div>';
   html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th class="center"># Ventas</th><th>Total Ventas</th></tr></thead><tbody>';
   dayRows.forEach(function(r){html+='<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
@@ -3246,12 +3274,12 @@ function buildReporteVentasMensual(){
   var html=rptHeader('Reporte de Ventas — Mensual',mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1));
   var diasConV=dayRows.length;
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual</div>';
-  html+='<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html+=rptKPI('Total ventas mes',fmtPDF(mV),'','#1d9e75');
+    html+=rptKPI('Total ventas mes',fmtPDF(mV),'','#1d9e75');
   html+=rptKPI('Días con ventas',diasConV,'','#0a3d2e');
   html+=rptKPI('Promedio diario',diasConV?fmtPDF(mV/diasConV):'$0.00','','#2563eb');
   html+=rptKPI('Días meta alcanzada',dayRows.filter(function(r){return r.v>=META;}).length+'/'+diasConV,'','#c4860a');
-  html+='</div></div>';
+  html+=rptKPIFlush();
+  html+=rptKPIFlush()+'</div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día</div>';
   if(dayRows.length){
     html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th></tr></thead><tbody>';
@@ -3271,15 +3299,17 @@ function buildReportePedidosDiario(){
   var tp=pedActivos.reduce(function(a,x){return a+x.monto;},0);
   var html=rptHeader('Reporte de Pedidos — Diario',fechaLabel);
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen de pedidos del día</div>';
-  html+='<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html+=rptKPI('Total pedidos',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
+    html+=rptKPI('Total pedidos',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
+  html+=rptKPIFlush();
   var cancelados=day.pedidos.length-pedActivos.length;
   html+=rptKPI('Cancelados',cancelados+' pedidos','No incluidos en total','#d44f2e');
+  html+=rptKPIFlush();
   ['Pollo Rico','Pollo Indio','Sello de Oro'].forEach(function(tipo){
     var t=pedActivos.filter(function(p){return p.tipo===tipo;}).reduce(function(a,p){return a+p.monto;},0);
     html+=rptKPI(tipo,fmtPDF(t),'','#c4860a');
+  html+=rptKPIFlush();
   });
-  html+='</div></div>';
+  html+=rptKPIFlush()+'</div>';
   html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de pedidos</div>';
   if(day.pedidos.length){
     html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
@@ -3306,12 +3336,12 @@ function buildReportePedidosSemanal(){
   var tp=pedActivos.reduce(function(a,p){return a+p.monto;},0);
   var html=rptHeader('Reporte de Pedidos — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen semanal</div>';
-  html+='<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html+=rptKPI('Total pedidos semana',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
+    html+=rptKPI('Total pedidos semana',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
   html+=rptKPI('Cancelados',pedsSem.filter(function(p){return p.estado==='cancelado';}).length+' pedidos','No incluidos','#d44f2e');
   html+=rptKPI('Completados',pedActivos.filter(function(p){return p.estado==='completado';}).length+' pedidos','','#1d9e75');
   html+=rptKPI('Pendientes',pedActivos.filter(function(p){return p.estado==='pendiente';}).length+' pedidos','','#c4860a');
-  html+='</div></div>';
+  html+=rptKPIFlush();
+  html+=rptKPIFlush()+'</div>';
   if(pedsSem.length){
     var byProv={};
     pedsSem.forEach(function(p){
@@ -3353,12 +3383,12 @@ function buildReportePedidosMensual(){
   var tp=pedActivos.reduce(function(a,p){return a+p.monto;},0);
   var html=rptHeader('Reporte de Pedidos — Mensual',mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1));
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual</div>';
-  html+='<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html+=rptKPI('Total pedidos mes',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
+    html+=rptKPI('Total pedidos mes',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
   html+=rptKPI('Cancelados',pedsMes.filter(function(p){return p.estado==='cancelado';}).length+'','No incluidos','#d44f2e');
   html+=rptKPI('Completados',pedActivos.filter(function(p){return p.estado==='completado';}).length+'','','#1d9e75');
   html+=rptKPI('Pendientes',pedActivos.filter(function(p){return p.estado==='pendiente';}).length+'','','#c4860a');
-  html+='</div></div>';
+  html+=rptKPIFlush();
+  html+=rptKPIFlush()+'</div>';
   if(pedsMes.length){
     var byProvM={};
     pedsMes.forEach(function(p){
@@ -3434,12 +3464,12 @@ function buildReporteInventarioMensual(){
   var sinStock=productos.filter(function(p){return p.cantidad<=0;});
   var stockBajo=productos.filter(function(p){return p.cantidad>0&&p.cantidad<=5;});
   html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual de inventario</div>';
-  html+='<div class="rpt-kpi-row rpt-kpi-row-4">';
-  html+=rptKPI('Total productos',productos.length+' items','','#0a3d2e');
+    html+=rptKPI('Total productos',productos.length+' items','','#0a3d2e');
   html+=rptKPI('Valor en stock',fmtPDF(totalValor),'precio de costo','#1d9e75');
   html+=rptKPI('Sin stock',sinStock.length+' productos','Requieren reposición','#d44f2e');
   html+=rptKPI('Stock bajo',stockBajo.length+' productos','Revisar pronto','#c4860a');
-  html+='</div></div>';
+  html+=rptKPIFlush();
+  html+=rptKPIFlush()+'</div>';
   // Movimientos del mes por producto
   var ventasProd={};
   monthDays.forEach(function(d){
