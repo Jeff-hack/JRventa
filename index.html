@@ -2764,19 +2764,9 @@ function rptStrip(cells){
   return h+'</div>';
 }
 
-/* rptKPI — compatibility shim: collects calls until rptKPIFlush() renders them as a strip */
-var _kpiQueue=[];
-function rptKPI(label,value,sub,color){
-  html+=rptKPIFlush();
-  _kpiQueue.push({label:label,value:value,sub:sub,color:color});
-  return '';  // accumulate, flush later
-}
-function rptKPIFlush(){
-  if(!_kpiQueue.length) return '';
-  var r=rptStrip(_kpiQueue);
-  _kpiQueue=[];
-  return r;
-}
+/* rptKPI/rptKPIFlush — no-ops, all builders use rptStrip directly */
+function rptKPI(){ return ''; }
+function rptKPIFlush(){ return ''; }
 
 /* Section header */
 function rptSH(label, right){
@@ -3145,12 +3135,13 @@ function buildReporteInventario(){
 
   // KPIs
   html += '<div class="rpt-section"><div class="rpt-section-title">Resumen de inventario</div>';
-    html += rptKPI('Total productos', productos.length+' items', '', '#0a3d2e');
-  html += rptKPI('Valor en stock', fmtPDF(totalValor), 'a precio de costo', '#1d9e75');
-  html += rptKPI('Stock bajo / sin stock', stockBajo.length+' / '+sinStock.length, 'requieren atención', '#d44f2e');
-  html += rptKPI('En stock normal', stockOk.length+' productos', '', '#1d9e75');
-  html+=rptKPIFlush();
-  html += rptKPIFlush()+'</div>';
+  html+=rptStrip([
+    {label:'Productos',value:productos.length+' items',color:'#0a3d2e'},
+    {label:'Valor en stock',value:fmtPDF(totalValor),sub:'precio de costo',color:'#1d9e75'},
+    {label:'Stock bajo',value:stockBajo.length+'',sub:'requieren atención',color:'#e8a020'},
+    {label:'Sin stock',value:sinStock.length+'',sub:'reposición urgente',color:'#d44f2e'}
+  ]);
+  html+='</div>';
 
   // Tabla completa
   html += '<div class="rpt-section no-break">';
@@ -3202,6 +3193,11 @@ function buildReporteInventario(){
   return html;
 }
 
+// ─── HELPER: section header ───
+function rptSecH(title, total){
+  return '<div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;background:#0a3d2e;padding:4px 9px;border-radius:3px 3px 0 0;display:flex;justify-content:space-between;align-items:center"><span>'+title+'</span>'+(total?'<span>'+total+'</span>':'')+' </div>';
+}
+
 // ─── REPORTE VENTAS DIARIO ───
 function buildReporteVentasDiario(){
   var day=getDayData(currentDate);
@@ -3209,17 +3205,20 @@ function buildReporteVentasDiario(){
   var tv=day.ventas.reduce(function(a,x){return a+x.monto;},0);
   var html=rptHeader('Reporte de Ventas — Diario',fechaLabel);
   html+=rptStrip([
-    {label:'Total ventas',value:fmtPDF(tv),sub:day.ventas.length+' transacciones',color:'#1d9e75'},
+    {label:'Total ventas',value:fmtPDF(tv),sub:day.ventas.length+' tx',color:'#1d9e75'},
     {label:'Promedio',value:day.ventas.length?fmtPDF(tv/day.ventas.length):'$0.00',color:'#0a3d2e'},
     {label:'Meta $'+META,value:Math.round((tv/META)*100)+'%',sub:tv>=META?'✓ Alcanzada':'Pendiente',color:tv>=META?'#1d9e75':'#d44f2e'}
   ]);
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de ventas</div>';
+  html+='<div class="rpt-section no-break">'+rptSecH('Detalle de ventas',fmtPDF(tv));
   if(day.ventas.length){
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    day.ventas.forEach(function(v){html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';});
-    html+='<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL</td><td class="num" style="font-weight:700;color:#1d9e75;background:#f0f0f0">'+fmtPDF(tv)+'</td></tr>';
-    html+='</tbody></table></div></div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin ventas registradas.</p>'; }
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="c">Cant</th><th class="r">Monto</th></tr></thead><tbody>';
+    day.ventas.forEach(function(v){
+      var vd=v.desc||''; if(v.items&&v.items.length){var f=v.items[0].productoNombre||v.items[0].desc||'';vd=v.items.length===1?f:f+' +'+(v.items.length-1)+' más';}
+      html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(vd)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="cen">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+    });
+    html+='<tr class="tot"><td colspan="4" class="r">TOTAL</td><td class="num" style="color:#1d9e75">'+fmtPDF(tv)+'</td></tr>';
+    html+='</tbody></table>';
+  } else { html+='<p style="font-size:11px;color:#aaa;padding:8px 0">Sin ventas registradas.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
 }
@@ -3235,26 +3234,27 @@ function buildReporteVentasSemanal(){
     semV+=v;
     dayRows.push({dia:DIAS[i],k:dateKey(d),v:v,nv:dd.ventas.length,ventas:dd.ventas});
   });
-  var html=rptHeader('Reporte de Ventas — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen semanal de ventas</div>';
-    html+=rptKPI('Total ventas semana',fmtPDF(semV),'','#1d9e75');
-  html+=rptKPIFlush();
   var diasConV=dayRows.filter(function(r){return r.v>0;}).length;
-  html+=rptKPI('Días con ventas',diasConV+' días','','#0a3d2e');
-  html+=rptKPI('Promedio diario',diasConV?fmtPDF(semV/diasConV):'$0.00','','#2563eb');
-  html+=rptKPIFlush();
-  html+=rptKPIFlush()+'</div>';
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Ventas por día</div>';
-  html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Día</th><th>Fecha</th><th class="center"># Ventas</th><th>Total Ventas</th></tr></thead><tbody>';
-  dayRows.forEach(function(r){html+='<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
-  html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="3">TOTAL</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td></tr>';
-  html+='</tbody></table></div></div>';
+  var html=rptHeader('Reporte de Ventas — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
+  html+=rptStrip([
+    {label:'Total semana',value:fmtPDF(semV),color:'#1d9e75'},
+    {label:'Días con ventas',value:diasConV+' días',color:'#0a3d2e'},
+    {label:'Promedio diario',value:diasConV?fmtPDF(semV/diasConV):'$0.00',color:'#2563eb'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Ventas por día');
+  html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Día</th><th>Fecha</th><th class="c"># Tx</th><th class="r">Total</th></tr></thead><tbody>';
+  dayRows.forEach(function(r){html+='<tr><td>'+r.dia+'</td><td>'+fmtDate(r.k)+'</td><td class="cen">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
+  html+='<tr class="tot"><td colspan="3">TOTAL SEMANA</td><td class="num" style="color:#1d9e75">'+fmtPDF(semV)+'</td></tr>';
+  html+='</tbody></table></div>';
   dayRows.forEach(function(r){
     if(!r.ventas.length) return;
-    html+='<div class="rpt-section no-break"><div class="rpt-section-title">'+r.dia+' '+fmtDate(r.k)+'</div>';
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Hora</th><th>Descripción</th><th>Producto</th><th class="center">Cant.</th><th>Monto</th></tr></thead><tbody>';
-    r.ventas.forEach(function(v){html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(v.desc)+'</td><td>'+(v.productoNombre?esc(v.productoNombre):'-')+'</td><td class="center">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';});
-    html+='</tbody></table></div></div>';
+    html+='<div class="rpt-section no-break">'+rptSecH(r.dia+' — '+fmtDate(r.k),fmtPDF(r.v));
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Hora</th><th>Descripción</th><th class="c">Cant</th><th class="r">Monto</th></tr></thead><tbody>';
+    r.ventas.forEach(function(v){
+      var vd=v.desc||''; if(v.items&&v.items.length){var f=v.items[0].productoNombre||v.items[0].desc||'';vd=v.items.length===1?f:f+' +'+(v.items.length-1)+' más';}
+      html+='<tr><td>'+esc(v.hora)+'</td><td>'+esc(vd)+'</td><td class="cen">'+v.cant+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(v.monto)+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
   });
   html+=rptFooter(); return html;
 }
@@ -3266,27 +3266,25 @@ function buildReporteVentasMensual(){
   var totalDias=new Date(year,month+1,0).getDate();
   var mV=0; var dayRows=[];
   for(var d=1;d<=totalDias;d++){
-    var dd=new Date(year,month,d); var k=dateKey(dd);
+    var dd2=new Date(year,month,d); var k=dateKey(dd2);
     var dayD=data[k]||{ventas:[],gastos:[],pedidos:[]};
     var v=dayD.ventas.reduce(function(a,x){return a+x.monto;},0);
     if(v) dayRows.push({k:k,d:d,v:v,nv:dayD.ventas.length}); mV+=v;
   }
-  var html=rptHeader('Reporte de Ventas — Mensual',mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1));
   var diasConV=dayRows.length;
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual</div>';
-    html+=rptKPI('Total ventas mes',fmtPDF(mV),'','#1d9e75');
-  html+=rptKPI('Días con ventas',diasConV,'','#0a3d2e');
-  html+=rptKPI('Promedio diario',diasConV?fmtPDF(mV/diasConV):'$0.00','','#2563eb');
-  html+=rptKPI('Días meta alcanzada',dayRows.filter(function(r){return r.v>=META;}).length+'/'+diasConV,'','#c4860a');
-  html+=rptKPIFlush();
-  html+=rptKPIFlush()+'</div>';
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle por día</div>';
+  var html=rptHeader('Reporte de Ventas — Mensual',cap(mesNombre));
+  html+=rptStrip([
+    {label:'Total mes',value:fmtPDF(mV),sub:diasConV+' días con ventas',color:'#1d9e75'},
+    {label:'Promedio diario',value:diasConV?fmtPDF(mV/diasConV):'$0.00',color:'#2563eb'},
+    {label:'Meta $'+META+' alcanzada',value:dayRows.filter(function(r){return r.v>=META;}).length+'/'+diasConV+' días',color:'#c4860a'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Detalle por día',fmtPDF(mV));
   if(dayRows.length){
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th class="center"># Tx</th><th>Ventas</th></tr></thead><tbody>';
-    dayRows.forEach(function(r){html+='<tr><td>'+fmtDate(r.k)+'</td><td class="center">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
-    html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="2">TOTAL MES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td></tr>';
-    html+='</tbody></table></div></div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin ventas este mes.</p>'; }
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Fecha</th><th class="c"># Tx</th><th class="r">Ventas</th></tr></thead><tbody>';
+    dayRows.forEach(function(r){html+='<tr><td>'+fmtDate(r.k)+'</td><td class="cen">'+r.nv+'</td><td class="num" style="color:#1d9e75">'+fmtPDF(r.v)+'</td></tr>';});
+    html+='<tr class="tot"><td colspan="2">TOTAL MES</td><td class="num" style="color:#1d9e75">'+fmtPDF(mV)+'</td></tr>';
+    html+='</tbody></table>';
+  } else { html+='<p style="font-size:11px;color:#aaa;padding:8px 0">Sin ventas este mes.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
 }
@@ -3297,34 +3295,65 @@ function buildReportePedidosDiario(){
   var fechaLabel=currentDate.toLocaleDateString('es-SV',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   var pedActivos=day.pedidos.filter(function(p){var gp=getPedido(p.id);return !gp||(gp.estado!=='cancelado');});
   var tp=pedActivos.reduce(function(a,x){return a+x.monto;},0);
-  var html=rptHeader('Reporte de Pedidos — Diario',fechaLabel);
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen de pedidos del día</div>';
-    html+=rptKPI('Total pedidos',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
-  html+=rptKPIFlush();
   var cancelados=day.pedidos.length-pedActivos.length;
-  html+=rptKPI('Cancelados',cancelados+' pedidos','No incluidos en total','#d44f2e');
-  html+=rptKPIFlush();
-  ['Pollo Rico','Pollo Indio','Sello de Oro'].forEach(function(tipo){
-    var t=pedActivos.filter(function(p){return p.tipo===tipo;}).reduce(function(a,p){return a+p.monto;},0);
-    html+=rptKPI(tipo,fmtPDF(t),'','#c4860a');
-  html+=rptKPIFlush();
-  });
-  html+=rptKPIFlush()+'</div>';
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Detalle de pedidos</div>';
+  var pr=pedActivos.filter(function(p){return p.tipo==='Pollo Rico';}).reduce(function(a,x){return a+x.monto;},0);
+  var pi=pedActivos.filter(function(p){return p.tipo==='Pollo Indio';}).reduce(function(a,x){return a+x.monto;},0);
+  var so=pedActivos.filter(function(p){return p.tipo==='Sello de Oro';}).reduce(function(a,x){return a+x.monto;},0);
+  var html=rptHeader('Reporte de Pedidos — Diario',fechaLabel);
+  html+=rptStrip([
+    {label:'Total activos',value:fmtPDF(tp),sub:pedActivos.length+' pedidos',color:'#e8a020'},
+    {label:'Cancelados',value:cancelados+'',sub:'no incluidos',color:'#d44f2e'},
+    {label:'Pollo Rico',value:fmtPDF(pr),color:'#e8a020'},
+    {label:'Pollo Indio',value:fmtPDF(pi),color:'#d44f2e'},
+    {label:'Sello de Oro',value:fmtPDF(so),color:'#c4860a'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Detalle de pedidos');
   if(day.pedidos.length){
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Tipo</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Tipo</th><th>Descripción</th><th>Estado</th><th class="r">Monto</th></tr></thead><tbody>';
     day.pedidos.forEach(function(p){
       var gped=getPedido(p.id); var estado=gped?gped.estado:'pendiente';
       var ec=estado==='completado'?'rpt-tag-green':estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
       var et=estado==='completado'?'Completado':estado==='cancelado'?'Cancelado':'Pendiente';
-      var rowStyle=estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
-      html+='<tr'+rowStyle+'><td>'+esc(p.tipo)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+      var pdesc=p.desc||''; if(gped&&gped.items&&gped.items.length){var fi=gped.items[0].desc||gped.items[0].productoNombre||'';pdesc=gped.items.length===1?fi:fi+' +'+(gped.items.length-1)+' más';}
+      var rs=estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
+      html+='<tr'+rs+'><td>'+esc(p.tipo)+'</td><td>'+esc(pdesc)+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
     });
-    html+='<tr><td colspan="4" style="font-weight:700;text-align:right;background:#f0f0f0">TOTAL ACTIVOS</td><td class="num" style="font-weight:700;color:#e8a020;background:#f0f0f0">'+fmtPDF(tp)+'</td></tr>';
-    html+='</tbody></table></div></div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos registrados.</p>'; }
+    html+='<tr class="tot"><td colspan="3" class="r">TOTAL ACTIVOS</td><td class="num" style="color:#e8a020">'+fmtPDF(tp)+'</td></tr>';
+    html+='</tbody></table>';
+  } else { html+='<p style="font-size:11px;color:#aaa;padding:8px 0">Sin pedidos registrados.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
+}
+
+// ─── PEDIDOS POR PROVEEDOR helper ───
+function rptPedidosByProv(peds){
+  if(!peds.length) return '<p style="font-size:11px;color:#aaa;padding:8px 0">Sin pedidos.</p>';
+  var byProv={};
+  peds.forEach(function(p){
+    if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0,comp:0,pend:0,canc:0};
+    byProv[p.tipo].peds.push(p);
+    if(p.estado!=='cancelado') byProv[p.tipo].total+=p.monto;
+    if(p.estado==='completado') byProv[p.tipo].comp++;
+    else if(p.estado==='pendiente') byProv[p.tipo].pend++;
+    else byProv[p.tipo].canc++;
+  });
+  var h='';
+  Object.keys(byProv).forEach(function(prov){
+    var g=byProv[prov];
+    h+='<div style="font-size:10px;font-weight:700;color:#0a3d2e;padding:4px 7px;background:#f0ede7;margin-top:8px;display:flex;justify-content:space-between">'+
+       '<span>'+esc(prov)+' — '+fmtPDF(g.total)+'</span>'+
+       '<span style="font-weight:500"><span style="color:#1d9e75">✓ '+g.comp+'</span> · <span style="color:#c4860a">⏳ '+g.pend+'</span> · <span style="color:#d44f2e">✗ '+g.canc+'</span></span></div>';
+    h+='<table class="rpt-table" style="width:100%;margin-bottom:4px"><thead><tr><th>Fecha</th><th>Descripción</th><th>Estado</th><th class="r">Monto</th></tr></thead><tbody>';
+    g.peds.forEach(function(p){
+      var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
+      var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
+      var pdesc=p.desc||''; if(p.items&&p.items.length){var fi=p.items[0].desc||p.items[0].productoNombre||'';pdesc=p.items.length===1?fi:fi+' +'+(p.items.length-1)+' más';}
+      var rs=p.estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
+      h+='<tr'+rs+'><td>'+fmtDate(p.fecha)+'</td><td>'+esc(pdesc)+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num" style="color:#e8a020">'+fmtPDF(p.monto)+'</td></tr>';
+    });
+    h+='</tbody></table>';
+  });
+  return h;
 }
 
 // ─── REPORTE PEDIDOS SEMANAL ───
@@ -3335,39 +3364,15 @@ function buildReportePedidosSemanal(){
   var pedActivos=pedsSem.filter(function(p){return p.estado!=='cancelado';});
   var tp=pedActivos.reduce(function(a,p){return a+p.monto;},0);
   var html=rptHeader('Reporte de Pedidos — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen semanal</div>';
-    html+=rptKPI('Total pedidos semana',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
-  html+=rptKPI('Cancelados',pedsSem.filter(function(p){return p.estado==='cancelado';}).length+' pedidos','No incluidos','#d44f2e');
-  html+=rptKPI('Completados',pedActivos.filter(function(p){return p.estado==='completado';}).length+' pedidos','','#1d9e75');
-  html+=rptKPI('Pendientes',pedActivos.filter(function(p){return p.estado==='pendiente';}).length+' pedidos','','#c4860a');
-  html+=rptKPIFlush();
-  html+=rptKPIFlush()+'</div>';
-  if(pedsSem.length){
-    var byProv={};
-    pedsSem.forEach(function(p){
-      if(!byProv[p.tipo]) byProv[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProv[p.tipo].peds.push(p);
-      if(p.estado!=='cancelado') byProv[p.tipo].total+=p.monto;
-      byProv[p.tipo][p.estado+'s']=(byProv[p.tipo][p.estado+'s']||0)+1;
-    });
-    html+='<div class="rpt-section"><div class="rpt-section-title">Pedidos por proveedor</div>';
-    Object.keys(byProv).forEach(function(prov){
-      var g=byProv[prov];
-      html+='<div class="rpt-prov-block no-break"><div class="rpt-prov-name">'+esc(prov)+' — Total: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+(g.completados||0)+'</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+(g.pendientes||0)+'</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+(g.cancelados||0)+'</span></div>'+
-        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
-      g.peds.forEach(function(p){
-        var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        var rs=p.estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
-        html+='<tr'+rs+'><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num">'+fmtPDF(p.monto)+'</td></tr>';
-      });
-      html+='</tbody></table></div></div>';
-    });
-    html+='</div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos esta semana.</p>'; }
+  html+=rptStrip([
+    {label:'Total activos',value:fmtPDF(tp),sub:pedActivos.length+' pedidos',color:'#e8a020'},
+    {label:'Completados',value:pedActivos.filter(function(p){return p.estado==='completado';}).length+'',color:'#1d9e75'},
+    {label:'Pendientes',value:pedActivos.filter(function(p){return p.estado==='pendiente';}).length+'',color:'#c4860a'},
+    {label:'Cancelados',value:pedsSem.filter(function(p){return p.estado==='cancelado';}).length+'',color:'#d44f2e'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Pedidos por proveedor — semana',fmtPDF(tp));
+  html+=rptPedidosByProv(pedsSem);
+  html+='</div>';
   html+=rptFooter(); return html;
 }
 
@@ -3381,72 +3386,54 @@ function buildReportePedidosMensual(){
   var pedsMes=pedidosGlobal.filter(function(p){return monthKeys.indexOf(p.fecha)!==-1;});
   var pedActivos=pedsMes.filter(function(p){return p.estado!=='cancelado';});
   var tp=pedActivos.reduce(function(a,p){return a+p.monto;},0);
-  var html=rptHeader('Reporte de Pedidos — Mensual',mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1));
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual</div>';
-    html+=rptKPI('Total pedidos mes',fmtPDF(tp),pedActivos.length+' activos','#e8a020');
-  html+=rptKPI('Cancelados',pedsMes.filter(function(p){return p.estado==='cancelado';}).length+'','No incluidos','#d44f2e');
-  html+=rptKPI('Completados',pedActivos.filter(function(p){return p.estado==='completado';}).length+'','','#1d9e75');
-  html+=rptKPI('Pendientes',pedActivos.filter(function(p){return p.estado==='pendiente';}).length+'','','#c4860a');
-  html+=rptKPIFlush();
-  html+=rptKPIFlush()+'</div>';
-  if(pedsMes.length){
-    var byProvM={};
-    pedsMes.forEach(function(p){
-      if(!byProvM[p.tipo]) byProvM[p.tipo]={peds:[],total:0,completados:0,cancelados:0,pendientes:0};
-      byProvM[p.tipo].peds.push(p);
-      if(p.estado!=='cancelado') byProvM[p.tipo].total+=p.monto;
-      byProvM[p.tipo][p.estado+'s']=(byProvM[p.tipo][p.estado+'s']||0)+1;
-    });
-    html+='<div class="rpt-section"><div class="rpt-section-title">Pedidos por proveedor</div>';
-    Object.keys(byProvM).forEach(function(prov){
-      var g=byProvM[prov];
-      html+='<div class="rpt-prov-block no-break"><div class="rpt-prov-name">'+esc(prov)+' — Total mes: '+fmtPDF(g.total)+
-        ' &nbsp;|&nbsp; <span style="color:#1d9e75">✓ '+(g.completados||0)+' completados</span>'+
-        ' &nbsp;<span style="color:#e8a020">⏳ '+(g.pendientes||0)+' pendientes</span>'+
-        ' &nbsp;<span style="color:#d44f2e">✗ '+(g.cancelados||0)+' cancelados</span></div>'+
-        '<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Fecha</th><th>Descripción</th><th class="center">Cant.</th><th>Estado</th><th>Monto</th></tr></thead><tbody>';
-      g.peds.forEach(function(p){
-        var ec=p.estado==='completado'?'rpt-tag-green':p.estado==='cancelado'?'rpt-tag-red':'rpt-tag-yellow';
-        var et=p.estado==='completado'?'Completado':p.estado==='cancelado'?'Cancelado':'Pendiente';
-        var rs=p.estado==='cancelado'?' style="opacity:0.5;text-decoration:line-through"':'';
-        html+='<tr'+rs+'><td>'+fmtDate(p.fecha)+'</td><td>'+esc(p.desc)+'</td><td class="center">'+p.cant+'</td><td><span class="rpt-tag '+ec+'">'+et+'</span></td><td class="num">'+fmtPDF(p.monto)+'</td></tr>';
-      });
-      html+='</tbody></table></div></div>';
-    });
-    html+='</div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin pedidos este mes.</p>'; }
+  var html=rptHeader('Reporte de Pedidos — Mensual',cap(mesNombre));
+  html+=rptStrip([
+    {label:'Total activos',value:fmtPDF(tp),sub:pedActivos.length+' pedidos',color:'#e8a020'},
+    {label:'Completados',value:pedActivos.filter(function(p){return p.estado==='completado';}).length+'',color:'#1d9e75'},
+    {label:'Pendientes',value:pedActivos.filter(function(p){return p.estado==='pendiente';}).length+'',color:'#c4860a'},
+    {label:'Cancelados',value:pedsMes.filter(function(p){return p.estado==='cancelado';}).length+'',color:'#d44f2e'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Pedidos por proveedor — mes',fmtPDF(tp));
+  html+=rptPedidosByProv(pedsMes);
+  html+='</div>';
   html+=rptFooter(); return html;
 }
 
 // ─── REPORTE INVENTARIO SEMANAL ───
 function buildReporteInventarioSemanal(){
   var days=getWeekDays(currentDate);
+  var semKeys=days.map(function(d){return dateKey(d);});
   var html=rptHeader('Reporte de Inventario — Semanal','Semana del '+fmtDateObj(days[0])+' al '+fmtDateObj(days[6]));
-  // Ventas de inventario en la semana (productos vendidos)
   var ventasProd={};
   days.forEach(function(d){
     var dd=getDayData(d);
     dd.ventas.forEach(function(v){
-      if(v.productoId){
-        if(!ventasProd[v.productoId]) ventasProd[v.productoId]={cant:0,monto:0};
-        ventasProd[v.productoId].cant+=v.cant;
-        ventasProd[v.productoId].monto+=v.monto;
-      }
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant,monto:v.monto}];
+      items.forEach(function(it){
+        if(it.productoId){
+          if(!ventasProd[it.productoId]) ventasProd[it.productoId]={cant:0,monto:0};
+          ventasProd[it.productoId].cant+=it.cant; ventasProd[it.productoId].monto+=it.monto;
+        }
+      });
     });
   });
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Estado actual del inventario</div>';
+  html+=rptStrip([
+    {label:'Productos',value:productos.length+' items',color:'#0a3d2e'},
+    {label:'Valor en stock',value:fmtPDF(productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0)),color:'#1d9e75'},
+    {label:'Sin stock',value:productos.filter(function(p){return p.cantidad<=0;}).length+'',color:'#d44f2e'},
+    {label:'Stock bajo',value:productos.filter(function(p){return p.cantidad>0&&p.cantidad<=5;}).length+'',color:'#e8a020'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Inventario con movimientos de la semana');
   if(productos.length){
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock actual</th><th>Unidad</th><th>Vendido semana</th><th>Ingresado semana</th><th>Estado</th><th>Valor stock</th></tr></thead><tbody>';
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Producto</th><th class="c">Stock</th><th>Unidad</th><th class="c">Vendido</th><th class="c">Ingresado</th><th class="r">Valor stock</th><th>Estado</th></tr></thead><tbody>';
     productos.forEach(function(p){
-      var vend=ventasProd[p.id]||{cant:0,monto:0};
-      // pedidos completados que afectan este producto esta semana
-      var semKeys=days.map(function(d){return dateKey(d);});
+      var vend=ventasProd[p.id]||{cant:0};
       var ingresado=pedidosGlobal.filter(function(ped){return ped.productoId===p.id&&ped.estado==='completado'&&semKeys.indexOf(ped.fecha)!==-1;}).reduce(function(a,ped){return a+ped.cant;},0);
       var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="center"><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></td><td>'+esc(p.unidad)+'</td><td class="center">'+(vend.cant>0?'-'+vend.cant:'-')+'</td><td class="center">'+(ingresado>0?'+'+ingresado:'-')+'</td><td><span class="rpt-tag '+sc+'">'+(p.cantidad<=0?'Sin stock':p.cantidad<=5?'Bajo':'OK')+'</span></td><td class="num">'+fmtPDF(p.cantidad*p.precioCosto)+'</td></tr>';
+      html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="cen"><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></td><td>'+esc(p.unidad)+'</td><td class="cen">'+(vend.cant>0?'−'+vend.cant:'—')+'</td><td class="cen">'+(ingresado>0?'+'+ingresado:'—')+'</td><td class="num">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+(p.cantidad<=0?'Sin stock':p.cantidad<=5?'Bajo':'OK')+'</span></td></tr>';
     });
-    html+='</tbody></table></div></div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin productos.</p>'; }
+    html+='</tbody></table>';
+  } else { html+='<p style="font-size:11px;color:#aaa;padding:8px 0">Sin productos.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
 }
@@ -3456,48 +3443,44 @@ function buildReporteInventarioMensual(){
   var year=currentDate.getFullYear(),month=currentDate.getMonth();
   var mesNombre=currentDate.toLocaleDateString('es-SV',{month:'long',year:'numeric'});
   var totalDias=new Date(year,month+1,0).getDate();
-  var monthDays=[];
-  for(var d=1;d<=totalDias;d++) monthDays.push(new Date(year,month,d));
-  var monthKeys=monthDays.map(function(d){return dateKey(d);});
-  var html=rptHeader('Reporte de Inventario — Mensual',mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1));
+  var monthDays=[]; var monthKeys=[];
+  for(var d=1;d<=totalDias;d++){var dd3=new Date(year,month,d);monthDays.push(dd3);monthKeys.push(dateKey(dd3));}
   var totalValor=productos.reduce(function(a,p){return a+p.cantidad*p.precioCosto;},0);
   var sinStock=productos.filter(function(p){return p.cantidad<=0;});
   var stockBajo=productos.filter(function(p){return p.cantidad>0&&p.cantidad<=5;});
-  html+='<div class="rpt-section"><div class="rpt-section-title">Resumen mensual de inventario</div>';
-    html+=rptKPI('Total productos',productos.length+' items','','#0a3d2e');
-  html+=rptKPI('Valor en stock',fmtPDF(totalValor),'precio de costo','#1d9e75');
-  html+=rptKPI('Sin stock',sinStock.length+' productos','Requieren reposición','#d44f2e');
-  html+=rptKPI('Stock bajo',stockBajo.length+' productos','Revisar pronto','#c4860a');
-  html+=rptKPIFlush();
-  html+=rptKPIFlush()+'</div>';
-  // Movimientos del mes por producto
   var ventasProd={};
   monthDays.forEach(function(d){
     var dd=getDayData(d);
     dd.ventas.forEach(function(v){
-      if(v.productoId){
-        if(!ventasProd[v.productoId]) ventasProd[v.productoId]={cant:0,monto:0};
-        ventasProd[v.productoId].cant+=v.cant;
-        ventasProd[v.productoId].monto+=v.monto;
-      }
+      var items=v.items&&v.items.length?v.items:[{productoId:v.productoId,cant:v.cant}];
+      items.forEach(function(it){
+        if(it.productoId){if(!ventasProd[it.productoId]) ventasProd[it.productoId]={cant:0};ventasProd[it.productoId].cant+=it.cant;}
+      });
     });
   });
-  html+='<div class="rpt-section no-break"><div class="rpt-section-title">Inventario completo con movimientos del mes</div>';
+  var html=rptHeader('Reporte de Inventario — Mensual',cap(mesNombre));
+  html+=rptStrip([
+    {label:'Productos',value:productos.length+' items',color:'#0a3d2e'},
+    {label:'Valor en stock',value:fmtPDF(totalValor),sub:'precio de costo',color:'#1d9e75'},
+    {label:'Sin stock',value:sinStock.length+'',sub:'reposición urgente',color:'#d44f2e'},
+    {label:'Stock bajo',value:stockBajo.length+'',sub:'revisar pronto',color:'#e8a020'}
+  ]);
+  html+='<div class="rpt-section no-break">'+rptSecH('Inventario completo — movimientos del mes');
   if(productos.length){
-    html+='<div class="rpt-table-wrap"><table class="rpt-table"><thead><tr><th>Producto</th><th class="center">Stock</th><th>Unidad</th><th>Vendido mes</th><th>Ingresos mes</th><th>Costo unit.</th><th>Valor stock</th><th>Estado</th></tr></thead><tbody>';
+    html+='<table class="rpt-table" style="width:100%"><thead><tr><th>Producto</th><th class="c">Stock</th><th>Unidad</th><th class="c">Vendido mes</th><th class="c">Ingresos mes</th><th class="r">Costo</th><th class="r">Valor stock</th><th>Estado</th></tr></thead><tbody>';
     productos.forEach(function(p){
-      var vend=ventasProd[p.id]||{cant:0,monto:0};
+      var vend=ventasProd[p.id]||{cant:0};
       var ingresado=pedidosGlobal.filter(function(ped){return ped.productoId===p.id&&ped.estado==='completado'&&monthKeys.indexOf(ped.fecha)!==-1;}).reduce(function(a,ped){return a+ped.cant;},0);
       var sc=p.cantidad<=0?'rpt-tag-red':p.cantidad<=5?'rpt-tag-yellow':'rpt-tag-green';
-      var sl=p.cantidad<=0?'Sin stock':p.cantidad<=5?'Bajo':'OK';
-      html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="center">'+p.cantidad+'</td><td>'+esc(p.unidad)+'</td><td class="center">'+(vend.cant>0?vend.cant:'-')+'</td><td class="center">'+(ingresado>0?ingresado:'-')+'</td><td class="num">'+fmtPDF(p.precioCosto)+'</td><td class="num" style="font-weight:700">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+sl+'</span></td></tr>';
+      html+='<tr><td><strong>'+esc(p.nombre)+'</strong></td><td class="cen"><span class="rpt-tag '+sc+'">'+p.cantidad+'</span></td><td>'+esc(p.unidad)+'</td><td class="cen">'+(vend.cant>0?vend.cant:'—')+'</td><td class="cen">'+(ingresado>0?ingresado:'—')+'</td><td class="num">'+fmtPDF(p.precioCosto)+'</td><td class="num" style="font-weight:700">'+fmtPDF(p.cantidad*p.precioCosto)+'</td><td><span class="rpt-tag '+sc+'">'+(p.cantidad<=0?'Sin stock':p.cantidad<=5?'Bajo':'OK')+'</span></td></tr>';
     });
-    html+='<tr style="background:#f0ede7;font-weight:700"><td colspan="6">VALOR TOTAL</td><td class="num">'+fmtPDF(totalValor)+'</td><td></td></tr>';
-    html+='</tbody></table></div></div>';
-  } else { html+='<p style="font-size:12px;color:#aaa">Sin productos en inventario.</p>'; }
+    html+='<tr class="tot"><td colspan="6">VALOR TOTAL EN STOCK</td><td class="num">'+fmtPDF(totalValor)+'</td><td></td></tr>';
+    html+='</tbody></table>';
+  } else { html+='<p style="font-size:11px;color:#aaa;padding:8px 0">Sin productos en inventario.</p>'; }
   html+='</div>';
   html+=rptFooter(); return html;
 }
+
 
 // ─── DISPARAR REPORTE ───
 function generarReporte(tipo){
