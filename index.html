@@ -149,6 +149,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .form-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.2s;-webkit-appearance:none;appearance:none}
 .form-input:focus{border-color:var(--primary)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .btn-primary{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;margin-top:4px}
 .btn-primary:active{opacity:0.85}
 .type-toggle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
@@ -991,6 +992,15 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
             <option value="Pollo Indio">Pollo Indio</option>
             <option value="Sello de Oro">Sello de Oro</option>
           </select>
+
+          <!-- Selector de producto del inventario -->
+          <div style="margin-top:10px;margin-bottom:4px">
+            <label class="form-label">Producto del inventario</label>
+            <select class="form-input" id="pedidoProdSel" onchange="onPedidoProdChange()">
+              <option value="">— Seleccionar producto registrado —</option>
+            </select>
+          </div>
+          <div id="pedidoProdInfo" style="display:none;font-size:11px;color:var(--text3);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px"></div>
         </div>
 
         <!-- Items acumulados del pedido -->
@@ -999,7 +1009,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <button type="button" onclick="agregarItemPedido()" style="background:var(--orange);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Agregar</button>
         </div>
         <div id="pedidoItemsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Agrega cada producto por separado. El total se calcula automáticamente.</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Selecciona un producto y presiona <strong>+ Agregar</strong>, o escribe la descripción manualmente.</div>
       </div>
 
       <div>
@@ -1010,6 +1020,22 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div>
           <label class="form-label">Cantidad</label>
           <input class="form-input" type="number" id="fCant" placeholder="1" min="0.01" step="0.01" value="1" oninput="onCantChange()">
+        </div>
+        <!-- Unidad: solo visible en modo pedido -->
+        <div id="fUnidadWrap" style="display:none">
+          <label class="form-label">Unidad</label>
+          <select class="form-input" id="fUnidad">
+            <option value="libras">Libras</option>
+            <option value="bolsas">Bolsas</option>
+            <option value="cajas">Cajas</option>
+            <option value="unidades">Unidades</option>
+            <option value="docenas">Docenas</option>
+            <option value="kilos">Kilos</option>
+            <option value="litros">Litros</option>
+            <option value="galones">Galones</option>
+            <option value="sacos">Sacos</option>
+            <option value="paquetes">Paquetes</option>
+          </select>
         </div>
         <div>
           <label class="form-label">Monto ($)</label>
@@ -1417,7 +1443,6 @@ function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal
 function openAddModal(){
   ventaItems=[];
   pedidoItems=[];
-  // Decide default type based on current section
   var defaultTipo='venta';
   if(currentPage==='operaciones'&&opsTab==='gastos') defaultTipo='gasto';
   if(currentPage==='inventario'&&invMainTab==='pedidos') defaultTipo='pedido';
@@ -1428,6 +1453,11 @@ function openAddModal(){
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
   poblarSelectProductos('ventaProductoSel');
+  poblarSelectProductos('pedidoProdSel');
+  var info=document.getElementById('pedidoProdInfo');
+  if(info) info.style.display='none';
+  var uSel=document.getElementById('fUnidad');
+  if(uSel) uSel.selectedIndex=0;
   renderVentaItems();
   renderPedidoItems();
   document.getElementById('addModal').classList.add('open');
@@ -1453,6 +1483,9 @@ function setTipo(t){
   document.getElementById('ventaProductoWrap').style.display=(t==='venta')?'block':'none';
   document.getElementById('ventaItemsWrap').style.display=(t==='venta')?'block':'none';
   document.getElementById('gastoWrap').style.display=(t==='gasto')?'block':'none';
+  // Unidad: solo en pedido
+  var unidadWrap=document.getElementById('fUnidadWrap');
+  if(unidadWrap) unidadWrap.style.display=(t==='pedido')?'block':'none';
   if(t==='venta') renderVentaItems();
   if(t==='pedido') renderPedidoItems();
 }
@@ -1472,8 +1505,17 @@ function onProductoSelChange(){
 
 function onCantChange(){
   var cant=parseFloat(document.getElementById('fCant').value)||1;
+  // Venta: usa precioVenta
   var pidV=parseInt(document.getElementById('ventaProductoSel').value);
-  if(pidV){ var pV=getProducto(pidV); if(pV) document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); }
+  if(pidV){ var pV=getProducto(pidV); if(pV){ document.getElementById('fMonto').value=(pV.precioVenta*cant).toFixed(2); return; } }
+  // Pedido: usa precioCosto del selector de producto
+  if(selectedTipo==='pedido'){
+    var pedSel=document.getElementById('pedidoProdSel');
+    if(pedSel){
+      var pidP=parseInt(pedSel.value);
+      if(pidP){ var pP=getProducto(pidP); if(pP&&pP.precioCosto>0){ document.getElementById('fMonto').value=(pP.precioCosto*cant).toFixed(2); } }
+    }
+  }
 }
 
 // Multi-producto: agregar item a la lista de venta
@@ -1670,25 +1712,25 @@ function completarPedido(id){
   });
   saveData();
 
-  // Sumar stock — soporta tanto pedido simple como multi-producto
+  // Sumar stock y actualizar fechaIngreso
   var stockMsg='';
   if(ped.items&&ped.items.length){
-    // Multi-producto: restaurar cada item
     ped.items.forEach(function(it){
       if(it.productoId){
         var prod=getProducto(it.productoId);
         if(prod){
-          prod.cantidad+=it.cant;
-          stockMsg+=' +'+it.cant+' '+it.unidad+' '+prod.nombre+';';
+          prod.cantidad+=parseFloat(it.cant)||1;
+          prod.fechaIngreso=fechaCompletado;   // ← actualizar fecha ingreso
+          stockMsg+=' +'+it.cant+' '+prod.unidad+' '+prod.nombre+';';
         }
       }
     });
     if(stockMsg) saveProductos();
   } else if(ped.productoId){
-    // Pedido simple con producto
     var prod=getProducto(ped.productoId);
     if(prod){
-      prod.cantidad+=ped.cant;
+      prod.cantidad+=parseFloat(ped.cant)||1;
+      prod.fechaIngreso=fechaCompletado;       // ← actualizar fecha ingreso
       saveProductos();
       stockMsg=' +'+ped.cant+' '+prod.unidad+' en stock de '+prod.nombre;
     }
@@ -1698,7 +1740,7 @@ function completarPedido(id){
   ped.fechaCompletado=fechaCompletado;
   savePedidos();
   renderAll();
-  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' en gastos'+(stockMsg?' ·'+stockMsg:''));
+  toast('✓ Pedido completado — $'+ped.monto.toFixed(2)+' registrado en gastos'+(stockMsg?' · Stock:'+stockMsg:''));
 }
 
 function cancelarPedido(id){
@@ -2664,27 +2706,58 @@ function importarDatos(event){
 }
 
 // ── PEDIDO MULTI-PRODUCTO ──
-function onPedidoProductoChange(){
-  // pedidoProductoSel was removed; no-op
+function onPedidoProdChange(){
+  var pid=parseInt(document.getElementById('pedidoProdSel').value);
+  var info=document.getElementById('pedidoProdInfo');
+  if(!pid){ info.style.display='none'; return; }
+  var p=getProducto(pid);
+  if(!p){ info.style.display='none'; return; }
+  info.style.display='block';
+  info.innerHTML='📦 Stock actual: <strong>'+p.cantidad+' '+p.unidad+'</strong> &nbsp;·&nbsp; Costo unitario: <strong>'+fmt(p.precioCosto)+'</strong>';
+  document.getElementById('fDesc').value=p.nombre;
+  document.getElementById('fCant').value='1';
+  document.getElementById('fMonto').value=p.precioCosto>0?p.precioCosto.toFixed(2):'';
+  // Pre-select matching unit if available
+  var uSel=document.getElementById('fUnidad');
+  if(uSel&&p.unidad){
+    var unit=p.unidad.toLowerCase();
+    var opts=uSel.options;
+    for(var i=0;i<opts.length;i++){
+      if(opts[i].value.toLowerCase()===unit||opts[i].text.toLowerCase()===unit){
+        uSel.selectedIndex=i; break;
+      }
+    }
+  }
 }
 
+function onPedidoProductoChange(){ /* legacy no-op */ }
+
 function agregarItemPedido(){
+  var pid=parseInt(document.getElementById('pedidoProdSel').value)||null;
   var cant=parseFloat(document.getElementById('fCant').value)||1;
   var monto=parseFloat(document.getElementById('fMonto').value)||0;
   var desc=document.getElementById('fDesc').value.trim();
+  var uSel=document.getElementById('fUnidad');
+  var unidad=uSel?uSel.value:'unidades';
   if(cant<=0){toast('⚠ Ingresa una cantidad válida');return;}
   if(monto<=0){toast('⚠ Ingresa un monto válido');return;}
   if(!desc){toast('⚠ Ingresa una descripción');return;}
+  var prod=pid?getProducto(pid):null;
   pedidoItems.push({
-    productoId:null,
-    productoNombre:null,
-    desc:desc, cant:cant, monto:monto,
-    unidad:'unidad'
+    productoId:prod?prod.id:null,
+    productoNombre:prod?prod.nombre:null,
+    desc:desc,
+    cant:cant,
+    monto:monto,
+    unidad:unidad
   });
-  // reset campos
+  // Reset campos
+  document.getElementById('pedidoProdSel').value='';
+  document.getElementById('pedidoProdInfo').style.display='none';
   document.getElementById('fDesc').value='';
   document.getElementById('fCant').value='1';
   document.getElementById('fMonto').value='';
+  if(uSel) uSel.selectedIndex=0;
   renderPedidoItems();
 }
 
@@ -2697,22 +2770,23 @@ function renderPedidoItems(){
   var el=document.getElementById('pedidoItemsList');
   if(!el) return;
   if(!pedidoItems.length){
-    el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;background:var(--surface2);border-radius:var(--radius-sm)">Selecciona un producto y presiona <strong>+ Agregar</strong>, o registra el pedido manualmente abajo.</div>';
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px;background:var(--surface2);border-radius:var(--radius-sm)">Selecciona un producto del inventario y presiona <strong>+ Agregar</strong>.</div>';
     return;
   }
   var total=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
   var html='';
   pedidoItems.forEach(function(it,i){
+    var prodLabel=it.productoNombre?'<span style="font-size:10px;color:var(--orange);background:#fef0d9;padding:1px 5px;border-radius:4px;margin-left:4px">📦 '+esc(it.productoNombre)+'</span>':'';
     html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
       '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+'</div>'+
-        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+it.unidad+(it.productoNombre?' · '+esc(it.productoNombre):'')+'</div>'+
+        '<div style="font-size:13px;font-weight:500">'+esc(it.desc)+prodLabel+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">Cant: '+it.cant+' '+esc(it.unidad)+'</div>'+
       '</div>'+
-      '<div style="font-family:DM Mono,monospace;font-size:13px;color:var(--orange);font-weight:500">'+fmt(it.monto)+'</div>'+
-      '<button onclick="removePedidoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1">×</button>'+
+      '<div style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--orange);font-weight:600;white-space:nowrap">'+fmt(it.monto)+'</div>'+
+      '<button onclick="removePedidoItem('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 4px;line-height:1;flex-shrink:0">×</button>'+
     '</div>';
   });
-  html+='<div style="text-align:right;font-size:13px;font-weight:700;color:var(--orange);padding:4px 2px">Total: '+fmt(total)+'</div>';
+  html+='<div style="text-align:right;font-size:13px;font-weight:700;color:var(--orange);padding:4px 2px;border-top:1px solid var(--border);margin-top:2px">Total: '+fmt(total)+'</div>';
   el.innerHTML=html;
 }
 function toast(msg){
