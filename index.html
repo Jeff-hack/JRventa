@@ -952,7 +952,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
 <div class="modal-overlay" id="addModal" onclick="overlayClose(event,'addModal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo registro</div>
+    <div class="modal-title" id="addModalTitle">Nuevo registro</div>
     <div class="form-section">
       <div>
         <label class="form-label">Tipo</label>
@@ -987,10 +987,11 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
       <!-- PEDIDO: tipo y productos -->
       <div id="pedidoWrap" style="display:none">
           <label class="form-label">Proveedor del pedido</label>
-          <select class="form-input" id="pedidoTipo">
+          <select class="form-input" id="pedidoTipo" onchange="onPedidoTipoChange()">
             <option value="Pollo Rico">Pollo Rico</option>
             <option value="Pollo Indio">Pollo Indio</option>
             <option value="Sello de Oro">Sello de Oro</option>
+            <option value="Superior">Superior</option>
           </select>
 
           <!-- Selector de producto del inventario -->
@@ -1053,7 +1054,7 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
         <div style="font-size:11px;color:var(--text3)">El monto total se calcula automáticamente.</div>
       </div>
 
-      <button class="btn-primary" onclick="saveRecord()">✓ Guardar registro</button>
+      <button class="btn-primary" id="addModalSaveBtn" onclick="saveRecord()">✓ Guardar registro</button>
     </div>
   </div>
 </div>
@@ -1096,6 +1097,17 @@ body{background:linear-gradient(180deg,#f8fafc,#eef2f7)!important}
           <label class="form-label">Precio venta ($)</label>
           <input class="form-input" type="number" id="pPrecioVenta" placeholder="0.00" step="0.01" min="0">
         </div>
+      </div>
+      <div>
+        <label class="form-label">Proveedor</label>
+        <select class="form-input" id="pProveedor">
+          <option value="">— Sin proveedor asignado —</option>
+          <option value="Pollo Rico">Pollo Rico</option>
+          <option value="Pollo Indio">Pollo Indio</option>
+          <option value="Sello de Oro">Sello de Oro</option>
+          <option value="Superior">Superior</option>
+        </select>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Puedes cambiarlo en cualquier momento si fue asignado por error.</div>
       </div>
       <div>
         <label class="form-label">Fecha de ingreso</label>
@@ -1161,6 +1173,7 @@ var currentPage = 'resumen';
 var data = {};      // data[YYYY-MM-DD] = {ventas,gastos,pedidos}
 var productos = []; // inventario global
 var invFiltroActual = 'todos'; // declared globally so setInvMainTab works on first call
+var editingPedidoId = null; // null = nuevo pedido, id = editando pedido existente
 // pedidos especiales globales (multi-día)
 var pedidosGlobal = [];
 // encargos
@@ -1443,6 +1456,9 @@ function overlayClose(e,id){if(e.target===document.getElementById(id))closeModal
 function openAddModal(){
   ventaItems=[];
   pedidoItems=[];
+  editingPedidoId=null;
+  document.getElementById('addModalTitle').textContent='Nuevo registro';
+  document.getElementById('addModalSaveBtn').textContent='✓ Guardar registro';
   var defaultTipo='venta';
   if(currentPage==='operaciones'&&opsTab==='gastos') defaultTipo='gasto';
   if(currentPage==='inventario'&&invMainTab==='pedidos') defaultTipo='pedido';
@@ -1453,7 +1469,9 @@ function openAddModal(){
   document.getElementById('ventaProductoSel').value='';
   document.getElementById('ventaStockInfo').style.display='none';
   poblarSelectProductos('ventaProductoSel');
-  poblarSelectProductos('pedidoProdSel');
+  var pedidoTipoSel=document.getElementById('pedidoTipo');
+  if(pedidoTipoSel) pedidoTipoSel.selectedIndex=0;
+  poblarSelectProductos('pedidoProdSel', pedidoTipoSel?pedidoTipoSel.value:null);
   var info=document.getElementById('pedidoProdInfo');
   if(info) info.style.display='none';
   var uSel=document.getElementById('fUnidad');
@@ -1463,16 +1481,34 @@ function openAddModal(){
   document.getElementById('addModal').classList.add('open');
 }
 
-function poblarSelectProductos(selId){
+function poblarSelectProductos(selId, filtroProveedor){
   var sel=document.getElementById(selId);
   if(!sel) return;
   sel.innerHTML='<option value="">— Seleccionar producto —</option>';
-  productos.forEach(function(p){
+  var lista=productos;
+  if(filtroProveedor){
+    lista=productos.filter(function(p){return p.proveedor===filtroProveedor;});
+  }
+  lista.forEach(function(p){
     var opt=document.createElement('option');
     opt.value=p.id;
     opt.textContent=p.nombre+' (stock: '+p.cantidad+' '+p.unidad+')';
     sel.appendChild(opt);
   });
+  if(filtroProveedor && !lista.length){
+    var opt2=document.createElement('option');
+    opt2.value='';
+    opt2.textContent='— Sin productos asignados a '+filtroProveedor+' —';
+    opt2.disabled=true;
+    sel.appendChild(opt2);
+  }
+}
+
+function onPedidoTipoChange(){
+  var prov=document.getElementById('pedidoTipo').value;
+  poblarSelectProductos('pedidoProdSel', prov);
+  var info=document.getElementById('pedidoProdInfo');
+  if(info) info.style.display='none';
 }
 
 function setTipo(t){
@@ -1566,7 +1602,47 @@ function renderVentaItems(){
   el.innerHTML=html;
 }
 
-// ─ Guardar registro ─
+function editarPedidoGlobal(id){
+  var ped=getPedido(id);
+  if(!ped){toast('⚠ Pedido no encontrado');return;}
+  if(ped.estado!=='pendiente'){toast('⚠ Solo se pueden editar pedidos pendientes');return;}
+
+  editingPedidoId=id;
+  ventaItems=[];
+  pedidoItems=[];
+
+  setTipo('pedido');
+  document.getElementById('addModalTitle').textContent='Editar pedido';
+  document.getElementById('addModalSaveBtn').textContent='✓ Guardar cambios';
+
+  var tipoSel=document.getElementById('pedidoTipo');
+  tipoSel.value=ped.tipo;
+  poblarSelectProductos('pedidoProdSel', ped.tipo);
+  var info=document.getElementById('pedidoProdInfo');
+  if(info) info.style.display='none';
+
+  if(ped.items&&ped.items.length){
+    pedidoItems=ped.items.map(function(it){return Object.assign({},it);});
+    document.getElementById('fDesc').value='';
+    document.getElementById('fCant').value='1';
+    document.getElementById('fMonto').value='';
+  } else {
+    // Pedido manual simple: cargar sus valores directos
+    document.getElementById('fDesc').value=ped.desc||'';
+    document.getElementById('fCant').value=ped.cant||1;
+    document.getElementById('fMonto').value=ped.monto||'';
+    var uSel=document.getElementById('fUnidad');
+    if(uSel && ped.unidad){
+      for(var i=0;i<uSel.options.length;i++){
+        if(uSel.options[i].value===ped.unidad){uSel.selectedIndex=i;break;}
+      }
+    }
+  }
+  renderPedidoItems();
+  document.getElementById('addModal').classList.add('open');
+}
+
+
 function saveRecord(){
   var desc=document.getElementById('fDesc').value.trim();
   var cant=parseFloat(document.getElementById('fCant').value)||1;
@@ -1621,6 +1697,51 @@ function saveRecord(){
   } else {
     // PEDIDO ESPECIAL → va a pedidosGlobal con estado pendiente
     var tipo=document.getElementById('pedidoTipo').value;
+
+    if(editingPedidoId){
+      // ── MODO EDICIÓN: actualizar pedido existente ──
+      var pedExist=getPedido(editingPedidoId);
+      if(!pedExist){toast('⚠ Pedido no encontrado');closeModal('addModal');return;}
+      if(pedExist.estado!=='pendiente'){toast('⚠ Solo se pueden editar pedidos pendientes');closeModal('addModal');return;}
+
+      var nuevoDesc, nuevoMonto, nuevoCant, nuevosItems, nuevaUnidad;
+      if(pedidoItems.length>0){
+        var firstPedE=pedidoItems[0].desc||pedidoItems[0].productoNombre||'Producto';
+        nuevoDesc=pedidoItems.length===1?firstPedE:firstPedE+' + '+(pedidoItems.length-1)+' más';
+        nuevoMonto=pedidoItems.reduce(function(a,x){return a+x.monto;},0);
+        nuevoCant=1;
+        nuevosItems=pedidoItems.slice();
+      } else {
+        if(!monto||monto<=0){toast('⚠ Ingresa un monto válido');document.getElementById('fMonto').focus();return;}
+        if(!desc) desc='Pedido';
+        var uSelE=document.getElementById('fUnidad');
+        nuevaUnidad=uSelE?uSelE.value:undefined;
+        nuevoDesc=desc; nuevoMonto=monto; nuevoCant=cant; nuevosItems=null;
+      }
+
+      pedExist.tipo=tipo;
+      pedExist.desc=nuevoDesc;
+      pedExist.monto=nuevoMonto;
+      pedExist.cant=nuevoCant;
+      if(nuevosItems) pedExist.items=nuevosItems; else delete pedExist.items;
+      if(nuevaUnidad) pedExist.unidad=nuevaUnidad;
+
+      // Sincronizar el reflejo en day.pedidos del día original del pedido
+      var origDay=data[pedExist.fecha];
+      if(origDay&&origDay.pedidos){
+        var ref=origDay.pedidos.find(function(p){return p.id===pedExist.id;});
+        if(ref){ref.tipo=tipo;ref.desc=nuevoDesc;ref.monto=nuevoMonto;ref.cant=nuevoCant;}
+      }
+
+      savePedidos();
+      saveData();
+      pedidoItems=[];
+      editingPedidoId=null;
+      closeModal('addModal');
+      renderAll();
+      toast('✓ Pedido actualizado');
+      return;
+    }
 
     if(pedidoItems.length>0){
       // Multi-producto: descripción representativa
@@ -1774,6 +1895,7 @@ function openProductoModal(id){
     document.getElementById('pPrecioVenta').value=p.precioVenta;
     document.getElementById('pFecha').value=p.fecha;
     document.getElementById('pNotas').value=p.notas||'';
+    document.getElementById('pProveedor').value=p.proveedor||'';
   } else {
     document.getElementById('productoModalTitle').textContent='Nuevo producto';
     ['pNombre','pNotas'].forEach(function(f){document.getElementById(f).value='';});
@@ -1782,6 +1904,7 @@ function openProductoModal(id){
     document.getElementById('pPrecioCosto').value='';
     document.getElementById('pPrecioVenta').value='';
     document.getElementById('pFecha').value=dateKey(new Date());
+    document.getElementById('pProveedor').value='';
   }
   document.getElementById('productoModal').classList.add('open');
 }
@@ -1794,14 +1917,15 @@ function saveProducto(){
   var precioVenta=parseFloat(document.getElementById('pPrecioVenta').value)||0;
   var fecha=document.getElementById('pFecha').value;
   var notas=document.getElementById('pNotas').value.trim();
+  var proveedor=document.getElementById('pProveedor').value;
   var idExist=document.getElementById('pId').value;
   if(!nombre){toast('⚠ Ingresa el nombre del producto');return;}
   if(!fecha){toast('⚠ Selecciona la fecha de ingreso');return;}
   if(idExist){
     var p=getProducto(parseInt(idExist));
-    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;}
+    if(p){p.nombre=nombre;p.cantidad=cantidad;p.unidad=unidad;p.precioCosto=precioCosto;p.precioVenta=precioVenta;p.fecha=fecha;p.notas=notas;p.proveedor=proveedor;}
   } else {
-    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas});
+    productos.push({id:Date.now(),nombre:nombre,cantidad:cantidad,unidad:unidad,precioCosto:precioCosto,precioVenta:precioVenta,fecha:fecha,notas:notas,proveedor:proveedor});
   }
   saveProductos();
   closeModal('productoModal');
@@ -2342,7 +2466,7 @@ function renderPedidos(){
       html+='<div class="ped-actions">'+
         '<button class="ped-btn ped-btn-del" onclick="eliminarPedidoGlobal('+it.id+')">Eliminar</button>'+
         '<button class="ped-btn ped-btn-cancel" onclick="cancelarPedido('+it.id+')">Cancelar</button>'+
-        '<button class="ped-btn" onclick="verDetallePedido('+it.id+')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2)">Ver</button>'+
+        '<button class="ped-btn" onclick="editarPedidoGlobal('+it.id+')" style="background:#e8f0fe;border:1px solid #93c5fd;color:#1e4fb7">✏ Editar</button>'+
         '<button class="ped-btn ped-btn-complete" onclick="completarPedido('+it.id+')">✓ Completar</button>'+
       '</div>';
     } else {
